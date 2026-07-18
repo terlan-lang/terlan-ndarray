@@ -23,6 +23,7 @@
     },
     "abi_version": 1,
     "header": "include/terlan_ndarray.h",
+    "headers": ["terlan_ndarray_internal.h"],
     "sources": ["terlan_ndarray.c"],
     "aliases": {
       "TerlanNdArrayStatus": "int32_t",
@@ -172,6 +173,42 @@
         ]
       },
       {
+        "id": "function.strides",
+        "c_name": "terlan_ndarray_v1_strides",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {
+            "name": "out_strides",
+            "c_type": "int64_t **",
+            "direction": "output",
+            "ownership": "borrowed_call",
+            "borrowed_array": {
+              "owner_parameter": "array",
+              "length_symbol": "function.rank",
+              "copy": "immediate"
+            }
+          }
+        ]
+      },
+      {
+        "id": "function.byte_count",
+        "c_name": "terlan_ndarray_v1_byte_count",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "out_byte_count", "c_type": "int64_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
         "id": "function.dtype",
         "c_name": "terlan_ndarray_v1_dtype",
         "kind": "function",
@@ -195,6 +232,126 @@
         "parameters": [
           {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
           {"name": "out_contiguous", "c_type": "int32_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
+        "id": "function.device_type",
+        "c_name": "terlan_ndarray_v1_device_type",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "out_device_type", "c_type": "int32_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
+        "id": "function.delete_bool_values",
+        "c_name": "terlan_ndarray_v1_delete_bool_values",
+        "kind": "function",
+        "status": "bind",
+        "returns": "void",
+        "error_model": "infallible",
+        "parameters": [
+          {"name": "values", "c_type": "uint8_t *", "direction": "input", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.delete_int_values",
+        "c_name": "terlan_ndarray_v1_delete_int_values",
+        "kind": "function",
+        "status": "bind",
+        "returns": "void",
+        "error_model": "infallible",
+        "parameters": [
+          {"name": "values", "c_type": "int64_t *", "direction": "input", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.delete_float_values",
+        "c_name": "terlan_ndarray_v1_delete_float_values",
+        "kind": "function",
+        "status": "bind",
+        "returns": "void",
+        "error_model": "infallible",
+        "parameters": [
+          {"name": "values", "c_type": "double *", "direction": "input", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.to_bools",
+        "c_name": "terlan_ndarray_v1_to_bools",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {
+            "name": "out_values",
+            "c_type": "uint8_t **",
+            "direction": "output",
+            "ownership": "transfer_full",
+            "owned_array": {
+              "length_parameter": "out_length",
+              "destructor_symbol": "function.delete_bool_values",
+              "copy": "immediate",
+              "element": "bool8"
+            }
+          },
+          {"name": "out_length", "c_type": "size_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
+        "id": "function.to_ints",
+        "c_name": "terlan_ndarray_v1_to_ints",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {
+            "name": "out_values",
+            "c_type": "int64_t **",
+            "direction": "output",
+            "ownership": "transfer_full",
+            "owned_array": {
+              "length_parameter": "out_length",
+              "destructor_symbol": "function.delete_int_values",
+              "copy": "immediate"
+            }
+          },
+          {"name": "out_length", "c_type": "size_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
+        "id": "function.to_floats",
+        "c_name": "terlan_ndarray_v1_to_floats",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {
+            "name": "out_values",
+            "c_type": "double **",
+            "direction": "output",
+            "ownership": "transfer_full",
+            "owned_array": {
+              "length_parameter": "out_length",
+              "destructor_symbol": "function.delete_float_values",
+              "copy": "immediate",
+              "element": "float64"
+            }
+          },
+          {"name": "out_length", "c_type": "size_t *", "direction": "output", "ownership": "borrowed_call"}
         ]
       },
       {
@@ -314,6 +471,30 @@
           "generated_smoke": "package_owned"
         },
         {
+          "name": "strides",
+          "operation": "ndarray.array.strides",
+          "c_symbol": "function.strides",
+          "role": "immutable_method",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "List[Int]",
+          "blocking": "fast",
+          "resource": "value",
+          "documentation": "Copies canonical row-major element strides.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "byte_count",
+          "operation": "ndarray.array.byte_count",
+          "c_symbol": "function.byte_count",
+          "role": "immutable_method",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "Int",
+          "blocking": "fast",
+          "resource": "borrowed_handle",
+          "documentation": "Returns the checked contiguous storage byte count.",
+          "generated_smoke": "package_owned"
+        },
+        {
           "name": "dtype_code",
           "operation": "ndarray.array.dtype_code",
           "c_symbol": "function.dtype",
@@ -335,6 +516,54 @@
           "blocking": "fast",
           "resource": "borrowed_handle",
           "documentation": "Returns one for the ABI-v1 contiguous layout.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "device_type_code",
+          "operation": "ndarray.array.device_type_code",
+          "c_symbol": "function.device_type",
+          "role": "immutable_method",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "Int",
+          "blocking": "fast",
+          "resource": "borrowed_handle",
+          "documentation": "Returns the ABI-v1 CPU device code.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "to_bools",
+          "operation": "ndarray.array.to_bools",
+          "c_symbol": "function.to_bools",
+          "role": "immutable_method",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "List[Bool]",
+          "blocking": "fast",
+          "resource": "value",
+          "documentation": "Returns an owned copy of Bool values.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "to_ints",
+          "operation": "ndarray.array.to_ints",
+          "c_symbol": "function.to_ints",
+          "role": "immutable_method",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "List[Int]",
+          "blocking": "fast",
+          "resource": "value",
+          "documentation": "Returns an owned copy of Int64 values.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "to_floats",
+          "operation": "ndarray.array.to_floats",
+          "c_symbol": "function.to_floats",
+          "role": "immutable_method",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "List[Float]",
+          "blocking": "fast",
+          "resource": "value",
+          "documentation": "Returns an owned copy of Float64 values.",
           "generated_smoke": "package_owned"
         },
         {

@@ -31,6 +31,14 @@ pub shape(array: Array): List[Int] -> native.
 @compiler.native {ndarray.array.numel}
 pub numel(array: Array): Int -> native.
 
+/** Copies canonical row-major element strides. */
+@compiler.native {ndarray.array.strides}
+pub strides(array: Array): List[Int] -> native.
+
+/** Returns the checked contiguous storage byte count. */
+@compiler.native {ndarray.array.byte_count}
+pub byte_count(array: Array): Int -> native.
+
 /** Returns the ABI-v1 dtype code. */
 @compiler.native {ndarray.array.dtype_code}
 pub dtype_code(array: Array): Int -> native.
@@ -38,6 +46,22 @@ pub dtype_code(array: Array): Int -> native.
 /** Returns one for the ABI-v1 contiguous layout. */
 @compiler.native {ndarray.array.contiguous_code}
 pub contiguous_code(array: Array): Int -> native.
+
+/** Returns the ABI-v1 CPU device code. */
+@compiler.native {ndarray.array.device_type_code}
+pub device_type_code(array: Array): Int -> native.
+
+/** Returns an owned copy of Bool values. */
+@compiler.native {ndarray.array.to_bools}
+pub to_bools(array: Array): List[Bool] -> native.
+
+/** Returns an owned copy of Int64 values. */
+@compiler.native {ndarray.array.to_ints}
+pub to_ints(array: Array): List[Int] -> native.
+
+/** Returns an owned copy of Float64 values. */
+@compiler.native {ndarray.array.to_floats}
+pub to_floats(array: Array): List[Float] -> native.
 
 /** Disposes an owned array exactly once. */
 @compiler.native {ndarray.array.dispose}

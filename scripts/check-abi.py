@@ -258,6 +258,8 @@ def main():
                 repository / "bindings/terlan_ndarray.c",
                 case_root / "terlan_ndarray.c",
             )
+            for header in manifest["c_metadata"].get("headers", []):
+                shutil.copy2(repository / "bindings" / header, case_root / header)
             variant_path = case_root / "ndarray-c.json"
             variant_path.write_text(json.dumps(variant, indent=2, sort_keys=True) + "\n")
             output = case_root / "output"

@@ -10,7 +10,10 @@
 - Rank-zero shape `[]` is a scalar containing exactly one element.
 - Any zero dimension produces a zero-element array.
 - Public constructors copy values and shape before returning.
-- Borrowed shape output is copied immediately by the generated adapter.
+- Borrowed shape and stride output is copied immediately by the generated
+  adapter.
+- Typed readback returns independently owned copies that the generated adapter
+  releases after conversion to Terlan lists.
 
 The native struct layout is private. Only symbols prefixed
 `terlan_ndarray_v1_` belong to ABI version 1.
@@ -30,6 +33,8 @@ compiler-specific packed structures.
 | 103 | `ndarray.shape.overflow` | Element or allocation size overflowed |
 | 104 | `ndarray.allocation.failed` | Native allocation failed |
 | 105 | `ndarray.bool.invalid_byte` | Bool input contained a value other than 0 or 1 |
+| 106 | `ndarray.dtype.mismatch` | Typed readback does not match the array dtype |
+| 107 | `ndarray.handle.disposed` | Native code received a disposed handle |
 
 The generated Terlan boundary translates statuses into typed errors. Raw
 native pointers and status integers are not part of the eventual public
@@ -39,7 +44,9 @@ high-level array API.
 
 ABI v1 resources are thread-confined. Calls must not race on one handle.
 Disposal consumes the handle exactly once; stale and double disposal are
-rejected by `NativeBoundary` before dispatch.
+rejected by `NativeBoundary` before dispatch. Reused handle-table slots receive
+a monotonically increasing generation, so an old Terlan value cannot resolve
+to a new native array.
 
 DLPack, Arrow, BLAS provider selection, views, shared storage, and devices
 other than CPU are not part of ABI v1 ND0. They require separately versioned

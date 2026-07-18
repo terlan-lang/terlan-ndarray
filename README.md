@@ -9,16 +9,22 @@ compiler contains no ndarray-specific lowering or runtime branch.
 
 ## Status
 
-`ND0` freezes and validates ABI version 1. The current native foundation owns
-Bool, Int64, and Float64 values plus checked shape metadata. Public numerical
+`ND0` freezes and validates ABI version 1. `ND1` implements owned Bool, Int64,
+and Float64 CPU arrays with checked layout metadata, copied readback,
+generation-safe handles, and deterministic disposal. Public numerical
 operations, CBLAS, DLPack, and package integrations are implemented by later
 roadmap milestones.
 
-Run the ABI gate with:
+Run the ABI and owned-lifecycle gates with:
 
 ```text
 make abi-check
+make package-check
 ```
+
+The gates write checked deterministic results to
+[`reports/ndarray-abi-report.json`](reports/ndarray-abi-report.json) and
+[`reports/ndarray-package-report.json`](reports/ndarray-package-report.json).
 
 The compiler is expected at `../terlan/target/debug/terlc`; override `TERLC`
 when using another build.

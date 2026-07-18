@@ -1,6 +1,6 @@
 module ndarray.AbiTest.
 
-import ndarray.Array.{from_bools, from_ints, from_floats, rank, shape, numel, dtype_code, contiguous_code, dispose, live_count}.
+import ndarray.Array.{from_bools, from_ints, from_floats, rank, shape, strides, numel, byte_count, dtype_code, contiguous_code, device_type_code, to_bools, to_ints, to_floats, dispose, live_count}.
 
 @test
 pub owned_cpu_metadata_is_observable(): Bool ->
@@ -8,15 +8,41 @@ pub owned_cpu_metadata_is_observable(): Bool ->
     let integer_shape = shape(integers);
     let integer_ok = rank(integers) == 2 and
         integer_shape == [2, 3] and
+        strides(integers) == [3, 1] and
         numel(integers) == 6 and
+        byte_count(integers) == 48 and
         dtype_code(integers) == 2 and
-        contiguous_code(integers) == 1;
+        contiguous_code(integers) == 1 and
+        device_type_code(integers) == 1 and
+        to_ints(integers) == [1, 2, 3, 4, 5, 6];
     let booleans = from_bools([true, false, true], [3]);
-    let boolean_ok = shape(booleans) == [3] and dtype_code(booleans) == 1;
+    let boolean_ok = shape(booleans) == [3] and
+        dtype_code(booleans) == 1 and
+        to_bools(booleans) == [true, false, true];
+    let first = 1.0 + 0.25;
+    let float_values = [first, first + 1.0, first + 2.0, first + 3.0, first + 4.0, first + 5.0];
+    let floats = from_floats(float_values, [2, 3]);
+    let float_ok = shape(floats) == [2, 3] and
+        strides(floats) == [3, 1] and
+        byte_count(floats) == 48 and
+        to_floats(floats) == float_values;
     let scalar = from_floats([2.5], []);
     let scalar_ok = rank(scalar) == 0 and numel(scalar) == 1 and
         dtype_code(scalar) == 3;
     dispose(integers);
     dispose(booleans);
+    dispose(floats);
     dispose(scalar);
-    integer_ok and boolean_ok and scalar_ok and live_count() == 0.
+    integer_ok and boolean_ok and float_ok and scalar_ok and live_count() == 0.
+
+@test
+pub scalar_and_zero_dimension_layouts_are_exact(): Bool ->
+    let scalar = from_floats([2.5], []);
+    let empty = from_ints([], [2, 0, 3]);
+    let layout_ok = shape(scalar) == [] and strides(scalar) == [] and
+        to_floats(scalar) == [2.5] and shape(empty) == [2, 0, 3] and
+        strides(empty) == [0, 3, 1] and numel(empty) == 0 and
+        byte_count(empty) == 0 and to_ints(empty) == [];
+    dispose(scalar);
+    dispose(empty);
+    layout_ok and live_count() == 0.

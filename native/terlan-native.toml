@@ -58,6 +58,20 @@ returns = "Int"
 blocking = "fast"
 resource = "borrowed_handle"
 
+[functions."ndarray.Array.strides"]
+operation = "ndarray.array.strides"
+arity = 1
+returns = "List[Int]"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.Array.byte_count"]
+operation = "ndarray.array.byte_count"
+arity = 1
+returns = "Int"
+blocking = "fast"
+resource = "borrowed_handle"
+
 [functions."ndarray.Array.dtype_code"]
 operation = "ndarray.array.dtype_code"
 arity = 1
@@ -71,6 +85,34 @@ arity = 1
 returns = "Int"
 blocking = "fast"
 resource = "borrowed_handle"
+
+[functions."ndarray.Array.device_type_code"]
+operation = "ndarray.array.device_type_code"
+arity = 1
+returns = "Int"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.to_bools"]
+operation = "ndarray.array.to_bools"
+arity = 1
+returns = "List[Bool]"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.Array.to_ints"]
+operation = "ndarray.array.to_ints"
+arity = 1
+returns = "List[Int]"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.Array.to_floats"]
+operation = "ndarray.array.to_floats"
+arity = 1
+returns = "List[Float]"
+blocking = "fast"
+resource = "value"
 
 [functions."ndarray.Array.dispose"]
 operation = "ndarray.array.dispose"

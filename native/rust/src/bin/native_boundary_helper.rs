@@ -25,6 +25,8 @@ fn main() {
 #[derive(Default)]
 struct Worker {
     next_id: u64,
+    free_ids: Vec<u64>,
+    generations: HashMap<u64, u64>,
     handles: HashMap<u64, HandleEntry>,
 }
 
@@ -71,6 +73,34 @@ struct Request {
 }
 
 impl Worker {
+    fn store_handle(&mut self, value: HandleValue) -> Result<(u64, u64), String> {
+        while let Some(id) = self.free_ids.pop() {
+            let previous = self.generations.get(&id).copied().unwrap_or_default();
+            if let Some(generation) = previous.checked_add(1) {
+                self.generations.insert(id, generation);
+                self.handles.insert(id, HandleEntry { generation, value });
+                return Ok((id, generation));
+            }
+        }
+        let Some(id) = self.next_id.checked_add(1) else {
+            return Err(protocol_error(
+                "resource_table_exhausted",
+                "NativeBoundary handle table exhausted",
+            ));
+        };
+        self.next_id = id;
+        let generation = 1;
+        self.generations.insert(id, generation);
+        self.handles.insert(id, HandleEntry { generation, value });
+        Ok((id, generation))
+    }
+
+    fn release_handle(&mut self, id: u64) {
+        if self.handles.remove(&id).is_some() {
+            self.free_ids.push(id);
+        }
+    }
+
     fn execute_line(&mut self, line: &str) -> String {
         let request = match parse_request(line) {
             Ok(request) => request,
@@ -95,10 +125,11 @@ impl Worker {
                     Ok(value) => value,
                     Err(error) => return native_error(&error),
                 };
-                self.next_id += 1;
-                let id = self.next_id;
-                self.handles.insert(id, HandleEntry { generation: 1, value: HandleValue::Array(value) });
-                format!("ok_handle {id} 1 {}", STANDARD.encode("ndarray.Array.Array"))
+                let (id, generation) = match self.store_handle(HandleValue::Array(value)) {
+                    Ok(handle) => handle,
+                    Err(error) => return error,
+                };
+                format!("ok_handle {id} {generation} {}", STANDARD.encode("ndarray.Array.Array"))
             }
             "ndarray.array.from_ints" => {
                 let [values @ (Arg::Ints(_) | Arg::EmptyList), shape @ (Arg::Ints(_) | Arg::EmptyList)] = request.args.as_slice() else {
@@ -108,10 +139,11 @@ impl Worker {
                     Ok(value) => value,
                     Err(error) => return native_error(&error),
                 };
-                self.next_id += 1;
-                let id = self.next_id;
-                self.handles.insert(id, HandleEntry { generation: 1, value: HandleValue::Array(value) });
-                format!("ok_handle {id} 1 {}", STANDARD.encode("ndarray.Array.Array"))
+                let (id, generation) = match self.store_handle(HandleValue::Array(value)) {
+                    Ok(handle) => handle,
+                    Err(error) => return error,
+                };
+                format!("ok_handle {id} {generation} {}", STANDARD.encode("ndarray.Array.Array"))
             }
             "ndarray.array.from_floats" => {
                 let [values @ (Arg::Floats(_) | Arg::EmptyList), shape @ (Arg::Ints(_) | Arg::EmptyList)] = request.args.as_slice() else {
@@ -121,10 +153,11 @@ impl Worker {
                     Ok(value) => value,
                     Err(error) => return native_error(&error),
                 };
-                self.next_id += 1;
-                let id = self.next_id;
-                self.handles.insert(id, HandleEntry { generation: 1, value: HandleValue::Array(value) });
-                format!("ok_handle {id} 1 {}", STANDARD.encode("ndarray.Array.Array"))
+                let (id, generation) = match self.store_handle(HandleValue::Array(value)) {
+                    Ok(handle) => handle,
+                    Err(error) => return error,
+                };
+                format!("ok_handle {id} {generation} {}", STANDARD.encode("ndarray.Array.Array"))
             }
             "ndarray.array.rank" => {
                 let [Arg::Handle(array)] = request.args.as_slice() else {
@@ -156,6 +189,26 @@ impl Worker {
                 };
                 match value_array.numel() { Ok(value) => format!("ok_int {value}"), Err(error) => native_error(&error) }
             }
+            "ndarray.array.strides" => {
+                let [Arg::Handle(array)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "strides expects its declared arguments");
+                };
+                let value_array = match self.live_array(array) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                match value_array.strides() { Ok(values) if values.is_empty() => "ok_ints".to_string(), Ok(values) => format!("ok_ints {}", values.iter().map(i64::to_string).collect::<Vec<_>>().join(",")), Err(error) => native_error(&error) }
+            }
+            "ndarray.array.byte_count" => {
+                let [Arg::Handle(array)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "byte_count expects its declared arguments");
+                };
+                let value_array = match self.live_array(array) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                match value_array.byte_count() { Ok(value) => format!("ok_int {value}"), Err(error) => native_error(&error) }
+            }
             "ndarray.array.dtype_code" => {
                 let [Arg::Handle(array)] = request.args.as_slice() else {
                     return protocol_error("invalid_arguments", "dtype_code expects its declared arguments");
@@ -176,6 +229,46 @@ impl Worker {
                 };
                 match value_array.contiguous_code() { Ok(value) => format!("ok_int {value}"), Err(error) => native_error(&error) }
             }
+            "ndarray.array.device_type_code" => {
+                let [Arg::Handle(array)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "device_type_code expects its declared arguments");
+                };
+                let value_array = match self.live_array(array) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                match value_array.device_type_code() { Ok(value) => format!("ok_int {value}"), Err(error) => native_error(&error) }
+            }
+            "ndarray.array.to_bools" => {
+                let [Arg::Handle(array)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "to_bools expects its declared arguments");
+                };
+                let value_array = match self.live_array(array) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                match value_array.to_bools() { Ok(values) if values.is_empty() => "ok_bools".to_string(), Ok(values) => format!("ok_bools {}", values.iter().map(bool::to_string).collect::<Vec<_>>().join(",")), Err(error) => native_error(&error) }
+            }
+            "ndarray.array.to_ints" => {
+                let [Arg::Handle(array)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "to_ints expects its declared arguments");
+                };
+                let value_array = match self.live_array(array) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                match value_array.to_ints() { Ok(values) if values.is_empty() => "ok_ints".to_string(), Ok(values) => format!("ok_ints {}", values.iter().map(i64::to_string).collect::<Vec<_>>().join(",")), Err(error) => native_error(&error) }
+            }
+            "ndarray.array.to_floats" => {
+                let [Arg::Handle(array)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "to_floats expects its declared arguments");
+                };
+                let value_array = match self.live_array(array) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                match value_array.to_floats() { Ok(values) if values.is_empty() => "ok_floats".to_string(), Ok(values) => format!("ok_floats {}", values.iter().map(f64::to_string).collect::<Vec<_>>().join(",")), Err(error) => native_error(&error) }
+            }
             "ndarray.array.dispose" => {
                 let [Arg::Handle(array)] = request.args.as_slice() else {
                     return protocol_error("invalid_arguments", "dispose expects its declared arguments");
@@ -183,7 +276,7 @@ impl Worker {
                 if let Err(error) = self.validate(array, "ndarray.Array.Array") {
                     return error;
                 }
-                self.handles.remove(&array.id);
+                self.release_handle(array.id);
                 "ok_unit".to_string()
             }
             "ndarray.array.live_count" => {

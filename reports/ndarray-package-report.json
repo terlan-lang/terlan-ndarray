@@ -1,0 +1,38 @@
+{
+  "abi_report_sha256": "9708257e80fd47fc659b0a6ea8f98655e25be703ddc6ac8361a14a905ca34c06",
+  "consumer": {
+    "revision_locked": true,
+    "status": "passed"
+  },
+  "dtypes": [
+    "bool8",
+    "float64",
+    "int64"
+  ],
+  "lifecycle": {
+    "double_disposal": "passed",
+    "slot_generation_reuse": "passed",
+    "stale_generation": "passed",
+    "stale_handle": "passed",
+    "wrong_resource_kind": "passed"
+  },
+  "package": "terlan-ndarray",
+  "schema": "terlan.ndarray.package-report.v1",
+  "status": "passed",
+  "tooling": {
+    "sanitizers": {
+      "leak_detection": {
+        "status": "passed"
+      },
+      "status": "passed",
+      "tools": [
+        "address",
+        "undefined"
+      ]
+    },
+    "valgrind": {
+      "reason": "valgrind executable is unavailable",
+      "status": "skipped"
+    }
+  }
+}
