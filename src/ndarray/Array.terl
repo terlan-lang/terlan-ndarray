@@ -1,0 +1,49 @@
+/**
+ * Generated ABI-v1 bindings for owned contiguous CPU arrays.
+ */
+
+module ndarray.Array.
+
+/** Opaque owned contiguous CPU array. */
+pub opaque type Array.
+
+/** Copies boolean values and shape into owned CPU storage. */
+@compiler.native {ndarray.array.from_bools}
+pub from_bools(values: List[Bool], shape: List[Int]): Array -> native.
+
+/** Copies Int64 values and shape into owned CPU storage. */
+@compiler.native {ndarray.array.from_ints}
+pub from_ints(values: List[Int], shape: List[Int]): Array -> native.
+
+/** Copies Float64 values and shape into owned CPU storage. */
+@compiler.native {ndarray.array.from_floats}
+pub from_floats(values: List[Float], shape: List[Int]): Array -> native.
+
+/** Returns array rank. */
+@compiler.native {ndarray.array.rank}
+pub rank(array: Array): Int -> native.
+
+/** Copies array shape into a Terlan list. */
+@compiler.native {ndarray.array.shape}
+pub shape(array: Array): List[Int] -> native.
+
+/** Returns logical element count. */
+@compiler.native {ndarray.array.numel}
+pub numel(array: Array): Int -> native.
+
+/** Returns the ABI-v1 dtype code. */
+@compiler.native {ndarray.array.dtype_code}
+pub dtype_code(array: Array): Int -> native.
+
+/** Returns one for the ABI-v1 contiguous layout. */
+@compiler.native {ndarray.array.contiguous_code}
+pub contiguous_code(array: Array): Int -> native.
+
+/** Disposes an owned array exactly once. */
+@compiler.native {ndarray.array.dispose}
+pub dispose(array: Array): Unit -> native.
+
+/** Returns live native allocations for lifecycle auditing. */
+@compiler.native {ndarray.array.live_count}
+pub live_count(): Int -> native.
+

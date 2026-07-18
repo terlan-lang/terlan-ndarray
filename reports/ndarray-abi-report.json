@@ -1,0 +1,77 @@
+{
+  "abi_version": 1,
+  "adversarial_cases": [
+    "missing_length",
+    "mutable_borrow",
+    "ambiguous_ownership",
+    "missing_destructor",
+    "unsupported_scalar_width",
+    "duplicate_symbol",
+    "missing_abi_version"
+  ],
+  "dtypes": [
+    "bool8",
+    "float64",
+    "int64"
+  ],
+  "generated_files": {
+    "bindings/native-binding-manifest.json": "fe1bfd518a2193787e48890c4c08c632e708711b168baa709ce2059745b05ad8",
+    "bindings/skipped-symbols.json": "eb8ea096f63fe2453261140b59f9e9518465a617b16ef2ee868d4992ff2990fc",
+    "docs/ndarray.Array.md": "e72baafbee4d4abbf2c1ce4894aa52021bbec1a26521dacdc0deb1a49c8dab67",
+    "native/rust/Cargo.toml": "1eda13a81b2282c836b4cbc412814497c9745c8796aa6d3e2d56bc5e82205ef1",
+    "native/rust/build.rs": "7bc9b761835117f398ff3163e02b35360a5109383149a74181bc347a9caa710d",
+    "native/rust/c/terlan_ndarray.c": "25f9391a40ff3bb94956fad7da446fce89a0b1581da043e83e39f2fedc133957",
+    "native/rust/include/terlan_ndarray.h": "ea6b81516f164a87fe16210b99741cadb70382f8963d142743f250167ff962ea",
+    "native/rust/src/bin/native_boundary_helper.rs": "61d7379842f6d3770364380f0164ae7fa2e396f116d8c261dafd59fe2c3ec98f",
+    "native/rust/src/lib.rs": "06178f7a934ef9878656adfd6ecc6065dfe2e39a33465a099e2ac4dc328a7e49",
+    "native/terlan-native.toml": "41a53789b2f3946409db714039feb52a5822cd1f304697aa02edf3edffa9b22e",
+    "src/ndarray/Array.terl": "11cdc612bc3c33cf17618cd717b1c03aabc31a105c86b323d98037816cd62055",
+    "terlan.toml": "8b1b3be0460b7a906c3700ef01ff85522ec56edeb95b953c99b03c20a0960ee1",
+    "tests/ndarray/NativeBoundaryTest.terl": "f5004988c3de3b562ec232f8d38cd537b3e6b70e6a3f526203d5cadf579f4063"
+  },
+  "native_dependencies": {
+    "dependencies": {
+      "dlpack": {
+        "header": "include/dlpack/dlpack.h",
+        "license": "Apache-2.0",
+        "release": "v1.3",
+        "revision": "84d107bf416c6bab9ae68ad285876600d230490d",
+        "sha256": "62052bef24bd69bb7b52e95428f9e99bd7951783850c36c5f2a41e71fd63c2fc",
+        "source_url": "https://raw.githubusercontent.com/dmlc/dlpack/84d107bf416c6bab9ae68ad285876600d230490d/include/dlpack/dlpack.h"
+      },
+      "openblas": {
+        "archive_url": "https://github.com/OpenMathLib/OpenBLAS/archive/62bcfb0dc9f1cfa685fc04135c50e2780c303137.tar.gz",
+        "cblas_integer_model": "LP64",
+        "default_provider": "pinned_source",
+        "license": "BSD-3-Clause",
+        "release": "v0.3.33",
+        "revision": "62bcfb0dc9f1cfa685fc04135c50e2780c303137",
+        "sha256": "91c894079dad77b2b51bee58f6f999dbd9db0419dd6a06dff93004767461ab86",
+        "system_override": {
+          "provider_env": "TERLAN_NDARRAY_BLAS_PROVIDER=system",
+          "required_header": "include/cblas.h",
+          "required_library_names": [
+            "libopenblas.a",
+            "libopenblas.dylib",
+            "libopenblas.so",
+            "openblas.dll",
+            "openblas.lib"
+          ],
+          "root_env": "TERLAN_NDARRAY_OPENBLAS_ROOT"
+        }
+      }
+    },
+    "schema": "terlan.ndarray.native-dependencies.v1",
+    "supported_hosts": [
+      "aarch64-apple-darwin",
+      "aarch64-pc-windows-msvc",
+      "aarch64-unknown-linux-gnu",
+      "x86_64-apple-darwin",
+      "x86_64-pc-windows-msvc",
+      "x86_64-unknown-linux-gnu"
+    ]
+  },
+  "package": "terlan-ndarray",
+  "schema": "terlan.ndarray.abi-report.v1",
+  "status": "passed"
+}

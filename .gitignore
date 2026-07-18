@@ -1,0 +1,6 @@
+/_build/
+/generated/
+/target/
+*.log
+*.pyc
+__pycache__/

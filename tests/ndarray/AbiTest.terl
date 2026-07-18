@@ -1,0 +1,22 @@
+module ndarray.AbiTest.
+
+import ndarray.Array.{from_bools, from_ints, from_floats, rank, shape, numel, dtype_code, contiguous_code, dispose, live_count}.
+
+@test
+pub owned_cpu_metadata_is_observable(): Bool ->
+    let integers = from_ints([1, 2, 3, 4, 5, 6], [2, 3]);
+    let integer_shape = shape(integers);
+    let integer_ok = rank(integers) == 2 and
+        integer_shape == [2, 3] and
+        numel(integers) == 6 and
+        dtype_code(integers) == 2 and
+        contiguous_code(integers) == 1;
+    let booleans = from_bools([true, false, true], [3]);
+    let boolean_ok = shape(booleans) == [3] and dtype_code(booleans) == 1;
+    let scalar = from_floats([2.5], []);
+    let scalar_ok = rank(scalar) == 0 and numel(scalar) == 1 and
+        dtype_code(scalar) == 3;
+    dispose(integers);
+    dispose(booleans);
+    dispose(scalar);
+    integer_ok and boolean_ok and scalar_ok and live_count() == 0.

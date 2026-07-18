@@ -1,0 +1,88 @@
+[package]
+namespace = "ndarray"
+adapter = "c-abi"
+crate = "terlan-ndarray-native"
+
+[c_metadata]
+schema = "terlan.c.metadata.v1"
+producer = "terlan-curated-metadata"
+format = "reviewed-declaration-json"
+abi_version = 1
+
+[runtime]
+bridge = "native_boundary"
+ownership = "opaque_handles"
+raw_pointers_public = false
+raw_pointers_contained_in_adapter = true
+exceptions_cross_boundary = false
+
+[functions."ndarray.Array.from_bools"]
+operation = "ndarray.array.from_bools"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.from_ints"]
+operation = "ndarray.array.from_ints"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.from_floats"]
+operation = "ndarray.array.from_floats"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.rank"]
+operation = "ndarray.array.rank"
+arity = 1
+returns = "Int"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.shape"]
+operation = "ndarray.array.shape"
+arity = 1
+returns = "List[Int]"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.Array.numel"]
+operation = "ndarray.array.numel"
+arity = 1
+returns = "Int"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.dtype_code"]
+operation = "ndarray.array.dtype_code"
+arity = 1
+returns = "Int"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.contiguous_code"]
+operation = "ndarray.array.contiguous_code"
+arity = 1
+returns = "Int"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.dispose"]
+operation = "ndarray.array.dispose"
+arity = 1
+returns = "Unit"
+blocking = "fast"
+resource = "dispose_handle"
+
+[functions."ndarray.Array.live_count"]
+operation = "ndarray.array.live_count"
+arity = 0
+returns = "Int"
+blocking = "fast"
+resource = "value"
+

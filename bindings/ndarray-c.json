@@ -1,0 +1,367 @@
+{
+  "schema": "terlan.c-abi.binding.v1",
+  "package": {
+    "name": "terlan-ndarray",
+    "version": "0.0.7",
+    "namespace": "ndarray",
+    "adapter": "c-abi",
+    "crate_name": "terlan-ndarray-native"
+  },
+  "validation": {
+    "deterministic_regeneration": true,
+    "warning_denied_build": true,
+    "ownership_lifecycle": true,
+    "error_translation": true,
+    "smoke": "package_owned_live"
+  },
+  "c_metadata": {
+    "schema": "terlan.c.metadata.v1",
+    "producer": {
+      "name": "terlan-curated-metadata",
+      "version": "ndarray-0.0.7-abi-v1",
+      "format": "reviewed-declaration-json"
+    },
+    "abi_version": 1,
+    "header": "include/terlan_ndarray.h",
+    "sources": ["terlan_ndarray.c"],
+    "aliases": {
+      "TerlanNdArrayStatus": "int32_t",
+      "TerlanNdArrayHandle": "TerlanNdArray *"
+    },
+    "symbols": [
+      {
+        "id": "record.ndarray",
+        "c_name": "TerlanNdArray",
+        "kind": "opaque_struct",
+        "status": "bind",
+        "ownership": "owned",
+        "destructor_symbol": "function.delete",
+        "thread_safety": "thread_confined"
+      },
+      {
+        "id": "function.from_bools",
+        "c_name": "terlan_ndarray_v1_from_bools",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {
+            "name": "values",
+            "c_type": "const uint8_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "value_count"}
+          },
+          {"name": "value_count", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {
+            "name": "shape",
+            "c_type": "const int64_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "rank"}
+          },
+          {"name": "rank", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {"name": "out_array", "c_type": "TerlanNdArrayHandle *", "direction": "output", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.from_ints",
+        "c_name": "terlan_ndarray_v1_from_ints",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {
+            "name": "values",
+            "c_type": "const int64_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "value_count"}
+          },
+          {"name": "value_count", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {
+            "name": "shape",
+            "c_type": "const int64_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "rank"}
+          },
+          {"name": "rank", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {"name": "out_array", "c_type": "TerlanNdArrayHandle *", "direction": "output", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.from_floats",
+        "c_name": "terlan_ndarray_v1_from_floats",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {
+            "name": "values",
+            "c_type": "const double *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "value_count"}
+          },
+          {"name": "value_count", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {
+            "name": "shape",
+            "c_type": "const int64_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "rank"}
+          },
+          {"name": "rank", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {"name": "out_array", "c_type": "TerlanNdArrayHandle *", "direction": "output", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.rank",
+        "c_name": "terlan_ndarray_v1_rank",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "out_rank", "c_type": "int64_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
+        "id": "function.shape",
+        "c_name": "terlan_ndarray_v1_shape",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {
+            "name": "out_shape",
+            "c_type": "int64_t **",
+            "direction": "output",
+            "ownership": "borrowed_call",
+            "borrowed_array": {
+              "owner_parameter": "array",
+              "length_symbol": "function.rank",
+              "copy": "immediate"
+            }
+          }
+        ]
+      },
+      {
+        "id": "function.numel",
+        "c_name": "terlan_ndarray_v1_numel",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "out_numel", "c_type": "int64_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
+        "id": "function.dtype",
+        "c_name": "terlan_ndarray_v1_dtype",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "out_dtype", "c_type": "int32_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
+        "id": "function.is_contiguous",
+        "c_name": "terlan_ndarray_v1_is_contiguous",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "out_contiguous", "c_type": "int32_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
+        "id": "function.delete",
+        "c_name": "terlan_ndarray_v1_delete",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.live_count",
+        "c_name": "terlan_ndarray_v1_live_count",
+        "kind": "function",
+        "status": "bind",
+        "returns": "int64_t",
+        "error_model": "infallible",
+        "parameters": []
+      }
+    ]
+  },
+  "modules": [
+    {
+      "module": "ndarray.Array",
+      "documentation": "Generated ABI-v1 bindings for owned contiguous CPU arrays.",
+      "types": [
+        {
+          "name": "Array",
+          "c_symbol": "record.ndarray",
+          "documentation": "Opaque owned contiguous CPU array."
+        }
+      ],
+      "functions": [
+        {
+          "name": "from_bools",
+          "operation": "ndarray.array.from_bools",
+          "c_symbol": "function.from_bools",
+          "role": "constructor",
+          "args": [
+            {"name": "values", "ty": "List[Bool]"},
+            {"name": "shape", "ty": "List[Int]"}
+          ],
+          "returns": "Array",
+          "blocking": "fast",
+          "resource": "opaque_handle",
+          "documentation": "Copies boolean values and shape into owned CPU storage.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "from_ints",
+          "operation": "ndarray.array.from_ints",
+          "c_symbol": "function.from_ints",
+          "role": "constructor",
+          "args": [
+            {"name": "values", "ty": "List[Int]"},
+            {"name": "shape", "ty": "List[Int]"}
+          ],
+          "returns": "Array",
+          "blocking": "fast",
+          "resource": "opaque_handle",
+          "documentation": "Copies Int64 values and shape into owned CPU storage.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "from_floats",
+          "operation": "ndarray.array.from_floats",
+          "c_symbol": "function.from_floats",
+          "role": "constructor",
+          "args": [
+            {"name": "values", "ty": "List[Float]"},
+            {"name": "shape", "ty": "List[Int]"}
+          ],
+          "returns": "Array",
+          "blocking": "fast",
+          "resource": "opaque_handle",
+          "documentation": "Copies Float64 values and shape into owned CPU storage.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "rank",
+          "operation": "ndarray.array.rank",
+          "c_symbol": "function.rank",
+          "role": "immutable_method",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "Int",
+          "blocking": "fast",
+          "resource": "borrowed_handle",
+          "documentation": "Returns array rank.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "shape",
+          "operation": "ndarray.array.shape",
+          "c_symbol": "function.shape",
+          "role": "immutable_method",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "List[Int]",
+          "blocking": "fast",
+          "resource": "value",
+          "documentation": "Copies array shape into a Terlan list.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "numel",
+          "operation": "ndarray.array.numel",
+          "c_symbol": "function.numel",
+          "role": "immutable_method",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "Int",
+          "blocking": "fast",
+          "resource": "borrowed_handle",
+          "documentation": "Returns logical element count.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "dtype_code",
+          "operation": "ndarray.array.dtype_code",
+          "c_symbol": "function.dtype",
+          "role": "immutable_method",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "Int",
+          "blocking": "fast",
+          "resource": "borrowed_handle",
+          "documentation": "Returns the ABI-v1 dtype code.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "contiguous_code",
+          "operation": "ndarray.array.contiguous_code",
+          "c_symbol": "function.is_contiguous",
+          "role": "immutable_method",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "Int",
+          "blocking": "fast",
+          "resource": "borrowed_handle",
+          "documentation": "Returns one for the ABI-v1 contiguous layout.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "dispose",
+          "operation": "ndarray.array.dispose",
+          "c_symbol": "function.delete",
+          "role": "dispose",
+          "args": [{"name": "array", "ty": "Array"}],
+          "returns": "Unit",
+          "blocking": "fast",
+          "resource": "dispose_handle",
+          "documentation": "Disposes an owned array exactly once.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "live_count",
+          "operation": "ndarray.array.live_count",
+          "c_symbol": "function.live_count",
+          "role": "free_function",
+          "args": [],
+          "returns": "Int",
+          "blocking": "fast",
+          "resource": "value",
+          "documentation": "Returns live native allocations for lifecycle auditing.",
+          "generated_smoke": "package_owned"
+        }
+      ]
+    }
+  ]
+}

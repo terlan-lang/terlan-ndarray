@@ -1,0 +1,42 @@
+{
+  "dependencies": {
+    "dlpack": {
+      "header": "include/dlpack/dlpack.h",
+      "license": "Apache-2.0",
+      "release": "v1.3",
+      "revision": "84d107bf416c6bab9ae68ad285876600d230490d",
+      "sha256": "62052bef24bd69bb7b52e95428f9e99bd7951783850c36c5f2a41e71fd63c2fc",
+      "source_url": "https://raw.githubusercontent.com/dmlc/dlpack/84d107bf416c6bab9ae68ad285876600d230490d/include/dlpack/dlpack.h"
+    },
+    "openblas": {
+      "archive_url": "https://github.com/OpenMathLib/OpenBLAS/archive/62bcfb0dc9f1cfa685fc04135c50e2780c303137.tar.gz",
+      "cblas_integer_model": "LP64",
+      "default_provider": "pinned_source",
+      "license": "BSD-3-Clause",
+      "release": "v0.3.33",
+      "revision": "62bcfb0dc9f1cfa685fc04135c50e2780c303137",
+      "sha256": "91c894079dad77b2b51bee58f6f999dbd9db0419dd6a06dff93004767461ab86",
+      "system_override": {
+        "provider_env": "TERLAN_NDARRAY_BLAS_PROVIDER=system",
+        "root_env": "TERLAN_NDARRAY_OPENBLAS_ROOT",
+        "required_header": "include/cblas.h",
+        "required_library_names": [
+          "libopenblas.a",
+          "libopenblas.dylib",
+          "libopenblas.so",
+          "openblas.dll",
+          "openblas.lib"
+        ]
+      }
+    }
+  },
+  "schema": "terlan.ndarray.native-dependencies.v1",
+  "supported_hosts": [
+    "aarch64-apple-darwin",
+    "aarch64-pc-windows-msvc",
+    "aarch64-unknown-linux-gnu",
+    "x86_64-apple-darwin",
+    "x86_64-pc-windows-msvc",
+    "x86_64-unknown-linux-gnu"
+  ]
+}

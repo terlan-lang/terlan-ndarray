@@ -1,0 +1,47 @@
+//! Generated ABI-v1 bindings for owned contiguous CPU arrays.
+
+module ndarray.Array.
+
+/// Opaque owned contiguous CPU array. 
+
+pub opaque type Array.
+
+/// Returns one for the ABI-v1 contiguous layout. 
+
+pub contiguous_code(array: Array): Int.
+
+/// Disposes an owned array exactly once. 
+
+pub dispose(array: Array): Unit.
+
+/// Returns the ABI-v1 dtype code. 
+
+pub dtype_code(array: Array): Int.
+
+/// Copies boolean values and shape into owned CPU storage. 
+
+pub from_bools(values: List[Bool], shape: List[Int]): Array.
+
+/// Copies Float64 values and shape into owned CPU storage. 
+
+pub from_floats(values: List[Float], shape: List[Int]): Array.
+
+/// Copies Int64 values and shape into owned CPU storage. 
+
+pub from_ints(values: List[Int], shape: List[Int]): Array.
+
+/// Returns live native allocations for lifecycle auditing. 
+
+pub live_count(): Int.
+
+/// Returns logical element count. 
+
+pub numel(array: Array): Int.
+
+/// Returns array rank. 
+
+pub rank(array: Array): Int.
+
+/// Copies array shape into a Terlan list. 
+
+pub shape(array: Array): List[Int].
