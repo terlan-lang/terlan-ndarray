@@ -63,6 +63,30 @@ pub to_ints(array: Array): List[Int] -> native.
 @compiler.native {ndarray.array.to_floats}
 pub to_floats(array: Array): List[Float] -> native.
 
+/** Copies an array into an independently owned contiguous shape. */
+@compiler.native {ndarray.array.reshape}
+pub reshape(array: Array, shape: List[Int]): Array -> native.
+
+/** Copies an array with two axes exchanged into contiguous storage. */
+@compiler.native {ndarray.array.transpose}
+pub transpose(array: Array, axis_a: Int, axis_b: Int): Array -> native.
+
+/** Adds exact-shape numeric arrays without broadcasting. */
+@compiler.native {ndarray.array.add}
+pub add(lhs: Array, rhs: Array): Array -> native.
+
+/** Subtracts exact-shape numeric arrays without broadcasting. */
+@compiler.native {ndarray.array.subtract}
+pub subtract(lhs: Array, rhs: Array): Array -> native.
+
+/** Multiplies exact-shape numeric arrays without broadcasting. */
+@compiler.native {ndarray.array.multiply}
+pub multiply(lhs: Array, rhs: Array): Array -> native.
+
+/** Reduces normalized axes; an empty axis list reduces all axes. */
+@compiler.native {ndarray.array.sum}
+pub sum(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
+
 /** Disposes an owned array exactly once. */
 @compiler.native {ndarray.array.dispose}
 pub dispose(array: Array): Unit -> native.

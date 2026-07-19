@@ -114,6 +114,54 @@ Returns an owned copy of Float64 values.
 - NativeBoundary operation: `ndarray.array.to_floats`
 - Ownership: `value`
 
+## `reshape`
+
+Copies an array into an independently owned contiguous shape.
+
+- C symbol: `terlan_ndarray_v1_reshape`
+- NativeBoundary operation: `ndarray.array.reshape`
+- Ownership: `opaque_handle`
+
+## `transpose`
+
+Copies an array with two axes exchanged into contiguous storage.
+
+- C symbol: `terlan_ndarray_v1_transpose`
+- NativeBoundary operation: `ndarray.array.transpose`
+- Ownership: `opaque_handle`
+
+## `add`
+
+Adds exact-shape numeric arrays without broadcasting.
+
+- C symbol: `terlan_ndarray_v1_add`
+- NativeBoundary operation: `ndarray.array.add`
+- Ownership: `opaque_handle`
+
+## `subtract`
+
+Subtracts exact-shape numeric arrays without broadcasting.
+
+- C symbol: `terlan_ndarray_v1_subtract`
+- NativeBoundary operation: `ndarray.array.subtract`
+- Ownership: `opaque_handle`
+
+## `multiply`
+
+Multiplies exact-shape numeric arrays without broadcasting.
+
+- C symbol: `terlan_ndarray_v1_multiply`
+- NativeBoundary operation: `ndarray.array.multiply`
+- Ownership: `opaque_handle`
+
+## `sum`
+
+Reduces normalized axes; an empty axis list reduces all axes.
+
+- C symbol: `terlan_ndarray_v1_sum`
+- NativeBoundary operation: `ndarray.array.sum`
+- Ownership: `opaque_handle`
+
 ## `dispose`
 
 Disposes an owned array exactly once.

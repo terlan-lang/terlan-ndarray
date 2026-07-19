@@ -11,15 +11,18 @@ compiler contains no ndarray-specific lowering or runtime branch.
 
 `ND0` freezes and validates ABI version 1. `ND1` implements owned Bool, Int64,
 and Float64 CPU arrays with checked layout metadata, copied readback,
-generation-safe handles, and deterministic disposal. Public numerical
-operations, CBLAS, DLPack, and package integrations are implemented by later
-roadmap milestones.
+generation-safe handles, and deterministic disposal. `ND2` adds independently
+owned reshape and two-axis transpose, exact-shape numeric arithmetic, and
+checked axis reductions. Broadcasting remains unavailable by design. CBLAS,
+Implicit dtype conversion is also unavailable. CBLAS, DLPack, and package
+integrations are implemented by later roadmap milestones.
 
-Run the ABI and owned-lifecycle gates with:
+Run the ABI, owned-lifecycle, and operation gates with:
 
 ```text
 make abi-check
 make package-check
+make operations-check
 ```
 
 The gates write checked deterministic results to

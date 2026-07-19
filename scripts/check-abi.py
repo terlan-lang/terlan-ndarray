@@ -254,10 +254,8 @@ def main():
             case_root = temporary / name
             case_root.mkdir()
             shutil.copytree(repository / "bindings/include", case_root / "include")
-            shutil.copy2(
-                repository / "bindings/terlan_ndarray.c",
-                case_root / "terlan_ndarray.c",
-            )
+            for source in manifest["c_metadata"].get("sources", []):
+                shutil.copy2(repository / "bindings" / source, case_root / source)
             for header in manifest["c_metadata"].get("headers", []):
                 shutil.copy2(repository / "bindings" / header, case_root / header)
             variant_path = case_root / "ndarray-c.json"
@@ -274,23 +272,33 @@ def main():
                     f"{name} produced the wrong diagnostic; expected {diagnostic!r}\n{combined}"
                 )
 
-        native_test = temporary / "ndarray-abi-test"
-        run(
-            [
-                os.environ.get("CC", "cc"),
-                "-std=c11",
-                "-Wall",
-                "-Wextra",
-                "-Wpedantic",
-                "-Werror",
-                str(repository / "bindings/terlan_ndarray.c"),
-                str(repository / "tests/abi_test.c"),
-                "-o",
-                str(native_test),
-            ],
-            cwd=repository,
-        )
-        run([str(native_test)], cwd=repository)
+        native_sources = [
+            str(repository / "bindings" / source)
+            for source in manifest["c_metadata"].get("sources", [])
+        ]
+        for test_source in (
+            "abi_test.c",
+            "operations_test.c",
+            "operations_property_test.c",
+        ):
+            native_test = temporary / f"ndarray-{Path(test_source).stem}"
+            run(
+                [
+                    os.environ.get("CC", "cc"),
+                    "-std=c11",
+                    "-Wall",
+                    "-Wextra",
+                    "-Wpedantic",
+                    "-Werror",
+                    *native_sources,
+                    str(repository / "tests" / test_source),
+                    "-lm",
+                    "-o",
+                    str(native_test),
+                ],
+                cwd=repository,
+            )
+            run([str(native_test)], cwd=repository)
 
         cargo_environment = os.environ.copy()
         cargo_environment["CARGO_TARGET_DIR"] = str(temporary / "cargo-target")

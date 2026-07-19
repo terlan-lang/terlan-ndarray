@@ -24,7 +24,7 @@
     "abi_version": 1,
     "header": "include/terlan_ndarray.h",
     "headers": ["terlan_ndarray_internal.h"],
-    "sources": ["terlan_ndarray.c"],
+    "sources": ["terlan_ndarray.c", "terlan_ndarray_operations.c"],
     "aliases": {
       "TerlanNdArrayStatus": "int32_t",
       "TerlanNdArrayHandle": "TerlanNdArray *"
@@ -355,6 +355,106 @@
         ]
       },
       {
+        "id": "function.reshape",
+        "c_name": "terlan_ndarray_v1_reshape",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {
+            "name": "shape",
+            "c_type": "const int64_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "rank"}
+          },
+          {"name": "rank", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {"name": "out_array", "c_type": "TerlanNdArrayHandle *", "direction": "output", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.transpose",
+        "c_name": "terlan_ndarray_v1_transpose",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "axis_a", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {"name": "axis_b", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {"name": "out_array", "c_type": "TerlanNdArrayHandle *", "direction": "output", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.add",
+        "c_name": "terlan_ndarray_v1_add",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "lhs", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "rhs", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "out_array", "c_type": "TerlanNdArrayHandle *", "direction": "output", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.subtract",
+        "c_name": "terlan_ndarray_v1_subtract",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "lhs", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "rhs", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "out_array", "c_type": "TerlanNdArrayHandle *", "direction": "output", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.multiply",
+        "c_name": "terlan_ndarray_v1_multiply",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "lhs", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "rhs", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {"name": "out_array", "c_type": "TerlanNdArrayHandle *", "direction": "output", "ownership": "transfer_full"}
+        ]
+      },
+      {
+        "id": "function.sum",
+        "c_name": "terlan_ndarray_v1_sum",
+        "kind": "function",
+        "status": "bind",
+        "returns": "TerlanNdArrayStatus",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {"name": "array", "c_type": "TerlanNdArrayHandle", "direction": "input", "ownership": "borrowed_call"},
+          {
+            "name": "axes",
+            "c_type": "const int64_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "axis_count"}
+          },
+          {"name": "axis_count", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {"name": "keep_dims", "c_type": "int32_t", "direction": "input", "ownership": "value"},
+          {"name": "out_array", "c_type": "TerlanNdArrayHandle *", "direction": "output", "ownership": "transfer_full"}
+        ]
+      },
+      {
         "id": "function.delete",
         "c_name": "terlan_ndarray_v1_delete",
         "kind": "function",
@@ -564,6 +664,98 @@
           "blocking": "fast",
           "resource": "value",
           "documentation": "Returns an owned copy of Float64 values.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "reshape",
+          "operation": "ndarray.array.reshape",
+          "c_symbol": "function.reshape",
+          "role": "immutable_method",
+          "args": [
+            {"name": "array", "ty": "Array"},
+            {"name": "shape", "ty": "List[Int]"}
+          ],
+          "returns": "Array",
+          "blocking": "fast",
+          "resource": "opaque_handle",
+          "documentation": "Copies an array into an independently owned contiguous shape.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "transpose",
+          "operation": "ndarray.array.transpose",
+          "c_symbol": "function.transpose",
+          "role": "immutable_method",
+          "args": [
+            {"name": "array", "ty": "Array"},
+            {"name": "axis_a", "ty": "Int"},
+            {"name": "axis_b", "ty": "Int"}
+          ],
+          "returns": "Array",
+          "blocking": "fast",
+          "resource": "opaque_handle",
+          "documentation": "Copies an array with two axes exchanged into contiguous storage.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "add",
+          "operation": "ndarray.array.add",
+          "c_symbol": "function.add",
+          "role": "immutable_method",
+          "args": [
+            {"name": "lhs", "ty": "Array"},
+            {"name": "rhs", "ty": "Array"}
+          ],
+          "returns": "Array",
+          "blocking": "fast",
+          "resource": "opaque_handle",
+          "documentation": "Adds exact-shape numeric arrays without broadcasting.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "subtract",
+          "operation": "ndarray.array.subtract",
+          "c_symbol": "function.subtract",
+          "role": "immutable_method",
+          "args": [
+            {"name": "lhs", "ty": "Array"},
+            {"name": "rhs", "ty": "Array"}
+          ],
+          "returns": "Array",
+          "blocking": "fast",
+          "resource": "opaque_handle",
+          "documentation": "Subtracts exact-shape numeric arrays without broadcasting.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "multiply",
+          "operation": "ndarray.array.multiply",
+          "c_symbol": "function.multiply",
+          "role": "immutable_method",
+          "args": [
+            {"name": "lhs", "ty": "Array"},
+            {"name": "rhs", "ty": "Array"}
+          ],
+          "returns": "Array",
+          "blocking": "fast",
+          "resource": "opaque_handle",
+          "documentation": "Multiplies exact-shape numeric arrays without broadcasting.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "sum",
+          "operation": "ndarray.array.sum",
+          "c_symbol": "function.sum",
+          "role": "immutable_method",
+          "args": [
+            {"name": "array", "ty": "Array"},
+            {"name": "axes", "ty": "List[Int]"},
+            {"name": "keep_dims", "ty": "Int"}
+          ],
+          "returns": "Array",
+          "blocking": "fast",
+          "resource": "opaque_handle",
+          "documentation": "Reduces normalized axes; an empty axis list reduces all axes.",
           "generated_smoke": "package_owned"
         },
         {

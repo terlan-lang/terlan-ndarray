@@ -6,6 +6,10 @@ module ndarray.Array.
 
 pub opaque type Array.
 
+/// Adds exact-shape numeric arrays without broadcasting.
+
+pub add(lhs: Array, rhs: Array): Array.
+
 /// Returns the checked contiguous storage byte count.
 
 pub byte_count(array: Array): Int.
@@ -42,6 +46,10 @@ pub from_ints(values: List[Int], shape: List[Int]): Array.
 
 pub live_count(): Int.
 
+/// Multiplies exact-shape numeric arrays without broadcasting.
+
+pub multiply(lhs: Array, rhs: Array): Array.
+
 /// Returns logical element count.
 
 pub numel(array: Array): Int.
@@ -50,6 +58,10 @@ pub numel(array: Array): Int.
 
 pub rank(array: Array): Int.
 
+/// Copies an array into an independently owned contiguous shape.
+
+pub reshape(array: Array, shape: List[Int]): Array.
+
 /// Copies array shape into a Terlan list.
 
 pub shape(array: Array): List[Int].
@@ -57,6 +69,14 @@ pub shape(array: Array): List[Int].
 /// Copies canonical row-major element strides.
 
 pub strides(array: Array): List[Int].
+
+/// Subtracts exact-shape numeric arrays without broadcasting.
+
+pub subtract(lhs: Array, rhs: Array): Array.
+
+/// Reduces normalized axes; an empty axis list reduces all axes.
+
+pub sum(array: Array, axes: List[Int], keep_dims: Int): Array.
 
 /// Returns an owned copy of Bool values.
 
@@ -69,3 +89,7 @@ pub to_floats(array: Array): List[Float].
 /// Returns an owned copy of Int64 values.
 
 pub to_ints(array: Array): List[Int].
+
+/// Copies an array with two axes exchanged into contiguous storage.
+
+pub transpose(array: Array, axis_a: Int, axis_b: Int): Array.

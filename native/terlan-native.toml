@@ -114,6 +114,48 @@ returns = "List[Float]"
 blocking = "fast"
 resource = "value"
 
+[functions."ndarray.Array.reshape"]
+operation = "ndarray.array.reshape"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.transpose"]
+operation = "ndarray.array.transpose"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.add"]
+operation = "ndarray.array.add"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.subtract"]
+operation = "ndarray.array.subtract"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.multiply"]
+operation = "ndarray.array.multiply"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sum"]
+operation = "ndarray.array.sum"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
 [functions."ndarray.Array.dispose"]
 operation = "ndarray.array.dispose"
 arity = 1

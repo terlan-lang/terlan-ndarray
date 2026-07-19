@@ -3,6 +3,7 @@
 
 #include "include/terlan_ndarray.h"
 
+#include <stddef.h>
 #include <stdint.h>
 
 typedef enum TerlanNdArrayState {
@@ -21,6 +22,15 @@ struct TerlanNdArray {
   void *data;
   TerlanNdArrayState state;
 };
+
+void *checked_malloc(size_t size);
+void *checked_calloc(size_t count, size_t size);
+TerlanNdArrayStatus require_live(TerlanNdArrayHandle array);
+size_t dtype_size(int32_t dtype);
+TerlanNdArrayStatus create_array(const void *values, int64_t value_count,
+                                 const int64_t *shape, int64_t rank,
+                                 size_t element_size, int32_t dtype,
+                                 TerlanNdArrayHandle *out_array);
 
 void terlan_ndarray_test_fail_allocation_after(int64_t successful_allocations);
 void terlan_ndarray_test_reset_allocation_failures(void);

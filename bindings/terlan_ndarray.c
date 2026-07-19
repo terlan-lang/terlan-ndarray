@@ -24,14 +24,14 @@ static int allocation_must_fail(void) {
   return attempt >= fail_after;
 }
 
-static void *checked_malloc(size_t size) {
+void *checked_malloc(size_t size) {
   if (allocation_must_fail()) {
     return NULL;
   }
   return malloc(size);
 }
 
-static void *checked_calloc(size_t count, size_t size) {
+void *checked_calloc(size_t count, size_t size) {
   if (allocation_must_fail()) {
     return NULL;
   }
@@ -96,7 +96,7 @@ static void destroy_partial(TerlanNdArray *array) {
   free(array);
 }
 
-static TerlanNdArrayStatus require_live(TerlanNdArrayHandle array) {
+TerlanNdArrayStatus require_live(TerlanNdArrayHandle array) {
   if (array == NULL) {
     return TERLAN_NDARRAY_INVALID_ARGUMENT;
   }
@@ -106,10 +106,24 @@ static TerlanNdArrayStatus require_live(TerlanNdArrayHandle array) {
   return TERLAN_NDARRAY_OK;
 }
 
-static TerlanNdArrayStatus create_array(const void *values, int64_t value_count,
-                                        const int64_t *shape, int64_t rank,
-                                        size_t element_size, int32_t dtype,
-                                        TerlanNdArrayHandle *out_array) {
+size_t dtype_size(int32_t dtype) {
+  switch (dtype) {
+  case TERLAN_NDARRAY_DTYPE_BOOL:
+    return sizeof(uint8_t);
+  case TERLAN_NDARRAY_DTYPE_INT64:
+    return sizeof(int64_t);
+  case TERLAN_NDARRAY_DTYPE_FLOAT64:
+    return sizeof(double);
+  default:
+    return 0;
+  }
+}
+
+
+TerlanNdArrayStatus create_array(const void *values, int64_t value_count,
+                                 const int64_t *shape, int64_t rank,
+                                 size_t element_size, int32_t dtype,
+                                 TerlanNdArrayHandle *out_array) {
   TerlanNdArray *array;
   TerlanNdArrayStatus status;
   size_t dimensions_size;

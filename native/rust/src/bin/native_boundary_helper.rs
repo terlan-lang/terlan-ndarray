@@ -269,6 +269,126 @@ impl Worker {
                 };
                 match value_array.to_floats() { Ok(values) if values.is_empty() => "ok_floats".to_string(), Ok(values) => format!("ok_floats {}", values.iter().map(f64::to_string).collect::<Vec<_>>().join(",")), Err(error) => native_error(&error) }
             }
+            "ndarray.array.reshape" => {
+                let [Arg::Handle(array), shape @ (Arg::Ints(_) | Arg::EmptyList)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "reshape expects its declared arguments");
+                };
+                let value_array = match self.live_array(array) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                let value = match value_array.reshape(arg_ints(shape)) {
+                    Ok(value) => value,
+                    Err(error) => return native_error(&error),
+                };
+                let (id, generation) = match self.store_handle(HandleValue::Array(value)) {
+                    Ok(handle) => handle,
+                    Err(error) => return error,
+                };
+                format!("ok_handle {id} {generation} {}", STANDARD.encode("ndarray.Array.Array"))
+            }
+            "ndarray.array.transpose" => {
+                let [Arg::Handle(array), Arg::Int(axis_a), Arg::Int(axis_b)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "transpose expects its declared arguments");
+                };
+                let value_array = match self.live_array(array) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                let value = match value_array.transpose(*axis_a, *axis_b) {
+                    Ok(value) => value,
+                    Err(error) => return native_error(&error),
+                };
+                let (id, generation) = match self.store_handle(HandleValue::Array(value)) {
+                    Ok(handle) => handle,
+                    Err(error) => return error,
+                };
+                format!("ok_handle {id} {generation} {}", STANDARD.encode("ndarray.Array.Array"))
+            }
+            "ndarray.array.add" => {
+                let [Arg::Handle(lhs), Arg::Handle(rhs)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "add expects its declared arguments");
+                };
+                let value_lhs = match self.live_array(lhs) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                let value_rhs = match self.live_array(rhs) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                let value = match value_lhs.add(value_rhs) {
+                    Ok(value) => value,
+                    Err(error) => return native_error(&error),
+                };
+                let (id, generation) = match self.store_handle(HandleValue::Array(value)) {
+                    Ok(handle) => handle,
+                    Err(error) => return error,
+                };
+                format!("ok_handle {id} {generation} {}", STANDARD.encode("ndarray.Array.Array"))
+            }
+            "ndarray.array.subtract" => {
+                let [Arg::Handle(lhs), Arg::Handle(rhs)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "subtract expects its declared arguments");
+                };
+                let value_lhs = match self.live_array(lhs) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                let value_rhs = match self.live_array(rhs) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                let value = match value_lhs.subtract(value_rhs) {
+                    Ok(value) => value,
+                    Err(error) => return native_error(&error),
+                };
+                let (id, generation) = match self.store_handle(HandleValue::Array(value)) {
+                    Ok(handle) => handle,
+                    Err(error) => return error,
+                };
+                format!("ok_handle {id} {generation} {}", STANDARD.encode("ndarray.Array.Array"))
+            }
+            "ndarray.array.multiply" => {
+                let [Arg::Handle(lhs), Arg::Handle(rhs)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "multiply expects its declared arguments");
+                };
+                let value_lhs = match self.live_array(lhs) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                let value_rhs = match self.live_array(rhs) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                let value = match value_lhs.multiply(value_rhs) {
+                    Ok(value) => value,
+                    Err(error) => return native_error(&error),
+                };
+                let (id, generation) = match self.store_handle(HandleValue::Array(value)) {
+                    Ok(handle) => handle,
+                    Err(error) => return error,
+                };
+                format!("ok_handle {id} {generation} {}", STANDARD.encode("ndarray.Array.Array"))
+            }
+            "ndarray.array.sum" => {
+                let [Arg::Handle(array), axes @ (Arg::Ints(_) | Arg::EmptyList), Arg::Int(keep_dims)] = request.args.as_slice() else {
+                    return protocol_error("invalid_arguments", "sum expects its declared arguments");
+                };
+                let value_array = match self.live_array(array) {
+                    Ok(value) => value,
+                    Err(error) => return error,
+                };
+                let value = match value_array.sum(arg_ints(axes), *keep_dims) {
+                    Ok(value) => value,
+                    Err(error) => return native_error(&error),
+                };
+                let (id, generation) = match self.store_handle(HandleValue::Array(value)) {
+                    Ok(handle) => handle,
+                    Err(error) => return error,
+                };
+                format!("ok_handle {id} {generation} {}", STANDARD.encode("ndarray.Array.Array"))
+            }
             "ndarray.array.dispose" => {
                 let [Arg::Handle(array)] = request.args.as_slice() else {
                     return protocol_error("invalid_arguments", "dispose expects its declared arguments");

@@ -7,6 +7,7 @@ pub mod ffi {
     }
 
     unsafe extern "C" {
+        pub fn terlan_ndarray_v1_add(lhs: *mut TerlanNdArray, rhs: *mut TerlanNdArray, out_array: *mut *mut TerlanNdArray) -> i32;
         pub fn terlan_ndarray_v1_byte_count(array: *mut TerlanNdArray, out_byte_count: *mut i64) -> i32;
         pub fn terlan_ndarray_v1_delete(array: *mut TerlanNdArray) -> i32;
         pub fn terlan_ndarray_v1_delete_bool_values(values: *mut u8);
@@ -19,13 +20,18 @@ pub mod ffi {
         pub fn terlan_ndarray_v1_from_ints(values: *const i64, value_count: i64, shape: *const i64, rank: i64, out_array: *mut *mut TerlanNdArray) -> i32;
         pub fn terlan_ndarray_v1_is_contiguous(array: *mut TerlanNdArray, out_contiguous: *mut i32) -> i32;
         pub fn terlan_ndarray_v1_live_count() -> i64;
+        pub fn terlan_ndarray_v1_multiply(lhs: *mut TerlanNdArray, rhs: *mut TerlanNdArray, out_array: *mut *mut TerlanNdArray) -> i32;
         pub fn terlan_ndarray_v1_numel(array: *mut TerlanNdArray, out_numel: *mut i64) -> i32;
         pub fn terlan_ndarray_v1_rank(array: *mut TerlanNdArray, out_rank: *mut i64) -> i32;
+        pub fn terlan_ndarray_v1_reshape(array: *mut TerlanNdArray, shape: *const i64, rank: i64, out_array: *mut *mut TerlanNdArray) -> i32;
         pub fn terlan_ndarray_v1_shape(array: *mut TerlanNdArray, out_shape: *mut *mut i64) -> i32;
         pub fn terlan_ndarray_v1_strides(array: *mut TerlanNdArray, out_strides: *mut *mut i64) -> i32;
+        pub fn terlan_ndarray_v1_subtract(lhs: *mut TerlanNdArray, rhs: *mut TerlanNdArray, out_array: *mut *mut TerlanNdArray) -> i32;
+        pub fn terlan_ndarray_v1_sum(array: *mut TerlanNdArray, axes: *const i64, axis_count: i64, keep_dims: i32, out_array: *mut *mut TerlanNdArray) -> i32;
         pub fn terlan_ndarray_v1_to_bools(array: *mut TerlanNdArray, out_values: *mut *mut u8, out_length: *mut usize) -> i32;
         pub fn terlan_ndarray_v1_to_floats(array: *mut TerlanNdArray, out_values: *mut *mut f64, out_length: *mut usize) -> i32;
         pub fn terlan_ndarray_v1_to_ints(array: *mut TerlanNdArray, out_values: *mut *mut i64, out_length: *mut usize) -> i32;
+        pub fn terlan_ndarray_v1_transpose(array: *mut TerlanNdArray, axis_a: i64, axis_b: i64, out_array: *mut *mut TerlanNdArray) -> i32;
     }
 }
 
@@ -218,6 +224,62 @@ impl Array {
         // SAFETY: ownership metadata transfers this array to the named destructor exactly once.
         unsafe { ffi::terlan_ndarray_v1_delete_float_values(out_out_values) };
         Ok(values?)
+    }
+
+    pub fn reshape(&self, shape: &[i64]) -> Result<Self, CAbiError> {
+        let shape_length = i64::try_from(shape.len()).map_err(|_| CAbiError { operation: "ndarray.array.reshape", status: -2 })?;
+        let mut raw: *mut ffi::TerlanNdArray = std::ptr::null_mut();
+        // SAFETY: generated arguments follow the reviewed ownership metadata.
+        let status = unsafe { ffi::terlan_ndarray_v1_reshape(self.raw.as_ptr(), shape.as_ptr(), shape_length, &mut raw) };
+        check_status("ndarray.array.reshape", status as i32, 0)?;
+        let raw = NonNull::new(raw).ok_or(CAbiError { operation: "ndarray.array.reshape", status: -1 })?;
+        Ok(Self { raw })
+    }
+
+    pub fn transpose(&self, axis_a: i64, axis_b: i64) -> Result<Self, CAbiError> {
+        let mut raw: *mut ffi::TerlanNdArray = std::ptr::null_mut();
+        // SAFETY: generated arguments follow the reviewed ownership metadata.
+        let status = unsafe { ffi::terlan_ndarray_v1_transpose(self.raw.as_ptr(), axis_a as i64, axis_b as i64, &mut raw) };
+        check_status("ndarray.array.transpose", status as i32, 0)?;
+        let raw = NonNull::new(raw).ok_or(CAbiError { operation: "ndarray.array.transpose", status: -1 })?;
+        Ok(Self { raw })
+    }
+
+    pub fn add(&self, rhs: &Self) -> Result<Self, CAbiError> {
+        let mut raw: *mut ffi::TerlanNdArray = std::ptr::null_mut();
+        // SAFETY: generated arguments follow the reviewed ownership metadata.
+        let status = unsafe { ffi::terlan_ndarray_v1_add(self.raw.as_ptr(), rhs.raw.as_ptr(), &mut raw) };
+        check_status("ndarray.array.add", status as i32, 0)?;
+        let raw = NonNull::new(raw).ok_or(CAbiError { operation: "ndarray.array.add", status: -1 })?;
+        Ok(Self { raw })
+    }
+
+    pub fn subtract(&self, rhs: &Self) -> Result<Self, CAbiError> {
+        let mut raw: *mut ffi::TerlanNdArray = std::ptr::null_mut();
+        // SAFETY: generated arguments follow the reviewed ownership metadata.
+        let status = unsafe { ffi::terlan_ndarray_v1_subtract(self.raw.as_ptr(), rhs.raw.as_ptr(), &mut raw) };
+        check_status("ndarray.array.subtract", status as i32, 0)?;
+        let raw = NonNull::new(raw).ok_or(CAbiError { operation: "ndarray.array.subtract", status: -1 })?;
+        Ok(Self { raw })
+    }
+
+    pub fn multiply(&self, rhs: &Self) -> Result<Self, CAbiError> {
+        let mut raw: *mut ffi::TerlanNdArray = std::ptr::null_mut();
+        // SAFETY: generated arguments follow the reviewed ownership metadata.
+        let status = unsafe { ffi::terlan_ndarray_v1_multiply(self.raw.as_ptr(), rhs.raw.as_ptr(), &mut raw) };
+        check_status("ndarray.array.multiply", status as i32, 0)?;
+        let raw = NonNull::new(raw).ok_or(CAbiError { operation: "ndarray.array.multiply", status: -1 })?;
+        Ok(Self { raw })
+    }
+
+    pub fn sum(&self, axes: &[i64], keep_dims: i64) -> Result<Self, CAbiError> {
+        let axes_length = i64::try_from(axes.len()).map_err(|_| CAbiError { operation: "ndarray.array.sum", status: -2 })?;
+        let mut raw: *mut ffi::TerlanNdArray = std::ptr::null_mut();
+        // SAFETY: generated arguments follow the reviewed ownership metadata.
+        let status = unsafe { ffi::terlan_ndarray_v1_sum(self.raw.as_ptr(), axes.as_ptr(), axes_length, keep_dims as i32, &mut raw) };
+        check_status("ndarray.array.sum", status as i32, 0)?;
+        let raw = NonNull::new(raw).ok_or(CAbiError { operation: "ndarray.array.sum", status: -1 })?;
+        Ok(Self { raw })
     }
 
 }

@@ -21,7 +21,12 @@ enum {
   TERLAN_NDARRAY_ALLOCATION_FAILED = 104,
   TERLAN_NDARRAY_INVALID_BOOL = 105,
   TERLAN_NDARRAY_DTYPE_MISMATCH = 106,
-  TERLAN_NDARRAY_DISPOSED = 107
+  TERLAN_NDARRAY_DISPOSED = 107,
+  TERLAN_NDARRAY_SHAPE_MISMATCH = 108,
+  TERLAN_NDARRAY_UNSUPPORTED_DTYPE = 109,
+  TERLAN_NDARRAY_AXIS_OUT_OF_RANGE = 110,
+  TERLAN_NDARRAY_DUPLICATE_AXIS = 111,
+  TERLAN_NDARRAY_ARITHMETIC_OVERFLOW = 112
 };
 
 enum {
@@ -64,6 +69,24 @@ TerlanNdArrayStatus terlan_ndarray_v1_to_ints(
     TerlanNdArrayHandle array, int64_t **out_values, size_t *out_length);
 TerlanNdArrayStatus terlan_ndarray_v1_to_floats(
     TerlanNdArrayHandle array, double **out_values, size_t *out_length);
+TerlanNdArrayStatus terlan_ndarray_v1_reshape(
+    TerlanNdArrayHandle array, const int64_t *shape, int64_t rank,
+    TerlanNdArrayHandle *out_array);
+TerlanNdArrayStatus terlan_ndarray_v1_transpose(
+    TerlanNdArrayHandle array, int64_t axis_a, int64_t axis_b,
+    TerlanNdArrayHandle *out_array);
+TerlanNdArrayStatus terlan_ndarray_v1_add(
+    TerlanNdArrayHandle lhs, TerlanNdArrayHandle rhs,
+    TerlanNdArrayHandle *out_array);
+TerlanNdArrayStatus terlan_ndarray_v1_subtract(
+    TerlanNdArrayHandle lhs, TerlanNdArrayHandle rhs,
+    TerlanNdArrayHandle *out_array);
+TerlanNdArrayStatus terlan_ndarray_v1_multiply(
+    TerlanNdArrayHandle lhs, TerlanNdArrayHandle rhs,
+    TerlanNdArrayHandle *out_array);
+TerlanNdArrayStatus terlan_ndarray_v1_sum(
+    TerlanNdArrayHandle array, const int64_t *axes, int64_t axis_count,
+    int32_t keep_dims, TerlanNdArrayHandle *out_array);
 void terlan_ndarray_v1_delete_bool_values(uint8_t *values);
 void terlan_ndarray_v1_delete_int_values(int64_t *values);
 void terlan_ndarray_v1_delete_float_values(double *values);
