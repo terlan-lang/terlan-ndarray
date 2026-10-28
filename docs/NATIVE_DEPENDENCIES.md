@@ -24,6 +24,13 @@ stores the completed build under the content-addressed
 OpenBLAS dynamic CPU dispatch, so the validated x86-64 artifact is not tied to
 the build machine's CPU generation. Ordinary compiler builds do not link BLAS.
 
+Published Rust consumers resolve a system OpenBLAS dynamically by default. This
+keeps a normal consumer build from inheriting OpenBLAS's private static
+dependencies, such as an unversioned `libgfortran` linker requirement. Release
+gates set `OPENBLAS_STATIC=1` (and `PKG_CONFIG_ALL_STATIC=1`) explicitly and
+validate against the pinned static provider above. The source and generated
+package manifests must never request static OpenBLAS unconditionally.
+
 Source validation requires `cc`, `curl`, GNU Make, and `pkg-config`. It does not
 require an OpenBLAS installation. Repeated runs reuse the verified cache.
 

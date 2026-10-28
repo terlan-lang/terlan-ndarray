@@ -195,7 +195,7 @@
       "pkg_config": {
         "package": "openblas",
         "min_version": "0.3.0",
-        "static_link": true
+        "static_link": false
       }
     },
     "aliases": {

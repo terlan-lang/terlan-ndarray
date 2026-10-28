@@ -15,7 +15,7 @@
     "int64"
   ],
   "generated_files": {
-    "bindings/native-binding-manifest.json": "68cc87211a1ee64585fd305c0106eaea8c52b022bf7cebd9c92384c83aab83f8",
+    "bindings/native-binding-manifest.json": "0c17666c6e9a73a792cb05180cbe59ae11280a9dcc585970d3be06c9e3dd6c22",
     "bindings/skipped-symbols.json": "eb8ea096f63fe2453261140b59f9e9518465a617b16ef2ee868d4992ff2990fc",
     "docs/ndarray.Array.md": "9b6cefe3aa05fbff35a50cb8d1a51829db15000e2a49ed5b80b76294699be251",
     "docs/ndarray.ArrowArray.md": "aefde85767f28faf067f6e21a3087ebf5bad664593fb63aaa50bf2612e2fa893",
@@ -30,7 +30,7 @@
     "docs/ndarray.Shape.md": "42aac87f2d1e58cdbcb10ada49c7a58cc2c285524ebf397eb7bb3c05df4f78f8",
     "docs/ndarray.TensorAlgebra.md": "d3cd27247cf241e962b69cf4d87161ebc988ebcf9a36e7ba1727304c32cae575",
     "native/rust/Cargo.toml": "125b58d337d4a41c1be1f5bd49147f5386b3cd945a444c44e454cc1dd732c14e",
-    "native/rust/build.rs": "fff78bbea426ceb07fda009e613e2ff11b650b2259a88cc35b8b8b06b75cb9a0",
+    "native/rust/build.rs": "c510c03adecc704db42396a1f4265fe35eb99bdba38ef7594006d311eacee00a",
     "native/rust/c/dlpack.h": "62052bef24bd69bb7b52e95428f9e99bd7951783850c36c5f2a41e71fd63c2fc",
     "native/rust/c/terlan_ndarray.c": "9a4c158a312bd28b401468d5bd1e694f6f95e9d3ccc4594dfad28244e139f94b",
     "native/rust/c/terlan_ndarray_advanced_indexing.c": "81b371e49884cfd913e42797611b9a49e5231b48260f963b0d785eba3c5d3a98",

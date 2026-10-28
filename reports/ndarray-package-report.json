@@ -1,5 +1,5 @@
 {
-  "abi_report_sha256": "ee7947541eb2c0350e8a2e460594a9725fafe5e1aca772a498e74ed29e5a6979",
+  "abi_report_sha256": "4a81919b7c0f96a95168b40ff540389e82a5af30d1dd2399f39438aa98e2fabf",
   "consumer": {
     "negative_cases": [
       "broadcast",

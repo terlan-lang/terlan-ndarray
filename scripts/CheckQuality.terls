@@ -10,11 +10,12 @@ import std.data.Json.
 import std.io.Console.{eprintln, println}.
 import std.io.{Directory, File}.
 import std.regex.Regex.
-import std.system.{Arguments, Platform, Process}.
+import std.system.{Arguments, Environment, Platform, Process}.
 
 import type std.core.Option.
 import type std.io.File.TextFile.
 import type std.regex.Regex.{Regex}.
+import type std.system.Process.{EnvironmentEntry}.
 
 struct SourceStats {
     valid: Bool,
@@ -726,7 +727,9 @@ check_independence(): IndependenceResult ->
         Ok(package_value) <- pkg_config.get("package");
         Ok(package) <- package_value.as_string();
         Ok(static_value) <- pkg_config.get("static_link");
-        Ok(static_link) <- static_value.as_bool()
+        Ok(static_link) <- static_value.as_bool();
+        Ok(generated_build) <- File.read_text("generated/native/rust/build.rs");
+        Ok(native_build) <- File.read_text("native/rust/build.rs")
     } else {
         _ ->
             IndependenceResult(valid = false, reason = "cannot read independence inputs", host = "")
@@ -750,9 +753,20 @@ if {
         reason = "pinned_source must be the default OpenBLAS provider",
         host = host,
     );
-    package != "openblas" or not static_link -> IndependenceResult(
+    package != "openblas" or static_link -> IndependenceResult(
         valid = false,
-        reason = "generated package must link OpenBLAS statically",
+        reason = "generated package must use dynamic system OpenBLAS by default",
+        host = host,
+    );
+    String.contains(generated_build, "probe.statik(true)") -> IndependenceResult(
+        valid = false,
+        reason = "generated package unconditionally requests static OpenBLAS",
+        host = host,
+    );
+    not String.contains(native_build, "OPENBLAS_STATIC")
+        or not String.contains(native_build, "probe.statik(static_openblas)") -> IndependenceResult(
+        valid = false,
+        reason = "native package must reserve static OpenBLAS for explicit opt-in",
         host = host,
     );
     not contains(hosts, host) -> IndependenceResult(
@@ -807,7 +821,7 @@ check_terlan_validation_drivers(): Bool ->
 run_cargo(
     root: String,
     arguments: List[String],
-    environment: List[std.system.Process.EnvironmentEntry],
+    environment: List[EnvironmentEntry],
     removed: List[String],
 ): Bool ->
     let command =
@@ -847,58 +861,116 @@ run_cargo(
             }
     }.
 
+openblas_environment(): Option[List[EnvironmentEntry]] ->
+    let {
+        Some(lock) <- read_json("native-dependencies.json");
+        Ok(dependencies) <- lock.get("dependencies");
+        Ok(openblas) <- dependencies.get("openblas");
+        Ok(revision_value) <- openblas.get("revision");
+        Ok(revision) <- revision_value.as_string()
+    } else {
+        _ -> None
+    };
+    (let base =
+    case Environment.get("TERLAN_NDARRAY_NATIVE_CACHE") {
+        Some(value) -> value;
+        None ->
+            case Environment.get("HOME") {
+                Some(home) -> child(home, ".cache/terlan/native");
+                None -> ""
+            }
+    };
+let host = Platform.current();
+let root =
+    child(
+        child(
+            child(child(base, "openblas"), revision),
+            String.concat(
+                [String.lowercase(host.architecture), "-", String.lowercase(host.operating_system)],
+            ),
+        ),
+        "install",
+    );
+let pkg_config = child(root, "lib/pkgconfig");
+if {
+    base == "" -> None;
+    not File.exists(child(pkg_config, "openblas.pc")) -> None;
+    true -> Some(
+        [
+            Process.environment_entry("PKG_CONFIG_LIBDIR", pkg_config),
+            Process.environment_entry("PKG_CONFIG_PATH", pkg_config),
+            Process.environment_entry("OPENBLAS_STATIC", "1"),
+            Process.environment_entry("PKG_CONFIG_ALL_STATIC", "1"),
+            Process.environment_entry("OPENBLAS_NUM_THREADS", "1"),
+            Process.environment_entry("TERLAN_NDARRAY_OPENBLAS_ROOT", root),
+        ],
+    )
+}).
+
 check_rust(): Bool ->
-    let manifest = "generated/native/rust/Cargo.toml";
-    if {
-        not File.exists(manifest) -> false;
-        true -> case Directory.create_temporary("terlan-ndarray-quality.") {
-            Err(_reason) -> false;
-            Ok(root) ->
-                let target = child(root, "target");
-                let fetched =
-                    run_cargo(
-                        root,
-                        ["fetch", "--offline", "--manifest-path", manifest],
+    let Some(provider_environment) <- openblas_environment() else {
+        _ -> false
+    };
+    (let manifest = "generated/native/rust/Cargo.toml";
+if {
+    not File.exists(manifest) -> false;
+    true -> case Directory.create_temporary("terlan-ndarray-quality.") {
+        Err(_reason) -> false;
+        Ok(root) ->
+            let target = child(root, "target");
+            let fetched =
+                run_cargo(
+                    root,
+                    ["fetch", "--offline", "--manifest-path", manifest],
+                    concat(
+                        provider_environment,
                         [
                             Process.environment_entry("CARGO_NET_OFFLINE", "true"),
                             Process.environment_entry("CARGO_TARGET_DIR", target),
                             Process.environment_entry("RUSTFLAGS", "-D warnings"),
                         ],
-                        [],
-                    );
-                let checked =
-                    fetched
-                        and run_cargo(
+                    ),
+                    [],
+                );
+            let checked =
+                fetched
+                    and run_cargo(
     root,
     ["check", "--offline", "--all-targets", "--manifest-path", manifest],
-    [
-        Process.environment_entry("CARGO_NET_OFFLINE", "true"),
-        Process.environment_entry("CARGO_TARGET_DIR", target),
-        Process.environment_entry("RUSTFLAGS", "-D warnings"),
-    ],
+    concat(
+        provider_environment,
+        [
+            Process.environment_entry("CARGO_NET_OFFLINE", "true"),
+            Process.environment_entry("CARGO_TARGET_DIR", target),
+            Process.environment_entry("RUSTFLAGS", "-D warnings"),
+        ],
+    ),
     [],
 );
-                let documented =
-                    checked
-                        and run_cargo(
+            let documented =
+                checked
+                    and run_cargo(
     root,
     ["doc", "--offline", "--no-deps", "--manifest-path", manifest],
-    [
-        Process.environment_entry("CARGO_NET_OFFLINE", "true"),
-        Process.environment_entry("CARGO_TARGET_DIR", target),
-        Process.environment_entry("RUSTDOCFLAGS", "-D warnings"),
-        Process.environment_entry("RUSTFLAGS", "-D warnings"),
-    ],
+    concat(
+        provider_environment,
+        [
+            Process.environment_entry("CARGO_NET_OFFLINE", "true"),
+            Process.environment_entry("CARGO_TARGET_DIR", target),
+            Process.environment_entry("RUSTDOCFLAGS", "-D warnings"),
+            Process.environment_entry("RUSTFLAGS", "-D warnings"),
+        ],
+    ),
     [],
 );
-                let removed = Directory.remove_all(root);
-                documented
-                    and case removed {
+            let removed = Directory.remove_all(root);
+            documented
+                and case removed {
     Ok(Unit) -> true;
     Err(_reason) -> false
 }
-        }
-    }.
+    }
+}).
 
 coverage_json(count: Int): Json ->
     let category = Json.object();
