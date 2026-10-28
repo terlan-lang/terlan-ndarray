@@ -44,74 +44,71 @@ pub take_into(
 ): Unit ->
     take_indices_into(destination, array, indices, axis, mode).
 
-/** Represents one array or recursively nested list accepted by `block`. */
-pub type Block = Array | List[Block].
+/** Represents the directly typed block-tree forms admitted by `block`. */
+pub type Block = Array | List[Array] | List[List[Array]] | List[List[List[Array]]].
 
-/** Collects block leaves in source traversal order. */
-block_arrays(value: Block): List[Array] ->
-    case value {
-        [] -> [];
-        [first | rest] ->
-            std.collections.List.concat(block_arrays(first), block_array_children(rest));
-        array -> [array]
-    }.
-
-/** Collects leaves from one list without changing their source order. */
-block_array_children(values: List[Block]): List[Array] ->
+/** Emits one leaf token per array. */
+block_leaf_layout(values: List[Array]): List[Int] ->
     case values {
         [] -> [];
-        [first | rest] ->
-            std.collections.List.concat(block_arrays(first), block_array_children(rest))
+        [_first | rest] -> [-1 | block_leaf_layout(rest)]
     }.
 
-/** Prefix-encodes one recursive block tree for the package-native boundary. */
-block_layout(value: Block): List[Int] ->
-    block_layout_pending([value], []).
+/** Prefix-encodes one list of array leaves. */
+block_array_list_layout(values: List[Array]): List[Int] ->
+    [length(values) | block_leaf_layout(values)].
 
-/** Prefix-encodes nodes from an explicit depth-first work list. */
-block_layout_pending(pending: List[Block], layout: List[Int]): List[Int] ->
-    case pending {
-        [] -> block_reverse_ints(layout, []);
-        [value | remaining] ->
-            case value {
-                [] -> block_layout_pending(remaining, [0 | layout]);
-                [first | rest] ->
-                    let children = [first | rest];
-                    let reversed = block_reverse_blocks(children, []);
-                    block_layout_pending(
-                        block_reverse_blocks(reversed, remaining),
-                        [block_list_length(children, 0) | layout],
-                    );
-                _array -> block_layout_pending(remaining, [-1 | layout])
-            }
+/** Flattens rows in source order. */
+block_flatten_rows(rows: List[List[Array]]): List[Array] ->
+    case rows {
+        [] -> [];
+        [first | rest] -> concat(first, block_flatten_rows(rest))
     }.
 
-/** Reverses block nodes onto an existing work-list tail. */
-block_reverse_blocks(values: List[Block], tail: List[Block]): List[Block] ->
-    case values {
-        [] -> tail;
-        [first | rest] -> block_reverse_blocks(rest, [first | tail])
+/** Prefix-encodes every row in source order. */
+block_rows_layout(rows: List[List[Array]]): List[Int] ->
+    case rows {
+        [] -> [];
+        [first | rest] -> concat(block_array_list_layout(first), block_rows_layout(rest))
     }.
 
-/** Restores collected layout tokens to source order. */
-block_reverse_ints(values: List[Int], tail: List[Int]): List[Int] ->
-    case values {
-        [] -> tail;
-        [first | rest] -> block_reverse_ints(rest, [first | tail])
+/** Prefix-encodes one list of rows. */
+block_matrix_layout(rows: List[List[Array]]): List[Int] ->
+    [length(rows) | block_rows_layout(rows)].
+
+/** Flattens planes in source order. */
+block_flatten_planes(planes: List[List[List[Array]]]): List[Array] ->
+    case planes {
+        [] -> [];
+        [first | rest] -> concat(block_flatten_rows(first), block_flatten_planes(rest))
     }.
 
-/** Counts one block-child list using a constant-stack tail recursion. */
-block_list_length(values: List[Block], count: Int): Int ->
-    case values {
-        [] -> count;
-        [_first | rest] -> block_list_length(rest, count + 1)
+/** Prefix-encodes every plane in source order. */
+block_planes_layout(planes: List[List[List[Array]]]): List[Int] ->
+    case planes {
+        [] -> [];
+        [first | rest] -> concat(block_matrix_layout(first), block_planes_layout(rest))
     }.
 
-/**
- * Assembles an owned array from recursively nested blocks using NumPy axis and rank rules.
- */
-pub block(value: Block): Array ->
-    block_native(block_arrays(value), block_layout(value)).
+/** Copies one array through NumPy-compatible block semantics. */
+pub block(value: Array): Array ->
+    block_native([value], [-1]).
+
+/** Assembles a one-level block list. */
+pub block(values: List[Array]): Array ->
+    block_native(values, block_array_list_layout(values)).
+
+/** Assembles a two-level block tree. */
+pub block(rows: List[List[Array]]): Array ->
+    block_native(block_flatten_rows(rows), block_matrix_layout(rows)).
+
+/** Assembles a three-level block tree. */
+pub block(planes: List[List[List[Array]]]): Array ->
+    block_native(block_flatten_planes(planes), [length(planes) | block_planes_layout(planes)]).
+
+/** Assembles an arbitrary-depth block tree from leaves and validated prefix tokens. */
+pub block_encoded(values: List[Array], layout: List[Int]): Array ->
+    block_native(values, layout).
 
 /** Returns an empty coordinate-grid list for an empty input sequence. */
 pub meshgrid(): List[Array] ->

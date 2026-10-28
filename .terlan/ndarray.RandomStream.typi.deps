@@ -1,9 +1,9 @@
 module=ndarray.RandomStream
 syntax_contract_schema=terlan-syntax-contract-v1
 syntax_contract_fingerprint_algorithm=fnv1a64
-syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
-source_hash=104663868163280281
-interface_hash=13898255047502123192
-interface_doc_hash=6069275756908600429
+syntax_contract_fingerprint=fnv1a64:b9e183c0575aeaba
+source_hash=8915486489316793355
+interface_hash=16973907786495696790
+interface_doc_hash=5401731196052341629
 deps=1
-ndarray.Array=10196142311769670942
+ndarray.Array=12095275650109602516

@@ -46116,7 +46116,14 @@
     {
       "module": "ndarray.Array",
       "documentation": "Generated ABI-v1 bindings for shared strided CPU arrays and owned materializations.",
-      "imports": [],
+      "imports": [
+        {
+          "module": "std.vm",
+          "names": [
+            "Bytes"
+          ]
+        }
+      ],
       "types": [
         {
           "name": "Array",
@@ -65065,7 +65072,14 @@
         {
           "module": "std.collections.List",
           "names": [
+            "concat",
             "length"
+          ]
+        },
+        {
+          "module": "std.vm",
+          "names": [
+            "Bytes"
           ]
         }
       ],

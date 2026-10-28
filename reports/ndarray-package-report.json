@@ -1,5 +1,5 @@
 {
-  "abi_report_sha256": "68cf50840d00ec2a497f7ef80e8523109986e094c71a33cac1939a6e60267a05",
+  "abi_report_sha256": "ee7947541eb2c0350e8a2e460594a9725fafe5e1aca772a498e74ed29e5a6979",
   "consumer": {
     "negative_cases": [
       "broadcast",
@@ -53,7 +53,7 @@
   "schema": "terlan.ndarray.package-report.v1",
   "status": "passed",
   "terlan_tests": {
-    "passed": 98,
+    "passed": 109,
     "status": "passed"
   },
   "tooling": {

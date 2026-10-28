@@ -2,6 +2,7 @@ module ndarray.BlockTest.
 
 import ndarray.Array.{ArrayOrder, copy_with_order, dispose, dtype_code, from_ints, full_int, is_c_contiguous, is_fortran_contiguous, live_count, set_int, shape, to_ints, to_ints_cast}.
 import ndarray.Numpy.{block}.
+import std.collections.List.{length}.
 
 @test
 pub nested_lists_follow_numpy_row_column_rank_and_copy_rules(): Bool ->
@@ -25,17 +26,7 @@ pub nested_lists_follow_numpy_row_column_rank_and_copy_rules(): Bool ->
             and shape(vector_column) == [2, 3];
     set_int(scalar_copy, [], 9);
     let copied = to_ints(scalar) == [5] and to_ints(scalar_copy) == [9];
-    dispose(vector_column);
-    dispose(vector_row);
-    dispose(column);
-    dispose(row);
-    dispose(scalar_copy);
-    dispose(matrix_b);
-    dispose(matrix_a);
-    dispose(vector_b);
-    dispose(vector_a);
-    dispose(scalar);
-    initial and copied and live_count() == 0.
+    (dispose(vector_column); dispose(vector_row); dispose(column); dispose(row); dispose(scalar_copy); dispose(matrix_b); dispose(matrix_a); dispose(vector_b); dispose(vector_a); dispose(scalar); initial and copied and live_count() == 0).
 
 @test
 pub irregular_nested_rows_match_numpy_inner_first_concatenation(): Bool ->
@@ -50,43 +41,43 @@ pub irregular_nested_rows_match_numpy_inner_first_concatenation(): Bool ->
     let valid =
         shape(result) == [6, 6]
             and to_ints(result) == [
-                1,
-                1,
-                1,
-                2,
-                2,
-                2,
-                3,
-                3,
-                3,
-                3,
-                3,
-                3,
-                4,
-                4,
-                4,
-                4,
-                4,
-                4,
-                5,
-                6,
-                6,
-                6,
-                6,
-                6,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-            ];
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    5,
+    6,
+    6,
+    6,
+    6,
+    6,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+];
     dispose(result);
     dispose(zero);
     dispose(six);
@@ -107,20 +98,14 @@ pub three_dimensional_blocks_preserve_depth_axes_and_promoted_dtype(): Bool ->
     let a101 = full_int([3, 2, 3], 6, 4);
     let a110 = full_int([3, 3, 2], 7, 4);
     let a111 = full_int([3, 3, 3], 8, 4);
-    let result = block([
-        [[a000, a001], [a010, a011]],
-        [[a100, a101], [a110, a111]],
-    ]);
+    let result = block([[[a000, a001], [a010, a011]], [[a100, a101], [a110, a111]]]);
     let output = to_ints_cast(result);
-    let prefix = case output {
-        [1 | [1 | [4 | [4 | [4 | [1 | [1 | [4 | [4 | [4 | _rest]]]]]]]]]] -> true;
-        _ -> false
-    };
-    let valid =
-        shape(result) == [5, 5, 5]
-            and dtype_code(result) == 4
-            and output.length() == 125
-            and prefix;
+    let prefix =
+        case output {
+            [1 | [1 | [4 | [4 | [4 | [1 | [1 | [4 | [4 | [4 | _rest]]]]]]]]]] -> true;
+            _ -> false
+        };
+    let valid = shape(result) == [5, 5, 5] and dtype_code(result) == 4 and output.length() == 125 and prefix;
     dispose(result);
     dispose(a111);
     dispose(a110);

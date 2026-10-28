@@ -27,104 +27,104 @@ pub type QrMode: Int =
 
 /// Computes a lower-triangular Cholesky factor for a symmetric positive-definite matrix.
 
-pub cholesky(array: Array): Array.
+pub cholesky(array: ndarray.Array): ndarray.Array.
 
 /// Computes a matrix condition number for a selected spectral, column-sum, or row-sum norm.
 
-pub cond(array: Array, order: Int): Float.
+pub cond(array: ndarray.Array, order: Int): Float.
 
 /// Computes one condition number per matrix while preserving leading batch dimensions.
 
-pub condition(array: Array, order: Int): Array.
+pub condition(array: ndarray.Array, order: Int): ndarray.Array.
 
 /// Computes one determinant per square matrix while preserving leading batch dimensions.
 
-pub det(array: Array): Array.
+pub det(array: ndarray.Array): ndarray.Array.
 
 /// Computes general complex eigenvalues and right eigenvectors.
 
-pub eig(array: Array): List[Array].
+pub eig(array: ndarray.Array): List[ndarray.Array].
 
 /// Computes general complex eigenvalues without materializing eigenvectors.
 
-pub eigvals(array: Array): Array.
+pub eigvals(array: ndarray.Array): ndarray.Array.
 
 /// Computes ascending eigenvalues of a finite Hermitian matrix.
 
-pub eigvalsh(array: Array): Array.
+pub eigvalsh(array: ndarray.Array): ndarray.Array.
 
 /// Computes Hermitian eigenvalues from the selected triangle.
 
-pub eigvalsh(array: Array, triangle: HermitianTriangle): Array.
+pub eigvalsh(array: ndarray.Array, triangle: HermitianTriangle): ndarray.Array.
 
 /// Solves a finite real least-squares system through an SVD pseudoinverse.
 
-pub least_squares(matrix: Array, rhs: Array, tolerance: Float): Array.
+pub least_squares(matrix: ndarray.Array, rhs: ndarray.Array, tolerance: Float): ndarray.Array.
 
 /// Returns solution, residuals, rank, and singular values for a least-squares system.
 
-pub lstsq(coefficients: Array, rhs: Array, rcond: Float = 0.0): List[Array].
+pub lstsq(coefficients: ndarray.Array, rhs: ndarray.Array, rcond: Float = 0.0): List[ndarray.Array].
 
 /// Raises a square matrix to an integer power by checked exponentiation.
 
-pub matrix_power(array: Array, exponent: Int): Array.
+pub matrix_power(array: ndarray.Array, exponent: Int): ndarray.Array.
 
 /// Computes numerical rank for a scalar, vector, matrix, or matrix stack.
 
-pub matrix_rank(array: Array, tolerance: Float = 0.0, hermitian: Bool = false): Array.
+pub matrix_rank(array: ndarray.Array, tolerance: Float = 0.0, hermitian: Bool = false): ndarray.Array.
 
 /// Multiplies a chain of arrays using package matmul semantics.
 
-pub multi_dot(arrays: List[Array]): Array.
+pub multi_dot(arrays: List[ndarray.Array]): ndarray.Array.
 
 /// Multiplies a chain and atomically writes the result into a validated destination.
 
-pub multi_dot_into(destination: Array, arrays: List[Array]): Unit.
+pub multi_dot_into(destination: ndarray.Array, arrays: List[ndarray.Array]): Unit.
 
 /// Computes the default Euclidean vector or Frobenius matrix norm.
 
-pub norm(array: Array): Float.
+pub norm(array: ndarray.Array): Float.
 
 /// Computes a named norm over all dimensions or one/two explicit axes.
 
-pub norm(array: Array, order: NormOrder, axes: List[Int] = [], keepdims: Bool = false): Array.
+pub norm(array: ndarray.Array, order: NormOrder, axes: List[Int] = [], keepdims: Bool = false): ndarray.Array.
 
 /// Computes a finite p-norm over all dimensions or one/two explicit axes.
 
-pub norm(array: Array, order: Float, axes: List[Int] = [], keepdims: Bool = false): Array.
+pub norm(array: ndarray.Array, order: Float, axes: List[Int] = [], keepdims: Bool = false): ndarray.Array.
 
 /// Computes an SVD pseudoinverse with an explicit singular-value cutoff.
 
-pub pinv(array: Array, tolerance: Float): Array.
+pub pinv(array: ndarray.Array, tolerance: Float): ndarray.Array.
 
 /// Computes reduced, complete, R-only, or raw QR output.
 
-pub qr(array: Array, mode: QrMode = QrMode.REDUCED): List[Array].
+pub qr(array: ndarray.Array, mode: QrMode = QrMode.REDUCED): List[ndarray.Array].
 
 /// Computes singular values without materializing singular vectors.
 
-pub singular_values(array: Array): Array.
+pub singular_values(array: ndarray.Array): ndarray.Array.
 
 /// Computes determinant sign and logarithmic absolute determinant as scalar arrays.
 
-pub slogdet(array: Array): List[Array].
+pub slogdet(array: ndarray.Array): List[ndarray.Array].
 
 /// Computes singular-value factors and returns U, singular values, and Vh.
 
-pub svd(array: Array, full_matrices: Bool): List[Array].
+pub svd(array: ndarray.Array, full_matrices: Bool): List[ndarray.Array].
 
 /// Computes a symmetric eigendecomposition and returns ascending eigenvalues followed by eigenvectors.
 
-pub symmetric_eigen(array: Array, tolerance: Float): List[Array].
+pub symmetric_eigen(array: ndarray.Array, tolerance: Float): List[ndarray.Array].
 
 /// Computes a Hermitian eigendecomposition from the selected triangle.
 
-pub symmetric_eigen(array: Array, tolerance: Float, triangle: HermitianTriangle): List[Array].
+pub symmetric_eigen(array: ndarray.Array, tolerance: Float, triangle: HermitianTriangle): List[ndarray.Array].
 
 /// Computes the inverse of a tensor interpreted as a square matrix split at an index.
 
-pub tensorinv(array: Array, index: Int): Array.
+pub tensorinv(array: ndarray.Array, index: Int): ndarray.Array.
 
 /// Solves a tensor equation after optionally moving selected coefficient axes to the end.
 
-pub tensorsolve(coefficients: Array, rhs: Array, axes: List[Int]): Array.
+pub tensorsolve(coefficients: ndarray.Array, rhs: ndarray.Array, axes: List[Int]): ndarray.Array.

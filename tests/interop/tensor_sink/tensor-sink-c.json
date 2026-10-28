@@ -117,6 +117,12 @@
     {
       "module": "tensor_sink.Consumer",
       "documentation": "Independent native tensor packet consumer fixture.",
+      "imports": [
+        {
+          "module": "std.vm",
+          "names": ["Bytes"]
+        }
+      ],
       "types": [],
       "functions": [
         {

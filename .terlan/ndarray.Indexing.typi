@@ -4,92 +4,92 @@ module ndarray.Indexing.
 
 /// Applies sequential unbuffered addition at coordinate rows while staging aliases and committing atomically.
 
-pub add_at_coordinates(array: Array, coordinates: Array, values: Array): Unit.
+pub add_at_coordinates(array: ndarray.Array, coordinates: ndarray.Array, values: ndarray.Array): Unit.
 
 /// Builds one shared basic-indexing view; Int minimum denotes an omitted bound and ellipsis_index expands omitted source axes.
 
-pub basic_slice(array: Array, starts: List[Int], stops: List[Int], steps: List[Int], ellipsis_index: Int, squeeze_axes: List[Int], new_axes: List[Int]): Array.
+pub basic_slice(array: ndarray.Array, starts: List[Int], stops: List[Int], steps: List[Int], ellipsis_index: Int, squeeze_axes: List[Int], new_axes: List[Int]): ndarray.Array.
 
 /// Atomically writes a flattened compressed result into an exact same-dtype destination.
 
-pub compress_flat_into(destination: Array, array: Array, mask: Array): Unit.
+pub compress_flat_into(destination: ndarray.Array, array: ndarray.Array, mask: ndarray.Array): Unit.
 
 /// Atomically writes an axis-compressed result into an exact same-dtype destination.
 
-pub compress_into(destination: Array, array: Array, mask: Array, axis: Int): Unit.
+pub compress_into(destination: ndarray.Array, array: ndarray.Array, mask: ndarray.Array, axis: Int): Unit.
 
 /// Pads each axis with explicit leading and trailing constants.
 
-pub pad_constant(array: Array, leading: List[Int], trailing: List[Int], leading_values: List[Float] = [0.0], trailing_values: List[Float] = [0.0]): Array.
+pub pad_constant(array: ndarray.Array, leading: List[Int], trailing: List[Int], leading_values: List[Float] = [0.0], trailing_values: List[Float] = [0.0]): ndarray.Array.
 
 /// Pads each axis with exact numerical values supplied by scalar or rank-sized arrays.
 
-pub pad_constant_values(array: Array, leading: List[Int], trailing: List[Int], leading_values: Array, trailing_values: Array): Array.
+pub pad_constant_values(array: ndarray.Array, leading: List[Int], trailing: List[Int], leading_values: ndarray.Array, trailing_values: ndarray.Array): ndarray.Array.
 
 /// Pads each axis by repeating its nearest edge value.
 
-pub pad_edge(array: Array, leading: List[Int], trailing: List[Int]): Array.
+pub pad_edge(array: ndarray.Array, leading: List[Int], trailing: List[Int]): ndarray.Array.
 
 /// Allocates padded regions without exposing uninitialized memory and preserves source values.
 
-pub pad_empty(array: Array, leading: List[Int], trailing: List[Int]): Array.
+pub pad_empty(array: ndarray.Array, leading: List[Int], trailing: List[Int]): ndarray.Array.
 
 /// Pads each axis with linear ramps from explicit end values to source edges.
 
-pub pad_linear_ramp(array: Array, leading: List[Int], trailing: List[Int], leading_values: List[Float] = [0.0], trailing_values: List[Float] = [0.0]): Array.
+pub pad_linear_ramp(array: ndarray.Array, leading: List[Int], trailing: List[Int], leading_values: List[Float] = [0.0], trailing_values: List[Float] = [0.0]): ndarray.Array.
 
 /// Pads each axis with linear ramps using exact numerical endpoints from scalar or rank-sized arrays.
 
-pub pad_linear_ramp_values(array: Array, leading: List[Int], trailing: List[Int], leading_values: Array, trailing_values: Array): Array.
+pub pad_linear_ramp_values(array: ndarray.Array, leading: List[Int], trailing: List[Int], leading_values: ndarray.Array, trailing_values: ndarray.Array): ndarray.Array.
 
 /// Pads with edge maximums over optional clipped statistic lengths.
 
-pub pad_maximum(array: Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): Array.
+pub pad_maximum(array: ndarray.Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): ndarray.Array.
 
 /// Pads with edge means over optional clipped statistic lengths.
 
-pub pad_mean(array: Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): Array.
+pub pad_mean(array: ndarray.Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): ndarray.Array.
 
 /// Pads with edge medians over optional clipped statistic lengths.
 
-pub pad_median(array: Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): Array.
+pub pad_median(array: ndarray.Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): ndarray.Array.
 
 /// Pads with edge minimums over optional clipped statistic lengths.
 
-pub pad_minimum(array: Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): Array.
+pub pad_minimum(array: ndarray.Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): ndarray.Array.
 
 /// Pads each axis with a reflection that excludes the edge value.
 
-pub pad_reflect(array: Array, leading: List[Int], trailing: List[Int]): Array.
+pub pad_reflect(array: ndarray.Array, leading: List[Int], trailing: List[Int]): ndarray.Array.
 
 /// Pads each axis with odd reflection excluding the edge value.
 
-pub pad_reflect_odd(array: Array, leading: List[Int], trailing: List[Int]): Array.
+pub pad_reflect_odd(array: ndarray.Array, leading: List[Int], trailing: List[Int]): ndarray.Array.
 
 /// Pads with minimum, maximum, mean, or median values selected by mode 0 through 3 over explicit edge lengths.
 
-pub pad_statistical(array: Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int], trailing_lengths: List[Int], mode: Int): Array.
+pub pad_statistical(array: ndarray.Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int], trailing_lengths: List[Int], mode: Int): ndarray.Array.
 
 /// Pads each axis with a reflection that includes the edge value.
 
-pub pad_symmetric(array: Array, leading: List[Int], trailing: List[Int]): Array.
+pub pad_symmetric(array: ndarray.Array, leading: List[Int], trailing: List[Int]): ndarray.Array.
 
 /// Pads each axis with odd reflection including the edge value.
 
-pub pad_symmetric_odd(array: Array, leading: List[Int], trailing: List[Int]): Array.
+pub pad_symmetric_odd(array: ndarray.Array, leading: List[Int], trailing: List[Int]): ndarray.Array.
 
 /// Pads each axis by wrapping values from its opposite end.
 
-pub pad_wrap(array: Array, leading: List[Int], trailing: List[Int]): Array.
+pub pad_wrap(array: ndarray.Array, leading: List[Int], trailing: List[Int]): ndarray.Array.
 
 /// Takes an integer index Array while preserving every index dimension in the output shape.
 
-pub take_indices(array: Array, indices: Array, axis: Int): Array.
+pub take_indices(array: ndarray.Array, indices: ndarray.Array, axis: Int): ndarray.Array.
 
 /// Atomically writes an Array-indexed take result into an exactly shaped destination, including overlapping source views.
 
-pub take_indices_into(destination: Array, array: Array, indices: Array, axis: Int, mode: Int): Unit.
+pub take_indices_into(destination: ndarray.Array, array: ndarray.Array, indices: ndarray.Array, axis: Int, mode: Int): Unit.
 
 /// Takes an integer index Array using raise, wrap, or clip normalization while preserving index dimensions.
 
-pub take_indices_mode(array: Array, indices: Array, axis: Int, mode: Int): Array.
+pub take_indices_mode(array: ndarray.Array, indices: ndarray.Array, axis: Int, mode: Int): ndarray.Array.

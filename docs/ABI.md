@@ -39,7 +39,7 @@ compiler-specific packed structures.
 | 109 | `ndarray.dtype.unsupported` | The operation does not support the array dtype |
 | 110 | `ndarray.axis.out_of_range` | A normalized axis is outside the array rank |
 | 111 | `ndarray.axis.duplicate` | A reduction names one normalized axis more than once |
-| 112 | `ndarray.arithmetic.overflow` | Int64 arithmetic or reduction overflowed |
+| 112 | `ndarray.arithmetic.overflow` | A checked Int64 operation or reduction overflowed |
 | 113 | `ndarray.dlpack.version` | DLPack version is unsupported |
 | 114 | `ndarray.dlpack.device` | DLPack device is unsupported |
 | 115 | `ndarray.dlpack.dtype` | DLPack dtype is unsupported or malformed |
@@ -73,8 +73,9 @@ high-level array API.
 - Elementwise numeric operations use the canonical promotion table and
   trailing-axis broadcasting. Scalar and singleton expansion are admitted;
   incompatible dimensions and unsupported Bool arithmetic are rejected.
-- Int64 operations are checked and return status 112 instead of wrapping or
-  invoking C signed-overflow behavior.
+- Elementwise Int arithmetic wraps at the destination dtype width, matching
+  NumPy. Checked integer operations such as reductions and `lcm` return status
+  112 instead of invoking C signed-overflow behavior.
 - Float64 operations preserve IEEE-754 behavior, including NaN and infinity.
 - `sum` normalizes negative axes, rejects duplicates, and uses a zero identity
   for empty reductions. An empty axis list reduces all axes. `keep_dims` must be

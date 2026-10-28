@@ -4,28 +4,28 @@ module ndarray.TensorAlgebra.
 
 /// Computes a three-component vector cross product along one normalized axis.
 
-pub cross(lhs: Array, rhs: Array, axis: Int): Array.
+pub cross(lhs: ndarray.Array, rhs: ndarray.Array, axis: Int): ndarray.Array.
 
 /// Executes an Einstein summation expression over one or more arrays.
 
-pub einsum(operands: List[Array], equation: String): Array.
+pub einsum(operands: List[ndarray.Array], equation: String): ndarray.Array.
 
 /// Executes Einstein summation using a typed output memory-order policy.
 
-pub einsum(operands: List[Array], equation: String, order: ndarray.Array.ArrayOrder): Array.
+pub einsum(operands: List[ndarray.Array], equation: String, order: ndarray.Array.ArrayOrder): ndarray.Array.
 
 /// Executes Einstein summation and atomically writes the result into an exactly shaped destination.
 
-pub einsum_into(destination: Array, operands: List[Array], equation: String): Unit.
+pub einsum_into(destination: ndarray.Array, operands: List[ndarray.Array], equation: String): Unit.
 
 /// Executes Einstein summation using an explicit C, Fortran, keep, or any output-order policy.
 
-pub einsum_ordered(operands: List[Array], equation: String, order: Int): Array.
+pub einsum_ordered(operands: List[ndarray.Array], equation: String, order: Int): ndarray.Array.
 
 /// Computes a NumPy-compatible rank-padded Kronecker product.
 
-pub kron(lhs: Array, rhs: Array): Array.
+pub kron(lhs: ndarray.Array, rhs: ndarray.Array): ndarray.Array.
 
 /// Contracts two tensors over paired normalized axis lists.
 
-pub tensordot(lhs: Array, rhs: Array, lhs_axes: List[Int], rhs_axes: List[Int]): Array.
+pub tensordot(lhs: ndarray.Array, rhs: ndarray.Array, lhs_axes: List[Int], rhs_axes: List[Int]): ndarray.Array.

@@ -1,9 +1,9 @@
 module=ndarray.Shape
 syntax_contract_schema=terlan-syntax-contract-v1
 syntax_contract_fingerprint_algorithm=fnv1a64
-syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+syntax_contract_fingerprint=fnv1a64:b9e183c0575aeaba
 source_hash=5866762753168918811
-interface_hash=3464513554724086274
+interface_hash=1410627480933511889
 interface_doc_hash=12455098479325852593
 deps=1
-ndarray.Array=10196142311769670942
+ndarray.Array=12095275650109602516

@@ -4,124 +4,124 @@ module ndarray.Legendre.
 
 /// Converts coefficients to the power basis.
 
-pub leg2poly(coefficients: Array): Array.
+pub leg2poly(coefficients: ndarray.Array): ndarray.Array.
 
 /// Adds coefficient vectors.
 
-pub legadd(lhs: Array, rhs: Array): Array.
+pub legadd(lhs: ndarray.Array, rhs: ndarray.Array): ndarray.Array.
 
 /// Builds a companion matrix.
 
-pub legcompanion(coefficients: Array): Array.
+pub legcompanion(coefficients: ndarray.Array): ndarray.Array.
 
 /// Differentiates coefficients.
 
-pub legder(coefficients: Array, order: Int): Array.
+pub legder(coefficients: ndarray.Array, order: Int): ndarray.Array.
 
 /// Differentiates Legendre coefficient lanes along an axis with derivative scaling.
 
-pub legder(coefficients: Array, order: Int, scale: Float, axis: Int): Array.
+pub legder(coefficients: ndarray.Array, order: Int, scale: Float, axis: Int): ndarray.Array.
 
 /// Returns quotient and remainder.
 
-pub legdiv(lhs: Array, rhs: Array): List[Array].
+pub legdiv(lhs: ndarray.Array, rhs: ndarray.Array): List[ndarray.Array].
 
 /// Fits coefficients to samples.
 
-pub legfit(coordinates: Array, values: Array, degree: Int): Array.
+pub legfit(coordinates: ndarray.Array, values: ndarray.Array, degree: Int): ndarray.Array.
 
 /// Fits selected Legendre degrees to scalar or matrix-valued samples.
 
-pub legfit(coordinates: Array, values: Array, degrees: Array): Array.
+pub legfit(coordinates: ndarray.Array, values: ndarray.Array, degrees: ndarray.Array): ndarray.Array.
 
 /// Fits selected Legendre degrees using sample weights.
 
-pub legfit(coordinates: Array, values: Array, degrees: Array, weights: Array): Array.
+pub legfit(coordinates: ndarray.Array, values: ndarray.Array, degrees: ndarray.Array, weights: ndarray.Array): ndarray.Array.
 
 /// Builds coefficients from roots.
 
-pub legfromroots(roots: Array): Array.
+pub legfromroots(roots: ndarray.Array): ndarray.Array.
 
 /// Returns Gaussian quadrature nodes and weights.
 
-pub leggauss(degree: Int): Array.
+pub leggauss(degree: Int): ndarray.Array.
 
 /// Evaluates over a two-dimensional Cartesian grid.
 
-pub leggrid2d(x: Array, y: Array, coefficients: Array): Array.
+pub leggrid2d(x: ndarray.Array, y: ndarray.Array, coefficients: ndarray.Array): ndarray.Array.
 
 /// Evaluates over a three-dimensional Cartesian grid.
 
-pub leggrid3d(x: Array, y: Array, z: Array, coefficients: Array): Array.
+pub leggrid3d(x: ndarray.Array, y: ndarray.Array, z: ndarray.Array, coefficients: ndarray.Array): ndarray.Array.
 
 /// Integrates coefficients.
 
-pub legint(coefficients: Array, order: Int, constant: Float): Array.
+pub legint(coefficients: ndarray.Array, order: Int, constant: Float): ndarray.Array.
 
 /// Integrates Legendre coefficient lanes along an axis with constants, a lower bound, and scaling.
 
-pub legint(coefficients: Array, order: Int, constants: Array, lower_bound: Float, scale: Float, axis: Int): Array.
+pub legint(coefficients: ndarray.Array, order: Int, constants: ndarray.Array, lower_bound: Float, scale: Float, axis: Int): ndarray.Array.
 
 /// Builds coefficients for offset plus scale times x.
 
-pub legline(offset: Float, scale: Float): Array.
+pub legline(offset: Float, scale: Float): ndarray.Array.
 
 /// Multiplies coefficient vectors.
 
-pub legmul(lhs: Array, rhs: Array): Array.
+pub legmul(lhs: ndarray.Array, rhs: ndarray.Array): ndarray.Array.
 
 /// Multiplies coefficients by x.
 
-pub legmulx(coefficients: Array): Array.
+pub legmulx(coefficients: ndarray.Array): ndarray.Array.
 
 /// Raises coefficients to a nonnegative power.
 
-pub legpow(coefficients: Array, exponent: Int): Array.
+pub legpow(coefficients: ndarray.Array, exponent: Int): ndarray.Array.
 
 /// Returns polynomial roots.
 
-pub legroots(coefficients: Array): Array.
+pub legroots(coefficients: ndarray.Array): ndarray.Array.
 
 /// Subtracts coefficient vectors.
 
-pub legsub(lhs: Array, rhs: Array): Array.
+pub legsub(lhs: ndarray.Array, rhs: ndarray.Array): ndarray.Array.
 
 /// Removes insignificant high-order coefficients.
 
-pub legtrim(coefficients: Array, tolerance: Float): Array.
+pub legtrim(coefficients: ndarray.Array, tolerance: Float): ndarray.Array.
 
 /// Evaluates coefficients.
 
-pub legval(coordinates: Array, coefficients: Array): Array.
+pub legval(coordinates: ndarray.Array, coefficients: ndarray.Array): ndarray.Array.
 
 /// Evaluates Legendre coefficient tensors with Cartesian or broadcast semantics.
 
-pub legval(coordinates: Array, coefficients: Array, tensor: Bool): Array.
+pub legval(coordinates: ndarray.Array, coefficients: ndarray.Array, tensor: Bool): ndarray.Array.
 
 /// Evaluates a two-dimensional coefficient tensor.
 
-pub legval2d(x: Array, y: Array, coefficients: Array): Array.
+pub legval2d(x: ndarray.Array, y: ndarray.Array, coefficients: ndarray.Array): ndarray.Array.
 
 /// Evaluates a three-dimensional coefficient tensor.
 
-pub legval3d(x: Array, y: Array, z: Array, coefficients: Array): Array.
+pub legval3d(x: ndarray.Array, y: ndarray.Array, z: ndarray.Array, coefficients: ndarray.Array): ndarray.Array.
 
 /// Builds a Vandermonde matrix.
 
-pub legvander(coordinates: Array, degree: Int): Array.
+pub legvander(coordinates: ndarray.Array, degree: Int): ndarray.Array.
 
 /// Builds a two-dimensional Vandermonde matrix.
 
-pub legvander2d(x: Array, y: Array, x_degree: Int, y_degree: Int): Array.
+pub legvander2d(x: ndarray.Array, y: ndarray.Array, x_degree: Int, y_degree: Int): ndarray.Array.
 
 /// Builds a three-dimensional Vandermonde matrix.
 
-pub legvander3d(x: Array, y: Array, z: Array, x_degree: Int, y_degree: Int, z_degree: Int): Array.
+pub legvander3d(x: ndarray.Array, y: ndarray.Array, z: ndarray.Array, x_degree: Int, y_degree: Int, z_degree: Int): ndarray.Array.
 
 /// Evaluates the orthogonality weight function.
 
-pub legweight(coordinates: Array): Array.
+pub legweight(coordinates: ndarray.Array): ndarray.Array.
 
 /// Converts power coefficients to the leg basis.
 
-pub poly2leg(coefficients: Array): Array.
+pub poly2leg(coefficients: ndarray.Array): ndarray.Array.

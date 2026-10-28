@@ -175,13 +175,25 @@ pub bincount(values: Array, weights: Array, minimum_length: Int): Array.
 
 pub bitwise_and(lhs: Array, rhs: Array): Array.
 
+/// Reduces integer or Bool elements with bitwise AND and a width-preserving all-bits identity.
+
+pub bitwise_and_reduce(array: Array, axes: List[Int], keep_dims: Int): Array.
+
 /// Computes broadcast-compatible integer bitwise disjunction.
 
 pub bitwise_or(lhs: Array, rhs: Array): Array.
 
+/// Reduces integer or Bool elements with bitwise OR and a zero identity.
+
+pub bitwise_or_reduce(array: Array, axes: List[Int], keep_dims: Int): Array.
+
 /// Computes broadcast-compatible integer bitwise exclusive disjunction.
 
 pub bitwise_xor(lhs: Array, rhs: Array): Array.
+
+/// Reduces integer or Bool elements with bitwise XOR and a zero identity.
+
+pub bitwise_xor_reduce(array: Array, axes: List[Int], keep_dims: Int): Array.
 
 /// Returns a read-only zero-stride view broadcast to a compatible shape.
 
@@ -333,7 +345,7 @@ pub degrees(array: Array): Array.
 
 /// Decodes a bounded checksummed package-native packet into an owned CPU array.
 
-pub deserialize(bytes: Bytes, maximum: Int): Array.
+pub deserialize(bytes: std.vm.Bytes, maximum: Int): Array.
 
 /// Computes a finite real square matrix determinant through maintained faer factorization.
 
@@ -358,6 +370,14 @@ pub digitize(values: Array, bins: Array, right: Bool): Array.
 /// Disposes an owned array exactly once.
 
 pub dispose(array: Array): Unit.
+
+/// Returns the ordered cumulative floating or complex division along an axis.
+
+pub divide_accumulate(array: Array, axis: Int): Array.
+
+/// Reduces an axis by ordered floating or complex division.
+
+pub divide_reduce(array: Array, axis: Int): Array.
 
 /// Computes NumPy-compatible scalar multiplication, vector inner products, and generalized array dot products.
 
@@ -413,7 +433,7 @@ pub expm1(array: Array): Array.
 
 /// Exports a pointer-free tensor packet through a package-native DLPack lifecycle.
 
-pub export_tensor_packet(array: Array, consumer: String): Bytes.
+pub export_tensor_packet(array: Array, consumer: String): std.vm.Bytes.
 
 /// Returns a complex FFT along one normalized axis.
 
@@ -463,9 +483,17 @@ pub flush(array: Array): Unit.
 
 pub fmax(lhs: Array, rhs: Array): Array.
 
+/// Reduces maxima while ignoring NaN operands unless a lane contains only NaNs.
+
+pub fmax_reduce(array: Array, axes: List[Int], keep_dims: Int): Array.
+
 /// Selects broadcasted minima while preferring a non-NaN operand.
 
 pub fmin(lhs: Array, rhs: Array): Array.
+
+/// Reduces minima while ignoring NaN operands unless a lane contains only NaNs.
+
+pub fmin_reduce(array: Array, axes: List[Int], keep_dims: Int): Array.
 
 /// Returns one when the current view is Fortran-contiguous.
 
@@ -481,7 +509,7 @@ pub frobenius_norm(array: Array): Float.
 
 /// Imports one package-owned non-null Arrow C Data export as an owned array.
 
-pub from_arrow(arrow: ndarray.ArrowArray.ArrowArray): Array.
+pub from_arrow(arrow: ndarray.ArrowArray): Array.
 
 /// Copies boolean values and shape into owned CPU storage.
 
@@ -509,7 +537,7 @@ pub from_ints_as(values: List[Int], shape: List[Int], dtype: Int): Array.
 
 /// Decodes bounded NumPy .npy bytes into an owned CPU array.
 
-pub from_npy(bytes: Bytes, maximum: Int): Array.
+pub from_npy(bytes: std.vm.Bytes, maximum: Int): Array.
 
 /// Creates an array filled from one checked floating value.
 
@@ -601,7 +629,7 @@ pub ihfft(array: Array, length: Int, axis: Int, normalization: Int): Array.
 
 /// Imports a validated pointer-free tensor packet as an owned CPU array.
 
-pub import_tensor_packet(packet: Bytes): Array.
+pub import_tensor_packet(packet: std.vm.Bytes): Array.
 
 /// Returns a flattened Bool membership mask with optional inversion.
 
@@ -771,6 +799,22 @@ pub matrix_rank(array: Array, tolerance: Float): Int.
 
 pub maximum(array: Array, axes: List[Int], keep_dims: Int): Array.
 
+/// Reduces maxima using a one-element initial value, including empty lanes.
+
+pub maximum_initial(array: Array, initial: Array, axes: List[Int], keep_dims: Int): Array.
+
+/// Reduces maxima into an exactly shaped writable destination.
+
+pub maximum_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit.
+
+/// Reduces maxima selected by a mask and rejects selected empty lanes.
+
+pub maximum_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int): Array.
+
+/// Reduces selected maxima from an explicit one-element initial value.
+
+pub maximum_where_initial(array: Array, mask: Array, initial: Array, axes: List[Int], keep_dims: Int): Array.
+
 /// Reduces normalized axes using NumPy-compatible mean semantics.
 
 pub mean(array: Array, axes: List[Int], keep_dims: Int): Array.
@@ -794,6 +838,22 @@ pub median(array: Array, axes: List[Int], keep_dims: Int): Array.
 /// Reduces normalized axes using NumPy-compatible minimum semantics.
 
 pub minimum(array: Array, axes: List[Int], keep_dims: Int): Array.
+
+/// Reduces minima using a one-element initial value, including empty lanes.
+
+pub minimum_initial(array: Array, initial: Array, axes: List[Int], keep_dims: Int): Array.
+
+/// Reduces minima into an exactly shaped writable destination.
+
+pub minimum_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit.
+
+/// Reduces minima selected by a mask and rejects selected empty lanes.
+
+pub minimum_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int): Array.
+
+/// Reduces selected minima from an explicit one-element initial value.
+
+pub minimum_where_initial(array: Array, mask: Array, initial: Array, axes: List[Int], keep_dims: Int): Array.
 
 /// Opens a bounded NumPy file as a read-only or read-write memory-backed array.
 
@@ -879,6 +939,10 @@ pub ones(shape: List[Int], dtype: Int): Array.
 
 pub outer(lhs: Array, rhs: Array): Array.
 
+/// Writes the outer product into an exactly shaped writable destination.
+
+pub outer_into(destination: Array, lhs: Array, rhs: Array): Unit.
+
 /// Returns an axis-wise copy satisfying the selected kth partition postcondition.
 
 pub partition(array: Array, kth: Int, axis: Int = - 1): Array.
@@ -930,6 +994,10 @@ pub power(lhs: Array, rhs: Array): Array.
 /// Reduces normalized axes using NumPy-compatible product semantics.
 
 pub product(array: Array, axes: List[Int], keep_dims: Int): Array.
+
+/// Multiplies into an exactly shaped writable destination without broadcasting the reduction result.
+
+pub product_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit.
 
 /// Assigns scalar or matching values at normalized flattened indexes in order.
 
@@ -1089,7 +1157,7 @@ pub select_where(mask: Array, selected: Array, rejected: Array): Array.
 
 /// Encodes an array as a versioned checksummed package-native packet.
 
-pub serialize(array: Array): Bytes.
+pub serialize(array: Array): std.vm.Bytes.
 
 /// Assigns one Bool element through a writable view and makes the mutation visible to its aliases.
 
@@ -1207,9 +1275,33 @@ pub strides(array: Array): List[Int].
 
 pub subtract(lhs: Array, rhs: Array): Array.
 
+/// Returns the ordered cumulative subtraction along an axis.
+
+pub subtract_accumulate(array: Array, axis: Int): Array.
+
+/// Reduces an axis by ordered subtraction without applying a commutative reassociation.
+
+pub subtract_reduce(array: Array, axis: Int): Array.
+
 /// Reduces normalized axes; an empty axis list reduces all axes.
 
 pub sum(array: Array, axes: List[Int], keep_dims: Int): Array.
+
+/// Sums elements using a one-element array as the initial accumulator.
+
+pub sum_initial(array: Array, initial: Array, axes: List[Int], keep_dims: Int): Array.
+
+/// Sums into an exactly shaped writable destination without broadcasting the reduction result.
+
+pub sum_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit.
+
+/// Sums elements selected by a broadcast-compatible truth mask.
+
+pub sum_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int): Array.
+
+/// Sums selected elements from an explicit one-element initial accumulator.
+
+pub sum_where_initial(array: Array, mask: Array, initial: Array, axes: List[Int], keep_dims: Int): Array.
 
 /// Copies normalized integer selections along one axis, preserving duplicate indexes and order.
 
@@ -1237,7 +1329,7 @@ pub tile(array: Array, repetitions: List[Int]): Array.
 
 /// Exports a compatible primitive array through official Arrow C Data ownership callbacks.
 
-pub to_arrow(array: Array): ndarray.ArrowArray.ArrowArray.
+pub to_arrow(array: Array): ndarray.ArrowArray.
 
 /// Returns an owned copy of Bool values.
 
@@ -1261,7 +1353,7 @@ pub to_ints_cast(array: Array): List[Int].
 
 /// Encodes an array as deterministic NumPy .npy bytes.
 
-pub to_npy(array: Array): Bytes.
+pub to_npy(array: Array): std.vm.Bytes.
 
 /// Sums a selected diagonal over two distinct axes.
 
@@ -1330,3 +1422,7 @@ pub weighted_average(array: Array, weights: Array, axis: Int, keep_dims: Int): A
 /// Creates a zero-filled array in the requested dtype.
 
 pub zeros(shape: List[Int], dtype: Int): Array.
+
+/// Creates a zero-filled array with explicit C or Fortran storage order.
+
+pub zeros_ordered(shape: List[Int], dtype: Int, order: Int): Array.

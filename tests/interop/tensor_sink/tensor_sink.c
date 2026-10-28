@@ -1,4 +1,4 @@
-#include "tensor_sink.h"
+#include "include/tensor_sink.h"
 
 #include <limits.h>
 #include <stddef.h>

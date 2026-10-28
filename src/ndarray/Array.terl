@@ -1,723 +1,2593 @@
 /**
  * Generated ABI-v1 bindings for shared strided CPU arrays and owned materializations.
  */
-
 module ndarray.Array.
 
-import ndarray.ArrowArray.{ArrowArray}.
+import ndarray.ArrowArray.
 
-/** Opaque CPU array with package-owned shared storage, shape, offset, and element strides. */
+import type std.vm.Bytes.
+
+/**
+ * Opaque CPU array with package-owned shared storage, shape, offset, and element strides.
+ */
 pub opaque type Array.
 
-/** Copies boolean values and shape into owned CPU storage. */
-@compiler.native {ndarray.array.from_bools} pub from_bools(values: List[Bool], shape: List[Int]): Array -> native.
-/** Copies Int64 values and shape into owned CPU storage. */
-@compiler.native {ndarray.array.from_ints} pub from_ints(values: List[Int], shape: List[Int]): Array -> native.
-/** Copies Float64 values and shape into owned CPU storage. */
-@compiler.native {ndarray.array.from_floats} pub from_floats(values: List[Float], shape: List[Int]): Array -> native.
-/** Constructs an array in a checked integer-compatible dtype code. */
-@compiler.native {ndarray.array.from_ints_as} pub from_ints_as(values: List[Int], shape: List[Int], dtype: Int): Array -> native.
-/** Constructs an array in a checked floating-compatible dtype code. */
-@compiler.native {ndarray.array.from_floats_as} pub from_floats_as(values: List[Float], shape: List[Int], dtype: Int): Array -> native.
-/** Constructs Complex64 or Complex128 storage from parallel real and imaginary values. */
-@compiler.native {ndarray.array.from_complex} pub from_complex(real_values: List[Float], imag_values: List[Float], shape: List[Int], dtype: Int): Array -> native.
-/** Allocates an initialized array; native-boundary safety guarantees zeroed storage rather than exposing uninitialized bytes. */
-@compiler.native {ndarray.array.empty} pub empty(shape: List[Int], dtype: Int): Array -> native.
-/** Creates a zero-filled array in the requested dtype. */
-@compiler.native {ndarray.array.zeros} pub zeros(shape: List[Int], dtype: Int): Array -> native.
-/** Creates a zero-filled array with explicit C or Fortran storage order. */
-@compiler.native {ndarray.array.zeros_ordered} pub zeros_ordered(shape: List[Int], dtype: Int, order: Int): Array -> native.
-/** Reduces an axis by ordered subtraction without applying a commutative reassociation. */
-@compiler.native {ndarray.array.subtract_reduce} pub subtract_reduce(array: Array, axis: Int): Array -> native.
-/** Returns the ordered cumulative subtraction along an axis. */
-@compiler.native {ndarray.array.subtract_accumulate} pub subtract_accumulate(array: Array, axis: Int): Array -> native.
-/** Reduces an axis by ordered floating or complex division. */
-@compiler.native {ndarray.array.divide_reduce} pub divide_reduce(array: Array, axis: Int): Array -> native.
-/** Returns the ordered cumulative floating or complex division along an axis. */
-@compiler.native {ndarray.array.divide_accumulate} pub divide_accumulate(array: Array, axis: Int): Array -> native.
-/** Creates a one-filled array in the requested dtype. */
-@compiler.native {ndarray.array.ones} pub ones(shape: List[Int], dtype: Int): Array -> native.
-/** Creates an array filled from one checked integer value. */
-@compiler.native {ndarray.array.full_int} pub full_int(shape: List[Int], value: Int, dtype: Int): Array -> native.
-/** Creates an array filled from one checked floating value. */
-@compiler.native {ndarray.array.full_float} pub full_float(shape: List[Int], value: Float, dtype: Int): Array -> native.
-/** Creates consecutive Int64 values from zero to an exclusive integer stop. */
-@compiler.native {ndarray.array.arange_int_stop} pub arange(stop: Int): Array -> native.
-/** Creates consecutive Float64 values from zero to an exclusive floating stop. */
-@compiler.native {ndarray.array.arange_float_stop} pub arange_float(stop: Float): Array -> native.
-/** Creates exact consecutive Int64 values over a half-open integer interval. */
-@compiler.native {ndarray.array.arange_int_interval} pub arange(start: Int, stop: Int): Array -> native.
-/** Creates consecutive Float64 values over a half-open floating interval. */
-@compiler.native {ndarray.array.arange_float_interval} pub arange_float(start: Float, stop: Float): Array -> native.
-/** Creates exact Int64 values over a half-open integer interval. */
-@compiler.native {ndarray.array.arange_int} pub arange_int(start: Int, stop: Int, step: Int): Array -> native.
-/** Creates Float64 values over a half-open interval with an explicit step. */
-@compiler.native {ndarray.array.arange_float_step} pub arange(start: Float, stop: Float, step: Float): Array -> native.
-/** Creates evenly stepped values over a half-open interval. */
-@compiler.native {ndarray.array.arange} pub arange(start: Float, stop: Float, step: Float, dtype: Int): Array -> native.
-/** Creates a requested number of evenly spaced values. */
-@compiler.native {ndarray.array.linspace} pub linspace(start: Float, stop: Float, count: Int, endpoint: Int, dtype: Int): Array -> native.
-/** Creates a rectangular identity-style matrix at an integer diagonal offset. */
-@compiler.native {ndarray.array.identity} pub identity(rows: Int, columns: Int, diagonal: Int, dtype: Int): Array -> native.
-/** Creates reproducible ChaCha8 uniform floating samples in a half-open interval. */
-@compiler.native {ndarray.array.random_uniform} pub random_uniform(shape: List[Int], low: Float, high: Float, seed: Int, dtype: Int): Array -> native.
-/** Creates reproducible ChaCha8 normal floating samples with explicit distribution parameters. */
-@compiler.native {ndarray.array.random_normal} pub random_normal(shape: List[Int], mean: Float, standard_deviation: Float, seed: Int, dtype: Int): Array -> native.
-/** Creates reproducible integer samples in a half-open interval. */
-@compiler.native {ndarray.array.random_integers} pub random_integers(shape: List[Int], low: Int, high: Int, seed: Int, dtype: Int): Array -> native.
-/** Creates reproducible Boolean samples from a Bernoulli distribution. */
-@compiler.native {ndarray.array.random_bernoulli} pub random_bernoulli(shape: List[Int], probability: Float, seed: Int): Array -> native.
-/** Creates a reproducibly shuffled permutation of consecutive integers. */
-@compiler.native {ndarray.array.random_permutation} pub random_permutation(length: Int, seed: Int): Array -> native.
-/** Returns an independently owned array reproducibly shuffled along one axis. */
-@compiler.native {ndarray.array.random_shuffle} pub random_shuffle(array: Array, axis: Int, seed: Int): Array -> native.
-/** Returns a shared strided diagonal view across two distinct axes. */
-@compiler.native {ndarray.array.diagonal} pub diagonal(array: Array, offset: Int, axis_a: Int, axis_b: Int): Array -> native.
-/** Returns array rank. */
-@compiler.native {ndarray.array.rank} pub rank(array: Array): Int -> native.
-/** Copies array shape into a Terlan list. */
-@compiler.native {ndarray.array.shape} pub shape(array: Array): List[Int] -> native.
-/** Returns logical element count. */
-@compiler.native {ndarray.array.numel} pub numel(array: Array): Int -> native.
-/** Copies the array's logical element strides, including zero and negative view strides. */
-@compiler.native {ndarray.array.strides} pub strides(array: Array): List[Int] -> native.
-/** Returns the checked byte count of the logical array elements. */
-@compiler.native {ndarray.array.byte_count} pub byte_count(array: Array): Int -> native.
-/** Returns the ABI-v1 dtype code. */
-@compiler.native {ndarray.array.dtype_code} pub dtype_code(array: Array): Int -> native.
-/** Returns one when the current view is canonical C-contiguous. */
-@compiler.native {ndarray.array.contiguous_code} pub contiguous_code(array: Array): Int -> native.
-/** Returns one when the current view is Fortran-contiguous. */
-@compiler.native {ndarray.array.fortran_contiguous_code} pub fortran_contiguous_code(array: Array): Int -> native.
-/** Returns the ABI-v1 CPU device code. */
-@compiler.native {ndarray.array.device_type_code} pub device_type_code(array: Array): Int -> native.
-/** Returns an owned copy of Bool values. */
-@compiler.native {ndarray.array.to_bools} pub to_bools(array: Array): List[Bool] -> native.
-/** Returns an owned copy of Int64 values. */
-@compiler.native {ndarray.array.to_ints} pub to_ints(array: Array): List[Int] -> native.
-/** Returns an owned copy of Float64 values. */
-@compiler.native {ndarray.array.to_floats} pub to_floats(array: Array): List[Float] -> native.
-/** Returns checked integral values from any exactly representable non-complex dtype. */
-@compiler.native {ndarray.array.to_ints_cast} pub to_ints_cast(array: Array): List[Int] -> native.
-/** Returns real values converted to Terlan Float from any non-complex dtype. */
-@compiler.native {ndarray.array.to_floats_cast} pub to_floats_cast(array: Array): List[Float] -> native.
-/** Returns the real components of a complex array. */
-@compiler.native {ndarray.array.complex_reals} pub complex_reals(array: Array): List[Float] -> native.
-/** Returns the imaginary components of a complex array. */
-@compiler.native {ndarray.array.complex_imags} pub complex_imags(array: Array): List[Float] -> native.
-/** Returns a shared reshape view when possible and otherwise a contiguous materialization. */
-@compiler.native {ndarray.array.reshape} pub reshape(array: Array, shape: List[Int]): Array -> native.
-/** Reshapes using explicit C, Fortran, or input-compatible traversal order. */
-@compiler.native {ndarray.array.reshape_ordered} pub reshape(array: Array, shape: List[Int], order: Int): Array -> native.
-/** Resizes a uniquely owned contiguous array in place, preserving its flattened prefix and zero-initializing growth. */
-@compiler.native {ndarray.array.resize_in_place} pub resize_in_place(array: Array, shape: List[Int]): Unit -> native.
-/** Returns a shared strided view with two normalized axes exchanged. */
-@compiler.native {ndarray.array.transpose} pub transpose(array: Array, axis_a: Int, axis_b: Int): Array -> native.
-/** Returns an independently owned copy preserving source-compatible memory order. */
-@compiler.native {ndarray.array.copy} pub copy(array: Array): Array -> native.
-/** Returns an independently owned copy using C, Fortran, or source-compatible memory order. */
-@compiler.native {ndarray.array.copy_ordered} pub copy(array: Array, order: Int): Array -> native.
-/** Returns a checked C-contiguous conversion to the requested dtype code. */
-@compiler.native {ndarray.array.astype} pub astype(array: Array, dtype: Int): Array -> native.
-/** Converts dtype under explicit NumPy-compatible order, copy, and casting rules. */
-@compiler.native {ndarray.array.astype_ordered} pub astype(array: Array, dtype: Int, order: Int, copy: Bool, casting: Int): Array -> native.
-/** Materializes the logical array into independently owned C-contiguous storage. */
-@compiler.native {ndarray.array.contiguous} pub contiguous(array: Array): Array -> native.
-/** Returns a shared view with one axis selected and removed; negative axes and indexes are normalized. */
-@compiler.native {ndarray.array.index_axis} pub index_axis(array: Array, axis: Int, index: Int): Array -> native.
-/** Returns a shared basic-slice view; the minimum Int value denotes an omitted start or stop. */
-@compiler.native {ndarray.array.slice_axis} pub slice_axis(array: Array, axis: Int, start: Int, stop: Int, step: Int): Array -> native.
-/** Returns a shared view using a complete normalized axis permutation. */
-@compiler.native {ndarray.array.permute} pub permute(array: Array, axes: List[Int]): Array -> native.
-/** Copies normalized integer selections along one axis, preserving duplicate indexes and order. */
-@compiler.native {ndarray.array.take} pub take(array: Array, indices: List[Int], axis: Int): Array -> native.
-/** Copies integer selections using raise, wrap, or clip index normalization. */
-@compiler.native {ndarray.array.take_mode} pub take_mode(array: Array, indices: List[Int], axis: Int, mode: Int): Array -> native.
-/** Takes one Int64 index at every output coordinate along a normalized axis. */
-@compiler.native {ndarray.array.take_along_axis} pub take_along_axis(array: Array, indices: Array, axis: Int): Array -> native.
-/** Assigns scalar or matching values at normalized flattened indexes in order. */
-@compiler.native {ndarray.array.put} pub put(array: Array, indices: List[Int], values: Array): Unit -> native.
-/** Assigns scalar or shape-matched values using one Int64 index at each coordinate. */
-@compiler.native {ndarray.array.put_along_axis} pub put_along_axis(array: Array, indices: Array, values: Array, axis: Int): Unit -> native.
-/** Selects axis entries using a rank-one Bool mask, truncating the axis to the mask length. */
-@compiler.native {ndarray.array.compress} pub compress(array: Array, mask: Array, axis: Int): Array -> native.
-/** Selects flattened logical values using a rank-one Bool mask, truncating to the mask length. */
-@compiler.native {ndarray.array.compress_flat} pub compress_flat(array: Array, mask: Array): Array -> native.
-/** Returns flattened values selected by an exact-shape Bool mask. */
-@compiler.native {ndarray.array.mask_select} pub mask_select(array: Array, mask: Array): Array -> native.
-/** Assigns scalar or matching values where an exact-shape Bool mask is true. */
-@compiler.native {ndarray.array.mask_assign} pub mask_assign(array: Array, mask: Array, values: Array): Unit -> native.
-/** Gathers flattened values from an Int64 coordinate matrix shaped [count, rank]. */
-@compiler.native {ndarray.array.gather_coordinates} pub gather_coordinates(array: Array, coordinates: Array): Array -> native.
-/** Atomically assigns scalar or matching values through an Int64 coordinate matrix shaped [count, rank]. */
-@compiler.native {ndarray.array.put_coordinates} pub put_coordinates(array: Array, coordinates: Array, values: Array): Unit -> native.
-/** Returns the truth value of an array containing exactly one element. */
-@compiler.native {ndarray.array.item_bool} pub item_bool(array: Array): Bool -> native.
-/** Returns a truncated Int from an array containing exactly one real element. */
-@compiler.native {ndarray.array.item_int} pub item_int(array: Array): Int -> native.
-/** Returns one Bool element after normalizing a complete index tuple. */
-@compiler.native {ndarray.array.get_bool} pub get_bool(array: Array, indices: List[Int]): Bool -> native.
-/** Returns one Int64 element after normalizing a complete index tuple. */
-@compiler.native {ndarray.array.get_int} pub get_int(array: Array, indices: List[Int]): Int -> native.
-/** Returns one Float64 element after normalizing a complete index tuple. */
-@compiler.native {ndarray.array.get_float} pub get_float(array: Array, indices: List[Int]): Float -> native.
-/** Assigns one Bool element through a writable view and makes the mutation visible to its aliases. */
-@compiler.native {ndarray.array.set_bool} pub set_bool(array: Array, indices: List[Int], value: Bool): Unit -> native.
-/** Assigns one Int64 element through a writable view and makes the mutation visible to its aliases. */
-@compiler.native {ndarray.array.set_int} pub set_int(array: Array, indices: List[Int], value: Int): Unit -> native.
-/** Assigns one Float64 element through a writable view and makes the mutation visible to its aliases. */
-@compiler.native {ndarray.array.set_float} pub set_float(array: Array, indices: List[Int], value: Float): Unit -> native.
-/** Adds broadcast-compatible numeric arrays with canonical dtype promotion. */
-@compiler.native {ndarray.array.add} pub add(lhs: Array, rhs: Array): Array -> native.
-/** Subtracts broadcast-compatible numeric arrays with canonical dtype promotion. */
-@compiler.native {ndarray.array.subtract} pub subtract(lhs: Array, rhs: Array): Array -> native.
-/** Multiplies broadcast-compatible numeric arrays with canonical dtype promotion. */
-@compiler.native {ndarray.array.multiply} pub multiply(lhs: Array, rhs: Array): Array -> native.
-/** Performs vector, matrix, and broadcast-batched matrix multiplication with numeric dtype promotion. */
-@compiler.native {ndarray.array.matmul} pub matmul(lhs: Array, rhs: Array): Array -> native.
-/** Computes NumPy-compatible scalar multiplication, vector inner products, and generalized array dot products. */
-@compiler.native {ndarray.array.dot} pub dot(lhs: Array, rhs: Array): Array -> native.
-/** Contracts the final dimensions of two arrays without conjugation. */
-@compiler.native {ndarray.array.inner} pub inner(lhs: Array, rhs: Array): Array -> native.
-/** Computes the outer product of the flattened inputs. */
-@compiler.native {ndarray.array.outer} pub outer(lhs: Array, rhs: Array): Array -> native.
-/** Flattens both inputs and computes their conjugating vector dot product. */
-@compiler.native {ndarray.array.vdot} pub vdot(lhs: Array, rhs: Array): Array -> native.
-/** Sums a selected diagonal over two distinct axes. */
-@compiler.native {ndarray.array.trace} pub trace(array: Array, offset: Int, axis_a: Int, axis_b: Int): Array -> native.
-/** Computes a finite real square matrix determinant through maintained faer factorization. */
-@compiler.native {ndarray.array.determinant} pub determinant(array: Array): Float -> native.
-/** Solves a finite real square system for a vector or matrix right-hand side through maintained faer factorization. */
-@compiler.native {ndarray.array.solve} pub solve(matrix: Array, rhs: Array): Array -> native.
-/** Computes a finite real square matrix inverse by solving against identity through maintained faer factorization. */
-@compiler.native {ndarray.array.inverse} pub inverse(matrix: Array): Array -> native.
-/** Computes a vector one-norm or matrix induced one-norm. */
-@compiler.native {ndarray.array.norm_l1} pub norm_l1(array: Array): Float -> native.
-/** Computes a vector Euclidean norm or matrix spectral norm. */
-@compiler.native {ndarray.array.norm_l2} pub norm_l2(array: Array): Float -> native.
-/** Computes a vector maximum norm or matrix induced infinity norm. */
-@compiler.native {ndarray.array.norm_max} pub norm_max(array: Array): Float -> native.
-/** Computes a vector Euclidean norm or matrix Frobenius norm. */
-@compiler.native {ndarray.array.frobenius_norm} pub frobenius_norm(array: Array): Float -> native.
-/** Computes the nuclear norm of a finite real matrix. */
-@compiler.native {ndarray.array.nuclear_norm} pub nuclear_norm(array: Array): Float -> native.
-/** Computes numerical matrix rank; zero tolerance selects the deterministic default. */
-@compiler.native {ndarray.array.matrix_rank} pub matrix_rank(array: Array, tolerance: Float): Int -> native.
-/** Encodes an array as deterministic NumPy .npy bytes. */
-@compiler.native {ndarray.array.to_npy} pub to_npy(array: Array): Bytes -> native.
-/** Decodes bounded NumPy .npy bytes into an owned CPU array. */
-@compiler.native {ndarray.array.from_npy} pub from_npy(bytes: Bytes, maximum: Int): Array -> native.
-/** Saves an array to an exact filesystem path in deterministic NumPy .npy format. */
-@compiler.native {ndarray.array.save_npy} pub save_npy(array: Array, path: String): Unit -> native.
-/** Loads a bounded NumPy .npy file from an exact filesystem path. */
-@compiler.native {ndarray.array.load_npy} pub load_npy(path: String, maximum: Int): Array -> native.
-/** Encodes an array as a versioned checksummed package-native packet. */
-@compiler.native {ndarray.array.serialize} pub serialize(array: Array): Bytes -> native.
-/** Decodes a bounded checksummed package-native packet into an owned CPU array. */
-@compiler.native {ndarray.array.deserialize} pub deserialize(bytes: Bytes, maximum: Int): Array -> native.
-/** Opens a bounded NumPy file as a read-only or read-write memory-backed array. */
-@compiler.native {ndarray.array.mmap_npy} pub mmap_npy(path: String, writable: Bool, maximum: Int): Array -> native.
-/** Flushes writable memory-backed storage and is a no-op for ordinary or read-only arrays. */
-@compiler.native {ndarray.array.flush} pub flush(array: Array): Unit -> native.
-/** Exports a compatible primitive array through official Arrow C Data ownership callbacks. */
-@compiler.native {ndarray.array.to_arrow} pub to_arrow(array: Array): ArrowArray -> native.
-/** Imports one package-owned non-null Arrow C Data export as an owned array. */
-@compiler.native {ndarray.array.from_arrow} pub from_arrow(arrow: ArrowArray): Array -> native.
-/** Splits an axis into equally sized shared views. */
-@compiler.native {ndarray.array.split} pub split(array: Array, sections: Int, axis: Int): List[Array] -> native.
-/** Splits an axis into uneven shared views with larger leading sections. */
-@compiler.native {ndarray.array.array_split} pub array_split(array: Array, sections: Int, axis: Int): List[Array] -> native.
-/** Splits an axis before each normalized index and preserves empty sections. */
-@compiler.native {ndarray.array.split_at} pub split_at(array: Array, indices: List[Int], axis: Int): List[Array] -> native.
-/** Counts truthy values across the flattened array. */
-@compiler.native {ndarray.array.count_nonzero} pub count_nonzero(array: Array): Int -> native.
-/** Counts nonzero elements over normalized axes with optional retained dimensions. */
-@compiler.native {ndarray.array.count_nonzero_axes} pub count_nonzero_axes(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Returns flattened indexes of truthy values as Int64. */
-@compiler.native {ndarray.array.flatnonzero} pub flatnonzero(array: Array): Array -> native.
-/** Returns one coordinate row for every truthy value. */
-@compiler.native {ndarray.array.argwhere} pub argwhere(array: Array): Array -> native.
-/** Returns one Int64 coordinate array per source axis. */
-@compiler.native {ndarray.array.nonzero} pub nonzero(array: Array): List[Array] -> native.
-/** Returns a shared view with one singleton axis inserted. */
-@compiler.native {ndarray.array.expand_dims} pub expand_dims(array: Array, axis: Int): Array -> native.
-/** Returns a shared view with singleton axes inserted at final output positions. */
-@compiler.native {ndarray.array.expand_dims_axes} pub expand_dims(array: Array, axes: List[Int]): Array -> native.
-/** Returns a shared view with selected singleton axes removed; an empty list removes all singleton axes. */
-@compiler.native {ndarray.array.squeeze} pub squeeze(array: Array, axes: List[Int]): Array -> native.
-/** Returns a shared negative-stride view with selected axes reversed. */
-@compiler.native {ndarray.array.flip} pub flip(array: Array, axes: List[Int]): Array -> native.
-/** Returns an owned array cyclically shifted along one axis. */
-@compiler.native {ndarray.array.roll} pub roll(array: Array, shift: Int, axis: Int): Array -> native.
-/** Returns an owned array cyclically shifted after flattening in logical row-major order. */
-@compiler.native {ndarray.array.roll_flat} pub roll(array: Array, shift: Int): Array -> native.
-/** Returns an owned array shifted by the same amount along every selected axis. */
-@compiler.native {ndarray.array.roll_axes_by} pub roll(array: Array, shift: Int, axes: List[Int]): Array -> native.
-/** Returns an owned array shifted along selected axes using one broadcast shift or one shift per axis. */
-@compiler.native {ndarray.array.roll_axes} pub roll(array: Array, shifts: List[Int], axes: List[Int]): Array -> native.
-/** Repeats each element a non-negative number of times along one axis. */
-@compiler.native {ndarray.array.repeat} pub repeat(array: Array, repeats: Int, axis: Int): Array -> native.
-/** Repeats axis entries using one broadcast count or one count per source entry. */
-@compiler.native {ndarray.array.repeat_counts} pub repeat_counts(array: Array, repeats: List[Int], axis: Int): Array -> native.
-/** Flattens in logical C order and repeats entries using broadcast or per-entry counts. */
-@compiler.native {ndarray.array.repeat_flat} pub repeat_flat(array: Array, repeats: List[Int]): Array -> native.
-/** Tiles an array according to trailing-axis repetition counts. */
-@compiler.native {ndarray.array.tile} pub tile(array: Array, repetitions: List[Int]): Array -> native.
-/** Concatenates a nonempty list of shape-compatible arrays with canonical dtype promotion. */
-@compiler.native {ndarray.array.concatenate} pub concatenate(arrays: List[Array], axis: Int): Array -> native.
-/** Stacks a nonempty list of equal-shape arrays with canonical dtype promotion. */
-@compiler.native {ndarray.array.stack} pub stack(arrays: List[Array], axis: Int): Array -> native.
-/** Returns an axis-wise stable ascending copy using deterministic NaN and complex ordering. */
-@compiler.native {ndarray.array.sort} pub sort(array: Array, axis: Int = -1): Array -> native.
-/** Returns stable Int64 indices that order each axis slice ascending. */
-@compiler.native {ndarray.array.argsort} pub argsort(array: Array, axis: Int = -1): Array -> native.
-/** Returns an ascending axis-wise copy without preserving equal-value order. */
-@compiler.native {ndarray.array.sort_unstable} pub sort_unstable(array: Array, axis: Int = -1): Array -> native.
-/** Returns ascending Int64 indexes without preserving equal-value order. */
-@compiler.native {ndarray.array.argsort_unstable} pub argsort_unstable(array: Array, axis: Int = -1): Array -> native.
-/** Returns a stable ascending one-dimensional copy. */
-@compiler.native {ndarray.array.sort_flat} pub sort_flat(array: Array): Array -> native.
-/** Returns stable Int64 indices ordering the flattened array. */
-@compiler.native {ndarray.array.argsort_flat} pub argsort_flat(array: Array): Array -> native.
-/** Sorts a writable array in place along one axis. */
-@compiler.native {ndarray.array.sort_inplace} pub sort_inplace(array: Array, axis: Int = -1): Unit -> native.
-/** Returns an axis-wise copy satisfying the selected kth partition postcondition. */
-@compiler.native {ndarray.array.partition} pub partition(array: Array, kth: Int, axis: Int = -1): Array -> native.
-/** Returns Int64 indexes satisfying the selected kth partition postcondition. */
-@compiler.native {ndarray.array.argpartition} pub argpartition(array: Array, kth: Int, axis: Int = -1): Array -> native.
-/** Returns an axis-wise partition for every integer position in kths without mutating either input. */
-@compiler.native {ndarray.array.partition_kths} pub partition(array: Array, kths: Array, axis: Int = -1): Array -> native.
-/** Returns Int64 indexes satisfying every integer position in kths. */
-@compiler.native {ndarray.array.argpartition_kths} pub argpartition(array: Array, kths: Array, axis: Int = -1): Array -> native.
-/** Returns a flattened partitioned copy for one selected position. */
-@compiler.native {ndarray.array.partition_flat} pub partition_flat(array: Array, kth: Int): Array -> native.
-/** Returns flattened Int64 indexes satisfying one selected partition position. */
-@compiler.native {ndarray.array.argpartition_flat} pub argpartition_flat(array: Array, kth: Int): Array -> native.
-/** Returns a flattened partitioned copy for every integer position in kths. */
-@compiler.native {ndarray.array.partition_kths_flat} pub partition_flat(array: Array, kths: Array): Array -> native.
-/** Returns flattened Int64 indexes satisfying every integer position in kths. */
-@compiler.native {ndarray.array.argpartition_kths_flat} pub argpartition_flat(array: Array, kths: Array): Array -> native.
-/** Partitions a writable array in place along one axis for one selected position. */
-@compiler.native {ndarray.array.partition_inplace} pub partition_inplace(array: Array, kth: Int, axis: Int = -1): Unit -> native.
-/** Partitions a writable array in place along one axis for every integer position in kths. */
-@compiler.native {ndarray.array.partition_kths_inplace} pub partition_inplace(array: Array, kths: Array, axis: Int = -1): Unit -> native.
-/** Returns a read-only zero-stride view broadcast to a compatible shape. */
-@compiler.native {ndarray.array.broadcast_to} pub broadcast_to(array: Array, shape: List[Int]): Array -> native.
-/** Divides broadcast-compatible arrays using NumPy dtype promotion. */
-@compiler.native {ndarray.array.true_divide} pub true_divide(lhs: Array, rhs: Array): Array -> native.
-/** Floor-divides broadcast-compatible real arrays. */
-@compiler.native {ndarray.array.floor_divide} pub floor_divide(lhs: Array, rhs: Array): Array -> native.
-/** Returns the NumPy-sign remainder of broadcast-compatible real arrays. */
-@compiler.native {ndarray.array.remainder} pub remainder(lhs: Array, rhs: Array): Array -> native.
-/** Raises broadcast-compatible arrays elementwise. */
-@compiler.native {ndarray.array.power} pub power(lhs: Array, rhs: Array): Array -> native.
-/** Selects broadcasted minima while propagating NaN values. */
-@compiler.native {ndarray.array.elementwise_minimum} pub elementwise_minimum(lhs: Array, rhs: Array): Array -> native.
-/** Selects broadcasted maxima while propagating NaN values. */
-@compiler.native {ndarray.array.elementwise_maximum} pub elementwise_maximum(lhs: Array, rhs: Array): Array -> native.
-/** Selects broadcasted minima while preferring a non-NaN operand. */
-@compiler.native {ndarray.array.fmin} pub fmin(lhs: Array, rhs: Array): Array -> native.
-/** Selects broadcasted maxima while preferring a non-NaN operand. */
-@compiler.native {ndarray.array.fmax} pub fmax(lhs: Array, rhs: Array): Array -> native.
-/** Clips values through broadcast-compatible lower and upper arrays. */
-@compiler.native {ndarray.array.clip} pub clip(array: Array, minimum: Array, maximum: Array): Array -> native.
-/** Clips values through a broadcast-compatible lower bound. */
-@compiler.native {ndarray.array.clip_lower} pub clip_lower(array: Array, minimum: Array): Array -> native.
-/** Clips values through a broadcast-compatible upper bound. */
-@compiler.native {ndarray.array.clip_upper} pub clip_upper(array: Array, maximum: Array): Array -> native.
-/** Clips into a writable destination after complete shape and cast validation. */
-@compiler.native {ndarray.array.clip_into} pub clip_into(destination: Array, array: Array, minimum: Array, maximum: Array): Unit -> native.
-/** Clips a lower bound into a writable destination after complete validation. */
-@compiler.native {ndarray.array.clip_lower_into} pub clip_lower_into(destination: Array, array: Array, minimum: Array): Unit -> native.
-/** Clips an upper bound into a writable destination after complete validation. */
-@compiler.native {ndarray.array.clip_upper_into} pub clip_upper_into(destination: Array, array: Array, maximum: Array): Unit -> native.
-/** Clips an array in place after complete validation. */
-@compiler.native {ndarray.array.clip_inplace} pub clip_inplace(array: Array, minimum: Array, maximum: Array): Unit -> native.
-/** Applies a lower bound to an array in place after complete validation. */
-@compiler.native {ndarray.array.clip_lower_inplace} pub clip_lower_inplace(array: Array, minimum: Array): Unit -> native.
-/** Applies an upper bound to an array in place after complete validation. */
-@compiler.native {ndarray.array.clip_upper_inplace} pub clip_upper_inplace(array: Array, maximum: Array): Unit -> native.
-/** Compares broadcast-compatible arrays for equality. */
-@compiler.native {ndarray.array.equal} pub equal(lhs: Array, rhs: Array): Array -> native.
-/** Compares broadcast-compatible arrays for inequality. */
-@compiler.native {ndarray.array.not_equal} pub not_equal(lhs: Array, rhs: Array): Array -> native.
-/** Compares broadcast-compatible real arrays with less-than. */
-@compiler.native {ndarray.array.less} pub less(lhs: Array, rhs: Array): Array -> native.
-/** Compares broadcast-compatible real arrays with less-than-or-equal. */
-@compiler.native {ndarray.array.less_equal} pub less_equal(lhs: Array, rhs: Array): Array -> native.
-/** Compares broadcast-compatible real arrays with greater-than. */
-@compiler.native {ndarray.array.greater} pub greater(lhs: Array, rhs: Array): Array -> native.
-/** Compares broadcast-compatible real arrays with greater-than-or-equal. */
-@compiler.native {ndarray.array.greater_equal} pub greater_equal(lhs: Array, rhs: Array): Array -> native.
-/** Computes elementwise truth-value conjunction with broadcasting. */
-@compiler.native {ndarray.array.logical_and} pub logical_and(lhs: Array, rhs: Array): Array -> native.
-/** Computes elementwise truth-value disjunction with broadcasting. */
-@compiler.native {ndarray.array.logical_or} pub logical_or(lhs: Array, rhs: Array): Array -> native.
-/** Computes elementwise truth-value exclusive disjunction with broadcasting. */
-@compiler.native {ndarray.array.logical_xor} pub logical_xor(lhs: Array, rhs: Array): Array -> native.
-/** Computes broadcast-compatible integer bitwise conjunction. */
-@compiler.native {ndarray.array.bitwise_and} pub bitwise_and(lhs: Array, rhs: Array): Array -> native.
-/** Computes broadcast-compatible integer bitwise disjunction. */
-@compiler.native {ndarray.array.bitwise_or} pub bitwise_or(lhs: Array, rhs: Array): Array -> native.
-/** Computes broadcast-compatible integer bitwise exclusive disjunction. */
-@compiler.native {ndarray.array.bitwise_xor} pub bitwise_xor(lhs: Array, rhs: Array): Array -> native.
-/** Shifts integer values left by validated elementwise counts. */
-@compiler.native {ndarray.array.left_shift} pub left_shift(lhs: Array, rhs: Array): Array -> native.
-/** Shifts integer values right by validated elementwise counts. */
-@compiler.native {ndarray.array.right_shift} pub right_shift(lhs: Array, rhs: Array): Array -> native.
-/** Returns elementwise non-negative greatest common divisors. */
-@compiler.native {ndarray.array.gcd} pub gcd(lhs: Array, rhs: Array): Array -> native.
-/** Returns checked elementwise least common multiples. */
-@compiler.native {ndarray.array.lcm} pub lcm(lhs: Array, rhs: Array): Array -> native.
-/** Returns stable elementwise Euclidean magnitudes. */
-@compiler.native {ndarray.array.hypot} pub hypot(lhs: Array, rhs: Array): Array -> native.
-/** Returns signed elementwise angles from y and x components. */
-@compiler.native {ndarray.array.arctan2} pub arctan2(lhs: Array, rhs: Array): Array -> native.
-/** Computes stable elementwise logarithms of summed exponentials. */
-@compiler.native {ndarray.array.logaddexp} pub logaddexp(lhs: Array, rhs: Array): Array -> native.
-/** Computes stable base-two logarithms of summed powers of two. */
-@compiler.native {ndarray.array.logaddexp2} pub logaddexp2(lhs: Array, rhs: Array): Array -> native.
-/** Copies elementwise floating signs from the second operand. */
-@compiler.native {ndarray.array.copysign} pub copysign(lhs: Array, rhs: Array): Array -> native.
-/** Returns the next representable values toward the second operand. */
-@compiler.native {ndarray.array.nextafter} pub nextafter(lhs: Array, rhs: Array): Array -> native.
-/** Returns a broadcast-compatible tolerance-comparison Bool mask. */
-@compiler.native {ndarray.array.is_close} pub is_close(lhs: Array, rhs: Array, relative_tolerance: Float, absolute_tolerance: Float, equal_nan: Bool): Array -> native.
-/** Selects promoted branch values through a broadcast-compatible truth-value condition. */
-@compiler.native {ndarray.array.select_where} pub select_where(mask: Array, selected: Array, rejected: Array): Array -> native.
-/** Negates every numerical element. */
-@compiler.native {ndarray.array.negative} pub negative(array: Array): Array -> native.
-/** Returns an owned numerical copy while rejecting Bool input. */
-@compiler.native {ndarray.array.positive} pub positive(array: Array): Array -> native.
-/** Returns elementwise magnitude, using real output for complex arrays. */
-@compiler.native {ndarray.array.absolute} pub absolute(array: Array): Array -> native.
-/** Returns the elementwise numerical sign. */
-@compiler.native {ndarray.array.sign} pub sign(array: Array): Array -> native.
-/** Squares every numerical element. */
-@compiler.native {ndarray.array.square} pub square(array: Array): Array -> native.
-/** Returns the elementwise principal square root. */
-@compiler.native {ndarray.array.sqrt} pub sqrt(array: Array): Array -> native.
-/** Returns one divided by each nonzero element. */
-@compiler.native {ndarray.array.reciprocal} pub reciprocal(array: Array): Array -> native.
-/** Returns the elementwise exponential. */
-@compiler.native {ndarray.array.exp} pub exp(array: Array): Array -> native.
-/** Returns the elementwise exponential minus one. */
-@compiler.native {ndarray.array.expm1} pub expm1(array: Array): Array -> native.
-/** Returns the elementwise natural logarithm. */
-@compiler.native {ndarray.array.log} pub log(array: Array): Array -> native.
-/** Returns the elementwise natural logarithm of one plus each value. */
-@compiler.native {ndarray.array.log1p} pub log1p(array: Array): Array -> native.
-/** Returns the elementwise base-two logarithm. */
-@compiler.native {ndarray.array.log2} pub log2(array: Array): Array -> native.
-/** Returns the elementwise base-ten logarithm. */
-@compiler.native {ndarray.array.log10} pub log10(array: Array): Array -> native.
-/** Returns the elementwise hyperbolic sine. */
-@compiler.native {ndarray.array.sinh} pub sinh(array: Array): Array -> native.
-/** Returns the elementwise hyperbolic cosine. */
-@compiler.native {ndarray.array.cosh} pub cosh(array: Array): Array -> native.
-/** Returns the elementwise hyperbolic tangent. */
-@compiler.native {ndarray.array.tanh} pub tanh(array: Array): Array -> native.
-/** Returns the elementwise inverse sine. */
-@compiler.native {ndarray.array.arcsin} pub arcsin(array: Array): Array -> native.
-/** Returns the elementwise inverse cosine. */
-@compiler.native {ndarray.array.arccos} pub arccos(array: Array): Array -> native.
-/** Returns the elementwise inverse tangent. */
-@compiler.native {ndarray.array.arctan} pub arctan(array: Array): Array -> native.
-/** Returns the elementwise inverse hyperbolic sine. */
-@compiler.native {ndarray.array.arcsinh} pub arcsinh(array: Array): Array -> native.
-/** Returns the elementwise inverse hyperbolic cosine. */
-@compiler.native {ndarray.array.arccosh} pub arccosh(array: Array): Array -> native.
-/** Returns the elementwise inverse hyperbolic tangent. */
-@compiler.native {ndarray.array.arctanh} pub arctanh(array: Array): Array -> native.
-/** Returns the elementwise sine. */
-@compiler.native {ndarray.array.sin} pub sin(array: Array): Array -> native.
-/** Returns the elementwise cosine. */
-@compiler.native {ndarray.array.cos} pub cos(array: Array): Array -> native.
-/** Returns the elementwise tangent. */
-@compiler.native {ndarray.array.tan} pub tan(array: Array): Array -> native.
-/** Returns the elementwise floor for real arrays. */
-@compiler.native {ndarray.array.floor} pub floor(array: Array): Array -> native.
-/** Returns the elementwise ceiling for real arrays. */
-@compiler.native {ndarray.array.ceil} pub ceil(array: Array): Array -> native.
-/** Rounds every element to the nearest even value. */
-@compiler.native {ndarray.array.round} pub round(array: Array): Array -> native.
-/** Returns elementwise truth-value negation. */
-@compiler.native {ndarray.array.logical_not} pub logical_not(array: Array): Array -> native.
-/** Returns a Bool mask identifying NaN components. */
-@compiler.native {ndarray.array.is_nan} pub is_nan(array: Array): Array -> native.
-/** Returns a Bool mask identifying infinite components. */
-@compiler.native {ndarray.array.is_infinite} pub is_infinite(array: Array): Array -> native.
-/** Returns a Bool mask identifying values with finite components. */
-@compiler.native {ndarray.array.is_finite} pub is_finite(array: Array): Array -> native.
-/** Returns the elementwise complex conjugate. */
-@compiler.native {ndarray.array.conjugate} pub conjugate(array: Array): Array -> native.
-/** Returns two raised to each element. */
-@compiler.native {ndarray.array.exp2} pub exp2(array: Array): Array -> native.
-/** Returns real elementwise cube roots. */
-@compiler.native {ndarray.array.cbrt} pub cbrt(array: Array): Array -> native.
-/** Converts real angles from radians to degrees. */
-@compiler.native {ndarray.array.degrees} pub degrees(array: Array): Array -> native.
-/** Converts real angles from degrees to radians. */
-@compiler.native {ndarray.array.radians} pub radians(array: Array): Array -> native.
-/** Returns a Bool mask preserving negative-zero sign bits. */
-@compiler.native {ndarray.array.sign_bit} pub sign_bit(array: Array): Array -> native.
-/** Returns mantissa and integer-exponent arrays. */
-@compiler.native {ndarray.array.frexp_all} pub frexp_all(array: Array): List[Array] -> native.
-/** Returns fractional and integral-part arrays. */
-@compiler.native {ndarray.array.modf_all} pub modf_all(array: Array): List[Array] -> native.
-/** Reduces normalized axes; an empty axis list reduces all axes. */
-@compiler.native {ndarray.array.sum} pub sum(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces normalized axes using NumPy-compatible product semantics. */
-@compiler.native {ndarray.array.product} pub product(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces normalized axes using NumPy-compatible mean semantics. */
-@compiler.native {ndarray.array.mean} pub mean(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Returns means over elements selected by a broadcast-compatible truth mask. */
-@compiler.native {ndarray.array.mean_where} pub mean_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Returns means using an explicit result dtype. */
-@compiler.native {ndarray.array.mean_as} pub mean_as(array: Array, axes: List[Int], keep_dims: Int, dtype: Int): Array -> native.
-/** Writes means into an exactly shaped writable destination. */
-@compiler.native {ndarray.array.mean_into} pub mean_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit -> native.
-/** Reduces normalized axes using NumPy-compatible minimum semantics. */
-@compiler.native {ndarray.array.minimum} pub minimum(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces normalized axes using NumPy-compatible maximum semantics. */
-@compiler.native {ndarray.array.maximum} pub maximum(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces normalized axes using NumPy-compatible any semantics. */
-@compiler.native {ndarray.array.any} pub any(array: Array, axes: List[Int] = [], keep_dims: Bool = false): Array -> native.
-/** Reduces normalized axes using NumPy-compatible all semantics. */
-@compiler.native {ndarray.array.all} pub all(array: Array, axes: List[Int] = [], keep_dims: Bool = false): Array -> native.
-/** Reduces normalized axes using NumPy-compatible argmin semantics. */
-@compiler.native {ndarray.array.argmin} pub argmin(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces normalized axes using NumPy-compatible argmax semantics. */
-@compiler.native {ndarray.array.argmax} pub argmax(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Writes argmin indexes into an exactly shaped writable integer or Bool destination. */
-@compiler.native {ndarray.array.argmin_into} pub argmin_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit -> native.
-/** Writes argmax indexes into an exactly shaped writable integer or Bool destination. */
-@compiler.native {ndarray.array.argmax_into} pub argmax_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit -> native.
-/** Reduces normalized axes using variance with an explicit non-negative correction. */
-@compiler.native {ndarray.array.variance} pub variance(array: Array, axes: List[Int], keep_dims: Int, correction: Int): Array -> native.
-/** Reduces normalized axes using standard deviation with an explicit non-negative correction. */
-@compiler.native {ndarray.array.standard_deviation} pub standard_deviation(array: Array, axes: List[Int], keep_dims: Int, correction: Int): Array -> native.
-/** Returns variances over elements selected by a broadcast-compatible truth mask. */
-@compiler.native {ndarray.array.variance_where} pub variance_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int, correction: Int): Array -> native.
-/** Returns variances using an explicit result dtype. */
-@compiler.native {ndarray.array.variance_as} pub variance_as(array: Array, axes: List[Int], keep_dims: Int, correction: Int, dtype: Int): Array -> native.
-/** Writes variances into an exactly shaped writable destination. */
-@compiler.native {ndarray.array.variance_into} pub variance_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int, correction: Int): Unit -> native.
-/** Returns standard deviations over elements selected by a broadcast-compatible truth mask. */
-@compiler.native {ndarray.array.standard_deviation_where} pub standard_deviation_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int, correction: Int): Array -> native.
-/** Returns standard deviations using an explicit result dtype. */
-@compiler.native {ndarray.array.standard_deviation_as} pub standard_deviation_as(array: Array, axes: List[Int], keep_dims: Int, correction: Int, dtype: Int): Array -> native.
-/** Writes standard deviations into an exactly shaped writable destination. */
-@compiler.native {ndarray.array.standard_deviation_into} pub standard_deviation_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int, correction: Int): Unit -> native.
-/** Returns the linear-interpolated median across normalized axes. */
-@compiler.native {ndarray.array.median} pub median(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Returns an axis reduction at a unit-interval quantile using an explicit interpolation policy. */
-@compiler.native {ndarray.array.quantile} pub quantile(array: Array, quantile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Array -> native.
-/** Returns an axis reduction at a percentage quantile using an explicit interpolation policy. */
-@compiler.native {ndarray.array.percentile} pub percentile(array: Array, percentile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Array -> native.
-/** Returns multiple unit-interval quantiles with the quantile dimension first. */
-@compiler.native {ndarray.array.quantiles} pub quantiles(array: Array, quantiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Array -> native.
-/** Returns multiple percentage quantiles with the percentile dimension first. */
-@compiler.native {ndarray.array.percentiles} pub percentiles(array: Array, percentiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Array -> native.
-/** Returns the maximum minus minimum across normalized axes. */
-@compiler.native {ndarray.array.peak_to_peak} pub peak_to_peak(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Returns an axis average weighted by a same-shape array or matching rank-one vector. */
-@compiler.native {ndarray.array.weighted_average} pub weighted_average(array: Array, weights: Array, axis: Int, keep_dims: Int): Array -> native.
-/** Returns a covariance matrix with explicit variable orientation and degrees-of-freedom correction. */
-@compiler.native {ndarray.array.covariance} pub covariance(array: Array, row_variables: Int, correction: Int): Array -> native.
-/** Returns the normalized covariance matrix for non-constant variables. */
-@compiler.native {ndarray.array.correlation} pub correlation(array: Array, row_variables: Int): Array -> native.
-/** Returns sums while omitting NaN values. */
-@compiler.native {ndarray.array.nan_sum} pub nan_sum(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Returns products while omitting NaN values. */
-@compiler.native {ndarray.array.nan_product} pub nan_product(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Returns means while omitting NaN values. */
-@compiler.native {ndarray.array.nan_mean} pub nan_mean(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Returns minima while omitting NaN values. */
-@compiler.native {ndarray.array.nan_minimum} pub nan_minimum(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Returns maxima while omitting NaN values. */
-@compiler.native {ndarray.array.nan_maximum} pub nan_maximum(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Returns variance while omitting NaN values. */
-@compiler.native {ndarray.array.nan_variance} pub nan_variance(array: Array, axes: List[Int], keep_dims: Int, correction: Int): Array -> native.
-/** Returns standard deviation while omitting NaN values. */
-@compiler.native {ndarray.array.nan_standard_deviation} pub nan_standard_deviation(array: Array, axes: List[Int], keep_dims: Int, correction: Int): Array -> native.
-/** Counts flattened values into equal-width bins over an explicit finite range. */
-@compiler.native {ndarray.array.histogram} pub histogram(array: Array, bins: Int, minimum: Float, maximum: Float): Array -> native.
-/** Returns equal-width Float64 histogram edges for an explicit finite range. */
-@compiler.native {ndarray.array.histogram_bin_edges} pub histogram_bin_edges(array: Array, bins: Int, minimum: Float, maximum: Float): Array -> native.
-/** Counts a [sample, dimension] matrix into an equal-width multidimensional histogram. */
-@compiler.native {ndarray.array.histogramdd} pub histogramdd(samples: Array, bins: Int, minima: Array, maxima: Array): Array -> native.
-/** Accumulates finite weights by non-negative integer value. */
-@compiler.native {ndarray.array.bincount} pub bincount(values: Array, weights: Array, minimum_length: Int): Array -> native.
-/** Returns insertion-bin indexes against strictly increasing rank-one edges. */
-@compiler.native {ndarray.array.digitize} pub digitize(values: Array, bins: Array, right: Bool): Array -> native.
-/** Returns repeated forward differences along one normalized axis. */
-@compiler.native {ndarray.array.difference} pub difference(array: Array, order: Int, axis: Int): Array -> native.
-/** Returns central interior and first-order edge gradients for uniform spacing. */
-@compiler.native {ndarray.array.gradient} pub gradient(array: Array, spacing: Float, axis: Int): Array -> native.
-/** Unwraps real periodic samples along one normalized axis. */
-@compiler.native {ndarray.array.unwrap} pub unwrap(array: Array, period: Float, axis: Int): Array -> native.
-/** Linearly interpolates real values over strictly increasing rank-one coordinates. */
-@compiler.native {ndarray.array.interpolate} pub interpolate(values: Array, coordinates: Array, samples: Array, left: Float, right: Float): Array -> native.
-/** Integrates along one axis using explicit rank-one coordinates and the trapezoidal rule. */
-@compiler.native {ndarray.array.trapezoidal_integral} pub trapezoidal_integral(array: Array, coordinates: Array, axis: Int): Array -> native.
-/** Integrates along one axis using uniform finite spacing and the trapezoidal rule. */
-@compiler.native {ndarray.array.trapezoidal_integral_uniform} pub trapezoidal_integral_uniform(array: Array, spacing: Float, axis: Int): Array -> native.
-/** Returns a complex FFT along one normalized axis. */
-@compiler.native {ndarray.array.fft} pub fft(array: Array, axis: Int, normalization: Int): Array -> native.
-/** Returns a complex FFT after truncating or zero-padding one normalized axis to an explicit length. */
-@compiler.native {ndarray.array.fft_sized} pub fft(array: Array, length: Int, axis: Int, normalization: Int): Array -> native.
-/** Returns an inverse complex FFT along one normalized axis. */
-@compiler.native {ndarray.array.ifft} pub ifft(array: Array, axis: Int, normalization: Int): Array -> native.
-/** Returns an inverse complex FFT after truncating or zero-padding one normalized axis to an explicit length. */
-@compiler.native {ndarray.array.ifft_sized} pub ifft(array: Array, length: Int, axis: Int, normalization: Int): Array -> native.
-/** Returns complex FFTs across normalized distinct axes. */
-@compiler.native {ndarray.array.fftn} pub fftn(array: Array, axes: List[Int], normalization: Int): Array -> native.
-/** Returns inverse complex FFTs across normalized distinct axes. */
-@compiler.native {ndarray.array.ifftn} pub ifftn(array: Array, axes: List[Int], normalization: Int): Array -> native.
-/** Returns non-negative bins from a real-input FFT. */
-@compiler.native {ndarray.array.rfft} pub rfft(array: Array, axis: Int, normalization: Int): Array -> native.
-/** Returns non-negative bins after truncating or zero-padding a real-input axis to an explicit length. */
-@compiler.native {ndarray.array.rfft_sized} pub rfft(array: Array, length: Int, axis: Int, normalization: Int): Array -> native.
-/** Reconstructs a real signal of explicit length from compact frequency bins. */
-@compiler.native {ndarray.array.irfft} pub irfft(array: Array, length: Int, axis: Int, normalization: Int): Array -> native.
-/** Returns compact real-input FFTs across normalized distinct axes. */
-@compiler.native {ndarray.array.rfftn} pub rfftn(array: Array, axes: List[Int], normalization: Int): Array -> native.
-/** Reconstructs a real array from compact N-dimensional frequency bins. */
-@compiler.native {ndarray.array.irfftn} pub irfftn(array: Array, length: Int, axes: List[Int], normalization: Int): Array -> native.
-/** Transforms a compact Hermitian signal to a real spectrum. */
-@compiler.native {ndarray.array.hfft} pub hfft(array: Array, length: Int, axis: Int, normalization: Int): Array -> native.
-/** Transforms a real spectrum to a compact Hermitian signal. */
-@compiler.native {ndarray.array.ihfft} pub ihfft(array: Array, axis: Int, normalization: Int): Array -> native.
-/** Transforms an explicitly sized real spectrum to a compact Hermitian signal. */
-@compiler.native {ndarray.array.ihfft_sized} pub ihfft(array: Array, length: Int, axis: Int, normalization: Int): Array -> native.
-/** Returns signed discrete frequency bins. */
-@compiler.native {ndarray.array.fftfreq} pub fftfreq(length: Int, spacing: Float): Array -> native.
-/** Returns non-negative real-transform frequency bins. */
-@compiler.native {ndarray.array.rfftfreq} pub rfftfreq(length: Int, spacing: Float): Array -> native.
-/** Moves zero-frequency bins to centered positions on selected axes. */
-@compiler.native {ndarray.array.fftshift} pub fftshift(array: Array, axes: List[Int]): Array -> native.
-/** Reverses centered frequency-bin shifts on selected axes. */
-@compiler.native {ndarray.array.ifftshift} pub ifftshift(array: Array, axes: List[Int]): Array -> native.
-/** Returns stable left or right insertion indexes into one sorted rank-one array. */
-@compiler.native {ndarray.array.searchsorted} pub searchsorted(sorted: Array, values: Array, right: Bool): Array -> native.
-/** Returns insertion indexes using a validated Int64 permutation of an unsorted rank-one array. */
-@compiler.native {ndarray.array.searchsorted_with_sorter} pub searchsorted_with_sorter(array: Array, values: Array, sorter: Array, right: Bool): Array -> native.
-/** Returns stable lexicographic indexes for a [key_count, item_count] matrix using the final key as primary. */
-@compiler.native {ndarray.array.lexsort_keys} pub lexsort_keys(keys: Array): Array -> native.
-/** Returns sorted unique values, first indexes, inverse indexes, and occurrence counts. */
-@compiler.native {ndarray.array.unique_all} pub unique_all(array: Array): List[Array] -> native.
-/** Returns the sorted flattened union of two equal-dtype arrays. */
-@compiler.native {ndarray.array.union} pub union(lhs: Array, rhs: Array): Array -> native.
-/** Returns the sorted flattened intersection of two equal-dtype arrays. */
-@compiler.native {ndarray.array.intersect} pub intersect(lhs: Array, rhs: Array): Array -> native.
-/** Returns sorted flattened values present only in the first array. */
-@compiler.native {ndarray.array.set_difference} pub set_difference(lhs: Array, rhs: Array): Array -> native.
-/** Returns sorted flattened values present in exactly one input. */
-@compiler.native {ndarray.array.set_xor} pub set_xor(lhs: Array, rhs: Array): Array -> native.
-/** Returns a same-shape Bool mask indicating membership in the flattened test array. */
-@compiler.native {ndarray.array.is_in} pub is_in(elements: Array, test_elements: Array): Array -> native.
-/** Returns a flattened Bool membership mask with optional inversion. */
-@compiler.native {ndarray.array.in1d} pub in1d(elements: Array, test_elements: Array, invert: Bool = false): Array -> native.
-/** Returns first-array values absent from the second while preserving order and duplicates. */
-@compiler.native {ndarray.array.set_difference_unique} pub set_difference_unique(lhs: Array, rhs: Array): Array -> native.
-/** Returns sorted intersections and their first flattened indexes in both inputs. */
-@compiler.native {ndarray.array.intersect_all} pub intersect_all(lhs: Array, rhs: Array): List[Array] -> native.
-/** Returns lexicographically unique axis slices, first indexes, inverse indexes, and counts. */
-@compiler.native {ndarray.array.unique_axis_all} pub unique_axis_all(array: Array, axis: Int): List[Array] -> native.
-/** Returns flattened consecutive differences with typed values prepended and appended. */
-@compiler.native {ndarray.array.ediff1d_edges} pub ediff1d_edges(array: Array, begin: Array, end: Array): Array -> native.
-/** Returns inclusive sums along one normalized axis using reduction accumulator promotion. */
-@compiler.native {ndarray.array.cumulative_sum} pub cumulative_sum(array: Array, axis: Int): Array -> native.
-/** Returns inclusive products along one normalized axis using reduction accumulator promotion. */
-@compiler.native {ndarray.array.cumulative_product} pub cumulative_product(array: Array, axis: Int): Array -> native.
-/** Exports a pointer-free tensor packet through a package-native DLPack lifecycle. */
-@compiler.native {ndarray.array.export_tensor_packet} pub export_tensor_packet(array: Array, consumer: String): Bytes -> native.
-/** Imports a validated pointer-free tensor packet as an owned CPU array. */
-@compiler.native {ndarray.array.import_tensor_packet} pub import_tensor_packet(packet: Bytes): Array -> native.
-/** Selects broadcast choice values with raise, wrap, or clip index handling. */
-@compiler.native {ndarray.array.choose} pub choose(indexes: Array, choices: List[Array], mode: Int): Array -> native.
-/** Fills the receiver in place from one scalar array using receiver dtype conversion. */
-@compiler.native {ndarray.array.fill} pub fill(array: Array, value: Array): Unit -> native.
-/** Returns a resized logical-order array by repeating or truncating source values. */
-@compiler.native {ndarray.array.resize} pub resize(array: Array, shape: List[Int]): Array -> native.
-/** Reduces selected values using NumPy-compatible any semantics and a broadcast boolean mask. */
-@compiler.native {ndarray.array.any_where} pub any_where(array: Array, mask: Array, axes: List[Int], keep_dims: Bool): Array -> native.
-/** Reduces selected values using NumPy-compatible all semantics and a broadcast boolean mask. */
-@compiler.native {ndarray.array.all_where} pub all_where(array: Array, mask: Array, axes: List[Int], keep_dims: Bool): Array -> native.
-/** Selects broadcast choice values and atomically writes them into an exactly shaped destination. */
-@compiler.native {ndarray.array.choose_into} pub choose_into(destination: Array, indexes: Array, choices: List[Array], mode: Int): Unit -> native.
-/** Rounds every real or complex component to the requested decimal position using ties-to-even semantics. */
-@compiler.native {ndarray.array.round_decimals} pub round_decimals(array: Array, decimals: Int): Array -> native.
-/** Rounds values and atomically writes them into an exactly shaped same-kind destination. */
-@compiler.native {ndarray.array.round_into} pub round_into(destination: Array, array: Array, decimals: Int): Unit -> native.
-/** Conjugates values and atomically writes them into an exactly shaped same-kind destination. */
-@compiler.native {ndarray.array.conjugate_into} pub conjugate_into(destination: Array, array: Array): Unit -> native.
-/** Multiplies arrays and atomically writes the result into an exactly shaped, exact-dtype destination. */
-@compiler.native {ndarray.array.matmul_into} pub matmul_into(destination: Array, lhs: Array, rhs: Array): Unit -> native.
-/** Computes a dot product into an exact-shape, exact-dtype, C-contiguous destination. */
-@compiler.native {ndarray.array.dot_into} pub dot_into(destination: Array, lhs: Array, rhs: Array): Unit -> native.
-/** Computes a diagonal sum and atomically writes it into an exactly shaped destination. */
-@compiler.native {ndarray.array.trace_into} pub trace_into(destination: Array, array: Array, offset: Int, axis_a: Int, axis_b: Int): Unit -> native.
-/** Disposes an owned array exactly once. */
-@compiler.native {ndarray.array.dispose} pub dispose(array: Array): Unit -> native.
-/** Writes the outer product into an exactly shaped writable destination. */
-@compiler.native {ndarray.array.outer_into} pub outer_into(destination: Array, lhs: Array, rhs: Array): Unit -> native.
-/** Sums into an exactly shaped writable destination without broadcasting the reduction result. */
-@compiler.native {ndarray.array.sum_into} pub sum_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit -> native.
-/** Multiplies into an exactly shaped writable destination without broadcasting the reduction result. */
-@compiler.native {ndarray.array.product_into} pub product_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit -> native.
-/** Reduces minima into an exactly shaped writable destination. */
-@compiler.native {ndarray.array.minimum_into} pub minimum_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit -> native.
-/** Reduces maxima into an exactly shaped writable destination. */
-@compiler.native {ndarray.array.maximum_into} pub maximum_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit -> native.
-/** Sums elements selected by a broadcast-compatible truth mask. */
-@compiler.native {ndarray.array.sum_where} pub sum_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Sums elements using a one-element array as the initial accumulator. */
-@compiler.native {ndarray.array.sum_initial} pub sum_initial(array: Array, initial: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Sums selected elements from an explicit one-element initial accumulator. */
-@compiler.native {ndarray.array.sum_where_initial} pub sum_where_initial(array: Array, mask: Array, initial: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces minima using a one-element initial value, including empty lanes. */
-@compiler.native {ndarray.array.minimum_initial} pub minimum_initial(array: Array, initial: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces maxima using a one-element initial value, including empty lanes. */
-@compiler.native {ndarray.array.maximum_initial} pub maximum_initial(array: Array, initial: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces minima selected by a mask and rejects selected empty lanes. */
-@compiler.native {ndarray.array.minimum_where} pub minimum_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces maxima selected by a mask and rejects selected empty lanes. */
-@compiler.native {ndarray.array.maximum_where} pub maximum_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces selected minima from an explicit one-element initial value. */
-@compiler.native {ndarray.array.minimum_where_initial} pub minimum_where_initial(array: Array, mask: Array, initial: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces selected maxima from an explicit one-element initial value. */
-@compiler.native {ndarray.array.maximum_where_initial} pub maximum_where_initial(array: Array, mask: Array, initial: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces minima while ignoring NaN operands unless a lane contains only NaNs. */
-@compiler.native {ndarray.array.fmin_reduce} pub fmin_reduce(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces maxima while ignoring NaN operands unless a lane contains only NaNs. */
-@compiler.native {ndarray.array.fmax_reduce} pub fmax_reduce(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces integer or Bool elements with bitwise AND and a width-preserving all-bits identity. */
-@compiler.native {ndarray.array.bitwise_and_reduce} pub bitwise_and_reduce(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces integer or Bool elements with bitwise OR and a zero identity. */
-@compiler.native {ndarray.array.bitwise_or_reduce} pub bitwise_or_reduce(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Reduces integer or Bool elements with bitwise XOR and a zero identity. */
-@compiler.native {ndarray.array.bitwise_xor_reduce} pub bitwise_xor_reduce(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
-/** Returns live native allocations for lifecycle auditing. */
-@compiler.native {ndarray.array.live_count} pub live_count(): Int -> native.
+/**
+ * Copies boolean values and shape into owned CPU storage.
+ */
+@compiler.native {ndarray.array.from_bools}
+pub from_bools(values: List[Bool], shape: List[Int]): Array ->
+    native.
 
-/** Selects array materialization order. */
+/**
+ * Copies Int64 values and shape into owned CPU storage.
+ */
+@compiler.native {ndarray.array.from_ints}
+pub from_ints(values: List[Int], shape: List[Int]): Array ->
+    native.
+
+/**
+ * Copies Float64 values and shape into owned CPU storage.
+ */
+@compiler.native {ndarray.array.from_floats}
+pub from_floats(values: List[Float], shape: List[Int]): Array ->
+    native.
+
+/**
+ * Constructs an array in a checked integer-compatible dtype code.
+ */
+@compiler.native {ndarray.array.from_ints_as}
+pub from_ints_as(values: List[Int], shape: List[Int], dtype: Int): Array ->
+    native.
+
+/**
+ * Constructs an array in a checked floating-compatible dtype code.
+ */
+@compiler.native {ndarray.array.from_floats_as}
+pub from_floats_as(values: List[Float], shape: List[Int], dtype: Int): Array ->
+    native.
+
+/**
+ * Constructs Complex64 or Complex128 storage from parallel real and imaginary values.
+ */
+@compiler.native {ndarray.array.from_complex}
+pub from_complex(
+    real_values: List[Float],
+    imag_values: List[Float],
+    shape: List[Int],
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Allocates an initialized array; native-boundary safety guarantees zeroed storage rather than exposing uninitialized bytes.
+ */
+@compiler.native {ndarray.array.empty}
+pub empty(shape: List[Int], dtype: Int): Array ->
+    native.
+
+/**
+ * Creates a zero-filled array in the requested dtype.
+ */
+@compiler.native {ndarray.array.zeros}
+pub zeros(shape: List[Int], dtype: Int): Array ->
+    native.
+
+/**
+ * Creates a zero-filled array with explicit C or Fortran storage order.
+ */
+@compiler.native {ndarray.array.zeros_ordered}
+pub zeros_ordered(shape: List[Int], dtype: Int, order: Int): Array ->
+    native.
+
+/**
+ * Reduces an axis by ordered subtraction without applying a commutative reassociation.
+ */
+@compiler.native {ndarray.array.subtract_reduce}
+pub subtract_reduce(array: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Returns the ordered cumulative subtraction along an axis.
+ */
+@compiler.native {ndarray.array.subtract_accumulate}
+pub subtract_accumulate(array: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Reduces an axis by ordered floating or complex division.
+ */
+@compiler.native {ndarray.array.divide_reduce}
+pub divide_reduce(array: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Returns the ordered cumulative floating or complex division along an axis.
+ */
+@compiler.native {ndarray.array.divide_accumulate}
+pub divide_accumulate(array: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Creates a one-filled array in the requested dtype.
+ */
+@compiler.native {ndarray.array.ones}
+pub ones(shape: List[Int], dtype: Int): Array ->
+    native.
+
+/**
+ * Creates an array filled from one checked integer value.
+ */
+@compiler.native {ndarray.array.full_int}
+pub full_int(shape: List[Int], value: Int, dtype: Int): Array ->
+    native.
+
+/**
+ * Creates an array filled from one checked floating value.
+ */
+@compiler.native {ndarray.array.full_float}
+pub full_float(shape: List[Int], value: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Creates consecutive Int64 values from zero to an exclusive integer stop.
+ */
+@compiler.native {ndarray.array.arange_int_stop}
+pub arange(stop: Int): Array ->
+    native.
+
+/**
+ * Creates consecutive Float64 values from zero to an exclusive floating stop.
+ */
+@compiler.native {ndarray.array.arange_float_stop}
+pub arange_float(stop: Float): Array ->
+    native.
+
+/**
+ * Creates exact consecutive Int64 values over a half-open integer interval.
+ */
+@compiler.native {ndarray.array.arange_int_interval}
+pub arange(start: Int, stop: Int): Array ->
+    native.
+
+/**
+ * Creates consecutive Float64 values over a half-open floating interval.
+ */
+@compiler.native {ndarray.array.arange_float_interval}
+pub arange_float(start: Float, stop: Float): Array ->
+    native.
+
+/**
+ * Creates exact Int64 values over a half-open integer interval.
+ */
+@compiler.native {ndarray.array.arange_int}
+pub arange_int(start: Int, stop: Int, step: Int): Array ->
+    native.
+
+/**
+ * Creates Float64 values over a half-open interval with an explicit step.
+ */
+@compiler.native {ndarray.array.arange_float_step}
+pub arange(start: Float, stop: Float, step: Float): Array ->
+    native.
+
+/**
+ * Creates evenly stepped values over a half-open interval.
+ */
+@compiler.native {ndarray.array.arange}
+pub arange(start: Float, stop: Float, step: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Creates a requested number of evenly spaced values.
+ */
+@compiler.native {ndarray.array.linspace}
+pub linspace(start: Float, stop: Float, count: Int, endpoint: Int, dtype: Int): Array ->
+    native.
+
+/**
+ * Creates a rectangular identity-style matrix at an integer diagonal offset.
+ */
+@compiler.native {ndarray.array.identity}
+pub identity(rows: Int, columns: Int, diagonal: Int, dtype: Int): Array ->
+    native.
+
+/**
+ * Creates reproducible ChaCha8 uniform floating samples in a half-open interval.
+ */
+@compiler.native {ndarray.array.random_uniform}
+pub random_uniform(shape: List[Int], low: Float, high: Float, seed: Int, dtype: Int): Array ->
+    native.
+
+/**
+ * Creates reproducible ChaCha8 normal floating samples with explicit distribution parameters.
+ */
+@compiler.native {ndarray.array.random_normal}
+pub random_normal(
+    shape: List[Int],
+    mean: Float,
+    standard_deviation: Float,
+    seed: Int,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Creates reproducible integer samples in a half-open interval.
+ */
+@compiler.native {ndarray.array.random_integers}
+pub random_integers(shape: List[Int], low: Int, high: Int, seed: Int, dtype: Int): Array ->
+    native.
+
+/**
+ * Creates reproducible Boolean samples from a Bernoulli distribution.
+ */
+@compiler.native {ndarray.array.random_bernoulli}
+pub random_bernoulli(shape: List[Int], probability: Float, seed: Int): Array ->
+    native.
+
+/**
+ * Creates a reproducibly shuffled permutation of consecutive integers.
+ */
+@compiler.native {ndarray.array.random_permutation}
+pub random_permutation(length: Int, seed: Int): Array ->
+    native.
+
+/**
+ * Returns an independently owned array reproducibly shuffled along one axis.
+ */
+@compiler.native {ndarray.array.random_shuffle}
+pub random_shuffle(array: Array, axis: Int, seed: Int): Array ->
+    native.
+
+/**
+ * Returns a shared strided diagonal view across two distinct axes.
+ */
+@compiler.native {ndarray.array.diagonal}
+pub diagonal(array: Array, offset: Int, axis_a: Int, axis_b: Int): Array ->
+    native.
+
+/**
+ * Returns array rank.
+ */
+@compiler.native {ndarray.array.rank}
+pub rank(array: Array): Int ->
+    native.
+
+/**
+ * Copies array shape into a Terlan list.
+ */
+@compiler.native {ndarray.array.shape}
+pub shape(array: Array): List[Int] ->
+    native.
+
+/**
+ * Returns logical element count.
+ */
+@compiler.native {ndarray.array.numel}
+pub numel(array: Array): Int ->
+    native.
+
+/**
+ * Copies the array's logical element strides, including zero and negative view strides.
+ */
+@compiler.native {ndarray.array.strides}
+pub strides(array: Array): List[Int] ->
+    native.
+
+/**
+ * Returns the checked byte count of the logical array elements.
+ */
+@compiler.native {ndarray.array.byte_count}
+pub byte_count(array: Array): Int ->
+    native.
+
+/**
+ * Returns the ABI-v1 dtype code.
+ */
+@compiler.native {ndarray.array.dtype_code}
+pub dtype_code(array: Array): Int ->
+    native.
+
+/**
+ * Returns one when the current view is canonical C-contiguous.
+ */
+@compiler.native {ndarray.array.contiguous_code}
+pub contiguous_code(array: Array): Int ->
+    native.
+
+/**
+ * Returns one when the current view is Fortran-contiguous.
+ */
+@compiler.native {ndarray.array.fortran_contiguous_code}
+pub fortran_contiguous_code(array: Array): Int ->
+    native.
+
+/**
+ * Returns the ABI-v1 CPU device code.
+ */
+@compiler.native {ndarray.array.device_type_code}
+pub device_type_code(array: Array): Int ->
+    native.
+
+/**
+ * Returns an owned copy of Bool values.
+ */
+@compiler.native {ndarray.array.to_bools}
+pub to_bools(array: Array): List[Bool] ->
+    native.
+
+/**
+ * Returns an owned copy of Int64 values.
+ */
+@compiler.native {ndarray.array.to_ints}
+pub to_ints(array: Array): List[Int] ->
+    native.
+
+/**
+ * Returns an owned copy of Float64 values.
+ */
+@compiler.native {ndarray.array.to_floats}
+pub to_floats(array: Array): List[Float] ->
+    native.
+
+/**
+ * Returns checked integral values from any exactly representable non-complex dtype.
+ */
+@compiler.native {ndarray.array.to_ints_cast}
+pub to_ints_cast(array: Array): List[Int] ->
+    native.
+
+/**
+ * Returns real values converted to Terlan Float from any non-complex dtype.
+ */
+@compiler.native {ndarray.array.to_floats_cast}
+pub to_floats_cast(array: Array): List[Float] ->
+    native.
+
+/**
+ * Returns the real components of a complex array.
+ */
+@compiler.native {ndarray.array.complex_reals}
+pub complex_reals(array: Array): List[Float] ->
+    native.
+
+/**
+ * Returns the imaginary components of a complex array.
+ */
+@compiler.native {ndarray.array.complex_imags}
+pub complex_imags(array: Array): List[Float] ->
+    native.
+
+/**
+ * Returns a shared reshape view when possible and otherwise a contiguous materialization.
+ */
+@compiler.native {ndarray.array.reshape}
+pub reshape(array: Array, shape: List[Int]): Array ->
+    native.
+
+/**
+ * Reshapes using explicit C, Fortran, or input-compatible traversal order.
+ */
+@compiler.native {ndarray.array.reshape_ordered}
+pub reshape(array: Array, shape: List[Int], order: Int): Array ->
+    native.
+
+/**
+ * Resizes a uniquely owned contiguous array in place, preserving its flattened prefix and zero-initializing growth.
+ */
+@compiler.native {ndarray.array.resize_in_place}
+pub resize_in_place(array: Array, shape: List[Int]): Unit ->
+    native.
+
+/**
+ * Returns a shared strided view with two normalized axes exchanged.
+ */
+@compiler.native {ndarray.array.transpose}
+pub transpose(array: Array, axis_a: Int, axis_b: Int): Array ->
+    native.
+
+/**
+ * Returns an independently owned copy preserving source-compatible memory order.
+ */
+@compiler.native {ndarray.array.copy}
+pub copy(array: Array): Array ->
+    native.
+
+/**
+ * Returns an independently owned copy using C, Fortran, or source-compatible memory order.
+ */
+@compiler.native {ndarray.array.copy_ordered}
+pub copy(array: Array, order: Int): Array ->
+    native.
+
+/**
+ * Returns a checked C-contiguous conversion to the requested dtype code.
+ */
+@compiler.native {ndarray.array.astype}
+pub astype(array: Array, dtype: Int): Array ->
+    native.
+
+/**
+ * Converts dtype under explicit NumPy-compatible order, copy, and casting rules.
+ */
+@compiler.native {ndarray.array.astype_ordered}
+pub astype(array: Array, dtype: Int, order: Int, copy: Bool, casting: Int): Array ->
+    native.
+
+/**
+ * Materializes the logical array into independently owned C-contiguous storage.
+ */
+@compiler.native {ndarray.array.contiguous}
+pub contiguous(array: Array): Array ->
+    native.
+
+/**
+ * Returns a shared view with one axis selected and removed; negative axes and indexes are normalized.
+ */
+@compiler.native {ndarray.array.index_axis}
+pub index_axis(array: Array, axis: Int, index: Int): Array ->
+    native.
+
+/**
+ * Returns a shared basic-slice view; the minimum Int value denotes an omitted start or stop.
+ */
+@compiler.native {ndarray.array.slice_axis}
+pub slice_axis(array: Array, axis: Int, start: Int, stop: Int, step: Int): Array ->
+    native.
+
+/**
+ * Returns a shared view using a complete normalized axis permutation.
+ */
+@compiler.native {ndarray.array.permute}
+pub permute(array: Array, axes: List[Int]): Array ->
+    native.
+
+/**
+ * Copies normalized integer selections along one axis, preserving duplicate indexes and order.
+ */
+@compiler.native {ndarray.array.take}
+pub take(array: Array, indices: List[Int], axis: Int): Array ->
+    native.
+
+/**
+ * Copies integer selections using raise, wrap, or clip index normalization.
+ */
+@compiler.native {ndarray.array.take_mode}
+pub take_mode(array: Array, indices: List[Int], axis: Int, mode: Int): Array ->
+    native.
+
+/**
+ * Takes one Int64 index at every output coordinate along a normalized axis.
+ */
+@compiler.native {ndarray.array.take_along_axis}
+pub take_along_axis(array: Array, indices: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Assigns scalar or matching values at normalized flattened indexes in order.
+ */
+@compiler.native {ndarray.array.put}
+pub put(array: Array, indices: List[Int], values: Array): Unit ->
+    native.
+
+/**
+ * Assigns scalar or shape-matched values using one Int64 index at each coordinate.
+ */
+@compiler.native {ndarray.array.put_along_axis}
+pub put_along_axis(array: Array, indices: Array, values: Array, axis: Int): Unit ->
+    native.
+
+/**
+ * Selects axis entries using a rank-one Bool mask, truncating the axis to the mask length.
+ */
+@compiler.native {ndarray.array.compress}
+pub compress(array: Array, mask: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Selects flattened logical values using a rank-one Bool mask, truncating to the mask length.
+ */
+@compiler.native {ndarray.array.compress_flat}
+pub compress_flat(array: Array, mask: Array): Array ->
+    native.
+
+/**
+ * Returns flattened values selected by an exact-shape Bool mask.
+ */
+@compiler.native {ndarray.array.mask_select}
+pub mask_select(array: Array, mask: Array): Array ->
+    native.
+
+/**
+ * Assigns scalar or matching values where an exact-shape Bool mask is true.
+ */
+@compiler.native {ndarray.array.mask_assign}
+pub mask_assign(array: Array, mask: Array, values: Array): Unit ->
+    native.
+
+/**
+ * Gathers flattened values from an Int64 coordinate matrix shaped [count, rank].
+ */
+@compiler.native {ndarray.array.gather_coordinates}
+pub gather_coordinates(array: Array, coordinates: Array): Array ->
+    native.
+
+/**
+ * Atomically assigns scalar or matching values through an Int64 coordinate matrix shaped [count, rank].
+ */
+@compiler.native {ndarray.array.put_coordinates}
+pub put_coordinates(array: Array, coordinates: Array, values: Array): Unit ->
+    native.
+
+/**
+ * Returns the truth value of an array containing exactly one element.
+ */
+@compiler.native {ndarray.array.item_bool}
+pub item_bool(array: Array): Bool ->
+    native.
+
+/**
+ * Returns a truncated Int from an array containing exactly one real element.
+ */
+@compiler.native {ndarray.array.item_int}
+pub item_int(array: Array): Int ->
+    native.
+
+/**
+ * Returns one Bool element after normalizing a complete index tuple.
+ */
+@compiler.native {ndarray.array.get_bool}
+pub get_bool(array: Array, indices: List[Int]): Bool ->
+    native.
+
+/**
+ * Returns one Int64 element after normalizing a complete index tuple.
+ */
+@compiler.native {ndarray.array.get_int}
+pub get_int(array: Array, indices: List[Int]): Int ->
+    native.
+
+/**
+ * Returns one Float64 element after normalizing a complete index tuple.
+ */
+@compiler.native {ndarray.array.get_float}
+pub get_float(array: Array, indices: List[Int]): Float ->
+    native.
+
+/**
+ * Assigns one Bool element through a writable view and makes the mutation visible to its aliases.
+ */
+@compiler.native {ndarray.array.set_bool}
+pub set_bool(array: Array, indices: List[Int], value: Bool): Unit ->
+    native.
+
+/**
+ * Assigns one Int64 element through a writable view and makes the mutation visible to its aliases.
+ */
+@compiler.native {ndarray.array.set_int}
+pub set_int(array: Array, indices: List[Int], value: Int): Unit ->
+    native.
+
+/**
+ * Assigns one Float64 element through a writable view and makes the mutation visible to its aliases.
+ */
+@compiler.native {ndarray.array.set_float}
+pub set_float(array: Array, indices: List[Int], value: Float): Unit ->
+    native.
+
+/**
+ * Adds broadcast-compatible numeric arrays with canonical dtype promotion.
+ */
+@compiler.native {ndarray.array.add}
+pub add(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Subtracts broadcast-compatible numeric arrays with canonical dtype promotion.
+ */
+@compiler.native {ndarray.array.subtract}
+pub subtract(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Multiplies broadcast-compatible numeric arrays with canonical dtype promotion.
+ */
+@compiler.native {ndarray.array.multiply}
+pub multiply(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Performs vector, matrix, and broadcast-batched matrix multiplication with numeric dtype promotion.
+ */
+@compiler.native {ndarray.array.matmul}
+pub matmul(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Computes NumPy-compatible scalar multiplication, vector inner products, and generalized array dot products.
+ */
+@compiler.native {ndarray.array.dot}
+pub dot(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Contracts the final dimensions of two arrays without conjugation.
+ */
+@compiler.native {ndarray.array.inner}
+pub inner(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Computes the outer product of the flattened inputs.
+ */
+@compiler.native {ndarray.array.outer}
+pub outer(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Flattens both inputs and computes their conjugating vector dot product.
+ */
+@compiler.native {ndarray.array.vdot}
+pub vdot(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Sums a selected diagonal over two distinct axes.
+ */
+@compiler.native {ndarray.array.trace}
+pub trace(array: Array, offset: Int, axis_a: Int, axis_b: Int): Array ->
+    native.
+
+/**
+ * Computes a finite real square matrix determinant through maintained faer factorization.
+ */
+@compiler.native {ndarray.array.determinant}
+pub determinant(array: Array): Float ->
+    native.
+
+/**
+ * Solves a finite real square system for a vector or matrix right-hand side through maintained faer factorization.
+ */
+@compiler.native {ndarray.array.solve}
+pub solve(matrix: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Computes a finite real square matrix inverse by solving against identity through maintained faer factorization.
+ */
+@compiler.native {ndarray.array.inverse}
+pub inverse(matrix: Array): Array ->
+    native.
+
+/**
+ * Computes a vector one-norm or matrix induced one-norm.
+ */
+@compiler.native {ndarray.array.norm_l1}
+pub norm_l1(array: Array): Float ->
+    native.
+
+/**
+ * Computes a vector Euclidean norm or matrix spectral norm.
+ */
+@compiler.native {ndarray.array.norm_l2}
+pub norm_l2(array: Array): Float ->
+    native.
+
+/**
+ * Computes a vector maximum norm or matrix induced infinity norm.
+ */
+@compiler.native {ndarray.array.norm_max}
+pub norm_max(array: Array): Float ->
+    native.
+
+/**
+ * Computes a vector Euclidean norm or matrix Frobenius norm.
+ */
+@compiler.native {ndarray.array.frobenius_norm}
+pub frobenius_norm(array: Array): Float ->
+    native.
+
+/**
+ * Computes the nuclear norm of a finite real matrix.
+ */
+@compiler.native {ndarray.array.nuclear_norm}
+pub nuclear_norm(array: Array): Float ->
+    native.
+
+/**
+ * Computes numerical matrix rank; zero tolerance selects the deterministic default.
+ */
+@compiler.native {ndarray.array.matrix_rank}
+pub matrix_rank(array: Array, tolerance: Float): Int ->
+    native.
+
+/**
+ * Encodes an array as deterministic NumPy .npy bytes.
+ */
+@compiler.native {ndarray.array.to_npy}
+pub to_npy(array: Array): Bytes ->
+    native.
+
+/**
+ * Decodes bounded NumPy .npy bytes into an owned CPU array.
+ */
+@compiler.native {ndarray.array.from_npy}
+pub from_npy(bytes: Bytes, maximum: Int): Array ->
+    native.
+
+/**
+ * Saves an array to an exact filesystem path in deterministic NumPy .npy format.
+ */
+@compiler.native {ndarray.array.save_npy}
+pub save_npy(array: Array, path: String): Unit ->
+    native.
+
+/**
+ * Loads a bounded NumPy .npy file from an exact filesystem path.
+ */
+@compiler.native {ndarray.array.load_npy}
+pub load_npy(path: String, maximum: Int): Array ->
+    native.
+
+/**
+ * Encodes an array as a versioned checksummed package-native packet.
+ */
+@compiler.native {ndarray.array.serialize}
+pub serialize(array: Array): Bytes ->
+    native.
+
+/**
+ * Decodes a bounded checksummed package-native packet into an owned CPU array.
+ */
+@compiler.native {ndarray.array.deserialize}
+pub deserialize(bytes: Bytes, maximum: Int): Array ->
+    native.
+
+/**
+ * Opens a bounded NumPy file as a read-only or read-write memory-backed array.
+ */
+@compiler.native {ndarray.array.mmap_npy}
+pub mmap_npy(path: String, writable: Bool, maximum: Int): Array ->
+    native.
+
+/**
+ * Flushes writable memory-backed storage and is a no-op for ordinary or read-only arrays.
+ */
+@compiler.native {ndarray.array.flush}
+pub flush(array: Array): Unit ->
+    native.
+
+/**
+ * Exports a compatible primitive array through official Arrow C Data ownership callbacks.
+ */
+@compiler.native {ndarray.array.to_arrow}
+pub to_arrow(array: Array): ArrowArray ->
+    native.
+
+/**
+ * Imports one package-owned non-null Arrow C Data export as an owned array.
+ */
+@compiler.native {ndarray.array.from_arrow}
+pub from_arrow(arrow: ArrowArray): Array ->
+    native.
+
+/**
+ * Splits an axis into equally sized shared views.
+ */
+@compiler.native {ndarray.array.split}
+pub split(array: Array, sections: Int, axis: Int): List[Array] ->
+    native.
+
+/**
+ * Splits an axis into uneven shared views with larger leading sections.
+ */
+@compiler.native {ndarray.array.array_split}
+pub array_split(array: Array, sections: Int, axis: Int): List[Array] ->
+    native.
+
+/**
+ * Splits an axis before each normalized index and preserves empty sections.
+ */
+@compiler.native {ndarray.array.split_at}
+pub split_at(array: Array, indices: List[Int], axis: Int): List[Array] ->
+    native.
+
+/**
+ * Counts truthy values across the flattened array.
+ */
+@compiler.native {ndarray.array.count_nonzero}
+pub count_nonzero(array: Array): Int ->
+    native.
+
+/**
+ * Counts nonzero elements over normalized axes with optional retained dimensions.
+ */
+@compiler.native {ndarray.array.count_nonzero_axes}
+pub count_nonzero_axes(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns flattened indexes of truthy values as Int64.
+ */
+@compiler.native {ndarray.array.flatnonzero}
+pub flatnonzero(array: Array): Array ->
+    native.
+
+/**
+ * Returns one coordinate row for every truthy value.
+ */
+@compiler.native {ndarray.array.argwhere}
+pub argwhere(array: Array): Array ->
+    native.
+
+/**
+ * Returns one Int64 coordinate array per source axis.
+ */
+@compiler.native {ndarray.array.nonzero}
+pub nonzero(array: Array): List[Array] ->
+    native.
+
+/**
+ * Returns a shared view with one singleton axis inserted.
+ */
+@compiler.native {ndarray.array.expand_dims}
+pub expand_dims(array: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Returns a shared view with singleton axes inserted at final output positions.
+ */
+@compiler.native {ndarray.array.expand_dims_axes}
+pub expand_dims(array: Array, axes: List[Int]): Array ->
+    native.
+
+/**
+ * Returns a shared view with selected singleton axes removed; an empty list removes all singleton axes.
+ */
+@compiler.native {ndarray.array.squeeze}
+pub squeeze(array: Array, axes: List[Int]): Array ->
+    native.
+
+/**
+ * Returns a shared negative-stride view with selected axes reversed.
+ */
+@compiler.native {ndarray.array.flip}
+pub flip(array: Array, axes: List[Int]): Array ->
+    native.
+
+/**
+ * Returns an owned array cyclically shifted along one axis.
+ */
+@compiler.native {ndarray.array.roll}
+pub roll(array: Array, shift: Int, axis: Int): Array ->
+    native.
+
+/**
+ * Returns an owned array cyclically shifted after flattening in logical row-major order.
+ */
+@compiler.native {ndarray.array.roll_flat}
+pub roll(array: Array, shift: Int): Array ->
+    native.
+
+/**
+ * Returns an owned array shifted by the same amount along every selected axis.
+ */
+@compiler.native {ndarray.array.roll_axes_by}
+pub roll(array: Array, shift: Int, axes: List[Int]): Array ->
+    native.
+
+/**
+ * Returns an owned array shifted along selected axes using one broadcast shift or one shift per axis.
+ */
+@compiler.native {ndarray.array.roll_axes}
+pub roll(array: Array, shifts: List[Int], axes: List[Int]): Array ->
+    native.
+
+/**
+ * Repeats each element a non-negative number of times along one axis.
+ */
+@compiler.native {ndarray.array.repeat}
+pub repeat(array: Array, repeats: Int, axis: Int): Array ->
+    native.
+
+/**
+ * Repeats axis entries using one broadcast count or one count per source entry.
+ */
+@compiler.native {ndarray.array.repeat_counts}
+pub repeat_counts(array: Array, repeats: List[Int], axis: Int): Array ->
+    native.
+
+/**
+ * Flattens in logical C order and repeats entries using broadcast or per-entry counts.
+ */
+@compiler.native {ndarray.array.repeat_flat}
+pub repeat_flat(array: Array, repeats: List[Int]): Array ->
+    native.
+
+/**
+ * Tiles an array according to trailing-axis repetition counts.
+ */
+@compiler.native {ndarray.array.tile}
+pub tile(array: Array, repetitions: List[Int]): Array ->
+    native.
+
+/**
+ * Concatenates a nonempty list of shape-compatible arrays with canonical dtype promotion.
+ */
+@compiler.native {ndarray.array.concatenate}
+pub concatenate(arrays: List[Array], axis: Int): Array ->
+    native.
+
+/**
+ * Stacks a nonempty list of equal-shape arrays with canonical dtype promotion.
+ */
+@compiler.native {ndarray.array.stack}
+pub stack(arrays: List[Array], axis: Int): Array ->
+    native.
+
+/**
+ * Returns an axis-wise stable ascending copy using deterministic NaN and complex ordering.
+ */
+@compiler.native {ndarray.array.sort}
+pub sort(array: Array, axis: Int = -1): Array ->
+    native.
+
+/**
+ * Returns stable Int64 indices that order each axis slice ascending.
+ */
+@compiler.native {ndarray.array.argsort}
+pub argsort(array: Array, axis: Int = -1): Array ->
+    native.
+
+/**
+ * Returns an ascending axis-wise copy without preserving equal-value order.
+ */
+@compiler.native {ndarray.array.sort_unstable}
+pub sort_unstable(array: Array, axis: Int = -1): Array ->
+    native.
+
+/**
+ * Returns ascending Int64 indexes without preserving equal-value order.
+ */
+@compiler.native {ndarray.array.argsort_unstable}
+pub argsort_unstable(array: Array, axis: Int = -1): Array ->
+    native.
+
+/**
+ * Returns a stable ascending one-dimensional copy.
+ */
+@compiler.native {ndarray.array.sort_flat}
+pub sort_flat(array: Array): Array ->
+    native.
+
+/**
+ * Returns stable Int64 indices ordering the flattened array.
+ */
+@compiler.native {ndarray.array.argsort_flat}
+pub argsort_flat(array: Array): Array ->
+    native.
+
+/**
+ * Sorts a writable array in place along one axis.
+ */
+@compiler.native {ndarray.array.sort_inplace}
+pub sort_inplace(array: Array, axis: Int = -1): Unit ->
+    native.
+
+/**
+ * Returns an axis-wise copy satisfying the selected kth partition postcondition.
+ */
+@compiler.native {ndarray.array.partition}
+pub partition(array: Array, kth: Int, axis: Int = -1): Array ->
+    native.
+
+/**
+ * Returns Int64 indexes satisfying the selected kth partition postcondition.
+ */
+@compiler.native {ndarray.array.argpartition}
+pub argpartition(array: Array, kth: Int, axis: Int = -1): Array ->
+    native.
+
+/**
+ * Returns an axis-wise partition for every integer position in kths without mutating either input.
+ */
+@compiler.native {ndarray.array.partition_kths}
+pub partition(array: Array, kths: Array, axis: Int = -1): Array ->
+    native.
+
+/**
+ * Returns Int64 indexes satisfying every integer position in kths.
+ */
+@compiler.native {ndarray.array.argpartition_kths}
+pub argpartition(array: Array, kths: Array, axis: Int = -1): Array ->
+    native.
+
+/**
+ * Returns a flattened partitioned copy for one selected position.
+ */
+@compiler.native {ndarray.array.partition_flat}
+pub partition_flat(array: Array, kth: Int): Array ->
+    native.
+
+/**
+ * Returns flattened Int64 indexes satisfying one selected partition position.
+ */
+@compiler.native {ndarray.array.argpartition_flat}
+pub argpartition_flat(array: Array, kth: Int): Array ->
+    native.
+
+/**
+ * Returns a flattened partitioned copy for every integer position in kths.
+ */
+@compiler.native {ndarray.array.partition_kths_flat}
+pub partition_flat(array: Array, kths: Array): Array ->
+    native.
+
+/**
+ * Returns flattened Int64 indexes satisfying every integer position in kths.
+ */
+@compiler.native {ndarray.array.argpartition_kths_flat}
+pub argpartition_flat(array: Array, kths: Array): Array ->
+    native.
+
+/**
+ * Partitions a writable array in place along one axis for one selected position.
+ */
+@compiler.native {ndarray.array.partition_inplace}
+pub partition_inplace(array: Array, kth: Int, axis: Int = -1): Unit ->
+    native.
+
+/**
+ * Partitions a writable array in place along one axis for every integer position in kths.
+ */
+@compiler.native {ndarray.array.partition_kths_inplace}
+pub partition_inplace(array: Array, kths: Array, axis: Int = -1): Unit ->
+    native.
+
+/**
+ * Returns a read-only zero-stride view broadcast to a compatible shape.
+ */
+@compiler.native {ndarray.array.broadcast_to}
+pub broadcast_to(array: Array, shape: List[Int]): Array ->
+    native.
+
+/**
+ * Divides broadcast-compatible arrays using NumPy dtype promotion.
+ */
+@compiler.native {ndarray.array.true_divide}
+pub true_divide(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Floor-divides broadcast-compatible real arrays.
+ */
+@compiler.native {ndarray.array.floor_divide}
+pub floor_divide(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns the NumPy-sign remainder of broadcast-compatible real arrays.
+ */
+@compiler.native {ndarray.array.remainder}
+pub remainder(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Raises broadcast-compatible arrays elementwise.
+ */
+@compiler.native {ndarray.array.power}
+pub power(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Selects broadcasted minima while propagating NaN values.
+ */
+@compiler.native {ndarray.array.elementwise_minimum}
+pub elementwise_minimum(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Selects broadcasted maxima while propagating NaN values.
+ */
+@compiler.native {ndarray.array.elementwise_maximum}
+pub elementwise_maximum(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Selects broadcasted minima while preferring a non-NaN operand.
+ */
+@compiler.native {ndarray.array.fmin}
+pub fmin(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Selects broadcasted maxima while preferring a non-NaN operand.
+ */
+@compiler.native {ndarray.array.fmax}
+pub fmax(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Clips values through broadcast-compatible lower and upper arrays.
+ */
+@compiler.native {ndarray.array.clip}
+pub clip(array: Array, minimum: Array, maximum: Array): Array ->
+    native.
+
+/**
+ * Clips values through a broadcast-compatible lower bound.
+ */
+@compiler.native {ndarray.array.clip_lower}
+pub clip_lower(array: Array, minimum: Array): Array ->
+    native.
+
+/**
+ * Clips values through a broadcast-compatible upper bound.
+ */
+@compiler.native {ndarray.array.clip_upper}
+pub clip_upper(array: Array, maximum: Array): Array ->
+    native.
+
+/**
+ * Clips into a writable destination after complete shape and cast validation.
+ */
+@compiler.native {ndarray.array.clip_into}
+pub clip_into(destination: Array, array: Array, minimum: Array, maximum: Array): Unit ->
+    native.
+
+/**
+ * Clips a lower bound into a writable destination after complete validation.
+ */
+@compiler.native {ndarray.array.clip_lower_into}
+pub clip_lower_into(destination: Array, array: Array, minimum: Array): Unit ->
+    native.
+
+/**
+ * Clips an upper bound into a writable destination after complete validation.
+ */
+@compiler.native {ndarray.array.clip_upper_into}
+pub clip_upper_into(destination: Array, array: Array, maximum: Array): Unit ->
+    native.
+
+/**
+ * Clips an array in place after complete validation.
+ */
+@compiler.native {ndarray.array.clip_inplace}
+pub clip_inplace(array: Array, minimum: Array, maximum: Array): Unit ->
+    native.
+
+/**
+ * Applies a lower bound to an array in place after complete validation.
+ */
+@compiler.native {ndarray.array.clip_lower_inplace}
+pub clip_lower_inplace(array: Array, minimum: Array): Unit ->
+    native.
+
+/**
+ * Applies an upper bound to an array in place after complete validation.
+ */
+@compiler.native {ndarray.array.clip_upper_inplace}
+pub clip_upper_inplace(array: Array, maximum: Array): Unit ->
+    native.
+
+/**
+ * Compares broadcast-compatible arrays for equality.
+ */
+@compiler.native {ndarray.array.equal}
+pub equal(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Compares broadcast-compatible arrays for inequality.
+ */
+@compiler.native {ndarray.array.not_equal}
+pub not_equal(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Compares broadcast-compatible real arrays with less-than.
+ */
+@compiler.native {ndarray.array.less}
+pub less(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Compares broadcast-compatible real arrays with less-than-or-equal.
+ */
+@compiler.native {ndarray.array.less_equal}
+pub less_equal(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Compares broadcast-compatible real arrays with greater-than.
+ */
+@compiler.native {ndarray.array.greater}
+pub greater(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Compares broadcast-compatible real arrays with greater-than-or-equal.
+ */
+@compiler.native {ndarray.array.greater_equal}
+pub greater_equal(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Computes elementwise truth-value conjunction with broadcasting.
+ */
+@compiler.native {ndarray.array.logical_and}
+pub logical_and(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Computes elementwise truth-value disjunction with broadcasting.
+ */
+@compiler.native {ndarray.array.logical_or}
+pub logical_or(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Computes elementwise truth-value exclusive disjunction with broadcasting.
+ */
+@compiler.native {ndarray.array.logical_xor}
+pub logical_xor(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Computes broadcast-compatible integer bitwise conjunction.
+ */
+@compiler.native {ndarray.array.bitwise_and}
+pub bitwise_and(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Computes broadcast-compatible integer bitwise disjunction.
+ */
+@compiler.native {ndarray.array.bitwise_or}
+pub bitwise_or(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Computes broadcast-compatible integer bitwise exclusive disjunction.
+ */
+@compiler.native {ndarray.array.bitwise_xor}
+pub bitwise_xor(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Shifts integer values left by validated elementwise counts.
+ */
+@compiler.native {ndarray.array.left_shift}
+pub left_shift(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Shifts integer values right by validated elementwise counts.
+ */
+@compiler.native {ndarray.array.right_shift}
+pub right_shift(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns elementwise non-negative greatest common divisors.
+ */
+@compiler.native {ndarray.array.gcd}
+pub gcd(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns checked elementwise least common multiples.
+ */
+@compiler.native {ndarray.array.lcm}
+pub lcm(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns stable elementwise Euclidean magnitudes.
+ */
+@compiler.native {ndarray.array.hypot}
+pub hypot(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns signed elementwise angles from y and x components.
+ */
+@compiler.native {ndarray.array.arctan2}
+pub arctan2(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Computes stable elementwise logarithms of summed exponentials.
+ */
+@compiler.native {ndarray.array.logaddexp}
+pub logaddexp(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Computes stable base-two logarithms of summed powers of two.
+ */
+@compiler.native {ndarray.array.logaddexp2}
+pub logaddexp2(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Copies elementwise floating signs from the second operand.
+ */
+@compiler.native {ndarray.array.copysign}
+pub copysign(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns the next representable values toward the second operand.
+ */
+@compiler.native {ndarray.array.nextafter}
+pub nextafter(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns a broadcast-compatible tolerance-comparison Bool mask.
+ */
+@compiler.native {ndarray.array.is_close}
+pub is_close(
+    lhs: Array,
+    rhs: Array,
+    relative_tolerance: Float,
+    absolute_tolerance: Float,
+    equal_nan: Bool,
+): Array ->
+    native.
+
+/**
+ * Selects promoted branch values through a broadcast-compatible truth-value condition.
+ */
+@compiler.native {ndarray.array.select_where}
+pub select_where(mask: Array, selected: Array, rejected: Array): Array ->
+    native.
+
+/**
+ * Negates every numerical element.
+ */
+@compiler.native {ndarray.array.negative}
+pub negative(array: Array): Array ->
+    native.
+
+/**
+ * Returns an owned numerical copy while rejecting Bool input.
+ */
+@compiler.native {ndarray.array.positive}
+pub positive(array: Array): Array ->
+    native.
+
+/**
+ * Returns elementwise magnitude, using real output for complex arrays.
+ */
+@compiler.native {ndarray.array.absolute}
+pub absolute(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise numerical sign.
+ */
+@compiler.native {ndarray.array.sign}
+pub sign(array: Array): Array ->
+    native.
+
+/**
+ * Squares every numerical element.
+ */
+@compiler.native {ndarray.array.square}
+pub square(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise principal square root.
+ */
+@compiler.native {ndarray.array.sqrt}
+pub sqrt(array: Array): Array ->
+    native.
+
+/**
+ * Returns one divided by each nonzero element.
+ */
+@compiler.native {ndarray.array.reciprocal}
+pub reciprocal(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise exponential.
+ */
+@compiler.native {ndarray.array.exp}
+pub exp(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise exponential minus one.
+ */
+@compiler.native {ndarray.array.expm1}
+pub expm1(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise natural logarithm.
+ */
+@compiler.native {ndarray.array.log}
+pub log(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise natural logarithm of one plus each value.
+ */
+@compiler.native {ndarray.array.log1p}
+pub log1p(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise base-two logarithm.
+ */
+@compiler.native {ndarray.array.log2}
+pub log2(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise base-ten logarithm.
+ */
+@compiler.native {ndarray.array.log10}
+pub log10(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise hyperbolic sine.
+ */
+@compiler.native {ndarray.array.sinh}
+pub sinh(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise hyperbolic cosine.
+ */
+@compiler.native {ndarray.array.cosh}
+pub cosh(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise hyperbolic tangent.
+ */
+@compiler.native {ndarray.array.tanh}
+pub tanh(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise inverse sine.
+ */
+@compiler.native {ndarray.array.arcsin}
+pub arcsin(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise inverse cosine.
+ */
+@compiler.native {ndarray.array.arccos}
+pub arccos(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise inverse tangent.
+ */
+@compiler.native {ndarray.array.arctan}
+pub arctan(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise inverse hyperbolic sine.
+ */
+@compiler.native {ndarray.array.arcsinh}
+pub arcsinh(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise inverse hyperbolic cosine.
+ */
+@compiler.native {ndarray.array.arccosh}
+pub arccosh(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise inverse hyperbolic tangent.
+ */
+@compiler.native {ndarray.array.arctanh}
+pub arctanh(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise sine.
+ */
+@compiler.native {ndarray.array.sin}
+pub sin(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise cosine.
+ */
+@compiler.native {ndarray.array.cos}
+pub cos(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise tangent.
+ */
+@compiler.native {ndarray.array.tan}
+pub tan(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise floor for real arrays.
+ */
+@compiler.native {ndarray.array.floor}
+pub floor(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise ceiling for real arrays.
+ */
+@compiler.native {ndarray.array.ceil}
+pub ceil(array: Array): Array ->
+    native.
+
+/**
+ * Rounds every element to the nearest even value.
+ */
+@compiler.native {ndarray.array.round}
+pub round(array: Array): Array ->
+    native.
+
+/**
+ * Returns elementwise truth-value negation.
+ */
+@compiler.native {ndarray.array.logical_not}
+pub logical_not(array: Array): Array ->
+    native.
+
+/**
+ * Returns a Bool mask identifying NaN components.
+ */
+@compiler.native {ndarray.array.is_nan}
+pub is_nan(array: Array): Array ->
+    native.
+
+/**
+ * Returns a Bool mask identifying infinite components.
+ */
+@compiler.native {ndarray.array.is_infinite}
+pub is_infinite(array: Array): Array ->
+    native.
+
+/**
+ * Returns a Bool mask identifying values with finite components.
+ */
+@compiler.native {ndarray.array.is_finite}
+pub is_finite(array: Array): Array ->
+    native.
+
+/**
+ * Returns the elementwise complex conjugate.
+ */
+@compiler.native {ndarray.array.conjugate}
+pub conjugate(array: Array): Array ->
+    native.
+
+/**
+ * Returns two raised to each element.
+ */
+@compiler.native {ndarray.array.exp2}
+pub exp2(array: Array): Array ->
+    native.
+
+/**
+ * Returns real elementwise cube roots.
+ */
+@compiler.native {ndarray.array.cbrt}
+pub cbrt(array: Array): Array ->
+    native.
+
+/**
+ * Converts real angles from radians to degrees.
+ */
+@compiler.native {ndarray.array.degrees}
+pub degrees(array: Array): Array ->
+    native.
+
+/**
+ * Converts real angles from degrees to radians.
+ */
+@compiler.native {ndarray.array.radians}
+pub radians(array: Array): Array ->
+    native.
+
+/**
+ * Returns a Bool mask preserving negative-zero sign bits.
+ */
+@compiler.native {ndarray.array.sign_bit}
+pub sign_bit(array: Array): Array ->
+    native.
+
+/**
+ * Returns mantissa and integer-exponent arrays.
+ */
+@compiler.native {ndarray.array.frexp_all}
+pub frexp_all(array: Array): List[Array] ->
+    native.
+
+/**
+ * Returns fractional and integral-part arrays.
+ */
+@compiler.native {ndarray.array.modf_all}
+pub modf_all(array: Array): List[Array] ->
+    native.
+
+/**
+ * Reduces normalized axes; an empty axis list reduces all axes.
+ */
+@compiler.native {ndarray.array.sum}
+pub sum(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces normalized axes using NumPy-compatible product semantics.
+ */
+@compiler.native {ndarray.array.product}
+pub product(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces normalized axes using NumPy-compatible mean semantics.
+ */
+@compiler.native {ndarray.array.mean}
+pub mean(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns means over elements selected by a broadcast-compatible truth mask.
+ */
+@compiler.native {ndarray.array.mean_where}
+pub mean_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns means using an explicit result dtype.
+ */
+@compiler.native {ndarray.array.mean_as}
+pub mean_as(array: Array, axes: List[Int], keep_dims: Int, dtype: Int): Array ->
+    native.
+
+/**
+ * Writes means into an exactly shaped writable destination.
+ */
+@compiler.native {ndarray.array.mean_into}
+pub mean_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit ->
+    native.
+
+/**
+ * Reduces normalized axes using NumPy-compatible minimum semantics.
+ */
+@compiler.native {ndarray.array.minimum}
+pub minimum(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces normalized axes using NumPy-compatible maximum semantics.
+ */
+@compiler.native {ndarray.array.maximum}
+pub maximum(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces normalized axes using NumPy-compatible any semantics.
+ */
+@compiler.native {ndarray.array.any}
+pub any(array: Array, axes: List[Int] = [], keep_dims: Bool = false): Array ->
+    native.
+
+/**
+ * Reduces normalized axes using NumPy-compatible all semantics.
+ */
+@compiler.native {ndarray.array.all}
+pub all(array: Array, axes: List[Int] = [], keep_dims: Bool = false): Array ->
+    native.
+
+/**
+ * Reduces normalized axes using NumPy-compatible argmin semantics.
+ */
+@compiler.native {ndarray.array.argmin}
+pub argmin(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces normalized axes using NumPy-compatible argmax semantics.
+ */
+@compiler.native {ndarray.array.argmax}
+pub argmax(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Writes argmin indexes into an exactly shaped writable integer or Bool destination.
+ */
+@compiler.native {ndarray.array.argmin_into}
+pub argmin_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit ->
+    native.
+
+/**
+ * Writes argmax indexes into an exactly shaped writable integer or Bool destination.
+ */
+@compiler.native {ndarray.array.argmax_into}
+pub argmax_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit ->
+    native.
+
+/**
+ * Reduces normalized axes using variance with an explicit non-negative correction.
+ */
+@compiler.native {ndarray.array.variance}
+pub variance(array: Array, axes: List[Int], keep_dims: Int, correction: Int): Array ->
+    native.
+
+/**
+ * Reduces normalized axes using standard deviation with an explicit non-negative correction.
+ */
+@compiler.native {ndarray.array.standard_deviation}
+pub standard_deviation(array: Array, axes: List[Int], keep_dims: Int, correction: Int): Array ->
+    native.
+
+/**
+ * Returns variances over elements selected by a broadcast-compatible truth mask.
+ */
+@compiler.native {ndarray.array.variance_where}
+pub variance_where(
+    array: Array,
+    mask: Array,
+    axes: List[Int],
+    keep_dims: Int,
+    correction: Int,
+): Array ->
+    native.
+
+/**
+ * Returns variances using an explicit result dtype.
+ */
+@compiler.native {ndarray.array.variance_as}
+pub variance_as(array: Array, axes: List[Int], keep_dims: Int, correction: Int, dtype: Int): Array ->
+    native.
+
+/**
+ * Writes variances into an exactly shaped writable destination.
+ */
+@compiler.native {ndarray.array.variance_into}
+pub variance_into(
+    destination: Array,
+    array: Array,
+    axes: List[Int],
+    keep_dims: Int,
+    correction: Int,
+): Unit ->
+    native.
+
+/**
+ * Returns standard deviations over elements selected by a broadcast-compatible truth mask.
+ */
+@compiler.native {ndarray.array.standard_deviation_where}
+pub standard_deviation_where(
+    array: Array,
+    mask: Array,
+    axes: List[Int],
+    keep_dims: Int,
+    correction: Int,
+): Array ->
+    native.
+
+/**
+ * Returns standard deviations using an explicit result dtype.
+ */
+@compiler.native {ndarray.array.standard_deviation_as}
+pub standard_deviation_as(
+    array: Array,
+    axes: List[Int],
+    keep_dims: Int,
+    correction: Int,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Writes standard deviations into an exactly shaped writable destination.
+ */
+@compiler.native {ndarray.array.standard_deviation_into}
+pub standard_deviation_into(
+    destination: Array,
+    array: Array,
+    axes: List[Int],
+    keep_dims: Int,
+    correction: Int,
+): Unit ->
+    native.
+
+/**
+ * Returns the linear-interpolated median across normalized axes.
+ */
+@compiler.native {ndarray.array.median}
+pub median(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns an axis reduction at a unit-interval quantile using an explicit interpolation policy.
+ */
+@compiler.native {ndarray.array.quantile}
+pub quantile(
+    array: Array,
+    quantile: Float,
+    axes: List[Int],
+    keep_dims: Int,
+    interpolation: Int,
+): Array ->
+    native.
+
+/**
+ * Returns an axis reduction at a percentage quantile using an explicit interpolation policy.
+ */
+@compiler.native {ndarray.array.percentile}
+pub percentile(
+    array: Array,
+    percentile: Float,
+    axes: List[Int],
+    keep_dims: Int,
+    interpolation: Int,
+): Array ->
+    native.
+
+/**
+ * Returns multiple unit-interval quantiles with the quantile dimension first.
+ */
+@compiler.native {ndarray.array.quantiles}
+pub quantiles(
+    array: Array,
+    quantiles: List[Float],
+    axes: List[Int],
+    keep_dims: Int,
+    interpolation: Int,
+): Array ->
+    native.
+
+/**
+ * Returns multiple percentage quantiles with the percentile dimension first.
+ */
+@compiler.native {ndarray.array.percentiles}
+pub percentiles(
+    array: Array,
+    percentiles: List[Float],
+    axes: List[Int],
+    keep_dims: Int,
+    interpolation: Int,
+): Array ->
+    native.
+
+/**
+ * Returns the maximum minus minimum across normalized axes.
+ */
+@compiler.native {ndarray.array.peak_to_peak}
+pub peak_to_peak(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns an axis average weighted by a same-shape array or matching rank-one vector.
+ */
+@compiler.native {ndarray.array.weighted_average}
+pub weighted_average(array: Array, weights: Array, axis: Int, keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns a covariance matrix with explicit variable orientation and degrees-of-freedom correction.
+ */
+@compiler.native {ndarray.array.covariance}
+pub covariance(array: Array, row_variables: Int, correction: Int): Array ->
+    native.
+
+/**
+ * Returns the normalized covariance matrix for non-constant variables.
+ */
+@compiler.native {ndarray.array.correlation}
+pub correlation(array: Array, row_variables: Int): Array ->
+    native.
+
+/**
+ * Returns sums while omitting NaN values.
+ */
+@compiler.native {ndarray.array.nan_sum}
+pub nan_sum(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns products while omitting NaN values.
+ */
+@compiler.native {ndarray.array.nan_product}
+pub nan_product(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns means while omitting NaN values.
+ */
+@compiler.native {ndarray.array.nan_mean}
+pub nan_mean(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns minima while omitting NaN values.
+ */
+@compiler.native {ndarray.array.nan_minimum}
+pub nan_minimum(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns maxima while omitting NaN values.
+ */
+@compiler.native {ndarray.array.nan_maximum}
+pub nan_maximum(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns variance while omitting NaN values.
+ */
+@compiler.native {ndarray.array.nan_variance}
+pub nan_variance(array: Array, axes: List[Int], keep_dims: Int, correction: Int): Array ->
+    native.
+
+/**
+ * Returns standard deviation while omitting NaN values.
+ */
+@compiler.native {ndarray.array.nan_standard_deviation}
+pub nan_standard_deviation(array: Array, axes: List[Int], keep_dims: Int, correction: Int): Array ->
+    native.
+
+/**
+ * Counts flattened values into equal-width bins over an explicit finite range.
+ */
+@compiler.native {ndarray.array.histogram}
+pub histogram(array: Array, bins: Int, minimum: Float, maximum: Float): Array ->
+    native.
+
+/**
+ * Returns equal-width Float64 histogram edges for an explicit finite range.
+ */
+@compiler.native {ndarray.array.histogram_bin_edges}
+pub histogram_bin_edges(array: Array, bins: Int, minimum: Float, maximum: Float): Array ->
+    native.
+
+/**
+ * Counts a [sample, dimension] matrix into an equal-width multidimensional histogram.
+ */
+@compiler.native {ndarray.array.histogramdd}
+pub histogramdd(samples: Array, bins: Int, minima: Array, maxima: Array): Array ->
+    native.
+
+/**
+ * Accumulates finite weights by non-negative integer value.
+ */
+@compiler.native {ndarray.array.bincount}
+pub bincount(values: Array, weights: Array, minimum_length: Int): Array ->
+    native.
+
+/**
+ * Returns insertion-bin indexes against strictly increasing rank-one edges.
+ */
+@compiler.native {ndarray.array.digitize}
+pub digitize(values: Array, bins: Array, right: Bool): Array ->
+    native.
+
+/**
+ * Returns repeated forward differences along one normalized axis.
+ */
+@compiler.native {ndarray.array.difference}
+pub difference(array: Array, order: Int, axis: Int): Array ->
+    native.
+
+/**
+ * Returns central interior and first-order edge gradients for uniform spacing.
+ */
+@compiler.native {ndarray.array.gradient}
+pub gradient(array: Array, spacing: Float, axis: Int): Array ->
+    native.
+
+/**
+ * Unwraps real periodic samples along one normalized axis.
+ */
+@compiler.native {ndarray.array.unwrap}
+pub unwrap(array: Array, period: Float, axis: Int): Array ->
+    native.
+
+/**
+ * Linearly interpolates real values over strictly increasing rank-one coordinates.
+ */
+@compiler.native {ndarray.array.interpolate}
+pub interpolate(values: Array, coordinates: Array, samples: Array, left: Float, right: Float): Array ->
+    native.
+
+/**
+ * Integrates along one axis using explicit rank-one coordinates and the trapezoidal rule.
+ */
+@compiler.native {ndarray.array.trapezoidal_integral}
+pub trapezoidal_integral(array: Array, coordinates: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Integrates along one axis using uniform finite spacing and the trapezoidal rule.
+ */
+@compiler.native {ndarray.array.trapezoidal_integral_uniform}
+pub trapezoidal_integral_uniform(array: Array, spacing: Float, axis: Int): Array ->
+    native.
+
+/**
+ * Returns a complex FFT along one normalized axis.
+ */
+@compiler.native {ndarray.array.fft}
+pub fft(array: Array, axis: Int, normalization: Int): Array ->
+    native.
+
+/**
+ * Returns a complex FFT after truncating or zero-padding one normalized axis to an explicit length.
+ */
+@compiler.native {ndarray.array.fft_sized}
+pub fft(array: Array, length: Int, axis: Int, normalization: Int): Array ->
+    native.
+
+/**
+ * Returns an inverse complex FFT along one normalized axis.
+ */
+@compiler.native {ndarray.array.ifft}
+pub ifft(array: Array, axis: Int, normalization: Int): Array ->
+    native.
+
+/**
+ * Returns an inverse complex FFT after truncating or zero-padding one normalized axis to an explicit length.
+ */
+@compiler.native {ndarray.array.ifft_sized}
+pub ifft(array: Array, length: Int, axis: Int, normalization: Int): Array ->
+    native.
+
+/**
+ * Returns complex FFTs across normalized distinct axes.
+ */
+@compiler.native {ndarray.array.fftn}
+pub fftn(array: Array, axes: List[Int], normalization: Int): Array ->
+    native.
+
+/**
+ * Returns inverse complex FFTs across normalized distinct axes.
+ */
+@compiler.native {ndarray.array.ifftn}
+pub ifftn(array: Array, axes: List[Int], normalization: Int): Array ->
+    native.
+
+/**
+ * Returns non-negative bins from a real-input FFT.
+ */
+@compiler.native {ndarray.array.rfft}
+pub rfft(array: Array, axis: Int, normalization: Int): Array ->
+    native.
+
+/**
+ * Returns non-negative bins after truncating or zero-padding a real-input axis to an explicit length.
+ */
+@compiler.native {ndarray.array.rfft_sized}
+pub rfft(array: Array, length: Int, axis: Int, normalization: Int): Array ->
+    native.
+
+/**
+ * Reconstructs a real signal of explicit length from compact frequency bins.
+ */
+@compiler.native {ndarray.array.irfft}
+pub irfft(array: Array, length: Int, axis: Int, normalization: Int): Array ->
+    native.
+
+/**
+ * Returns compact real-input FFTs across normalized distinct axes.
+ */
+@compiler.native {ndarray.array.rfftn}
+pub rfftn(array: Array, axes: List[Int], normalization: Int): Array ->
+    native.
+
+/**
+ * Reconstructs a real array from compact N-dimensional frequency bins.
+ */
+@compiler.native {ndarray.array.irfftn}
+pub irfftn(array: Array, length: Int, axes: List[Int], normalization: Int): Array ->
+    native.
+
+/**
+ * Transforms a compact Hermitian signal to a real spectrum.
+ */
+@compiler.native {ndarray.array.hfft}
+pub hfft(array: Array, length: Int, axis: Int, normalization: Int): Array ->
+    native.
+
+/**
+ * Transforms a real spectrum to a compact Hermitian signal.
+ */
+@compiler.native {ndarray.array.ihfft}
+pub ihfft(array: Array, axis: Int, normalization: Int): Array ->
+    native.
+
+/**
+ * Transforms an explicitly sized real spectrum to a compact Hermitian signal.
+ */
+@compiler.native {ndarray.array.ihfft_sized}
+pub ihfft(array: Array, length: Int, axis: Int, normalization: Int): Array ->
+    native.
+
+/**
+ * Returns signed discrete frequency bins.
+ */
+@compiler.native {ndarray.array.fftfreq}
+pub fftfreq(length: Int, spacing: Float): Array ->
+    native.
+
+/**
+ * Returns non-negative real-transform frequency bins.
+ */
+@compiler.native {ndarray.array.rfftfreq}
+pub rfftfreq(length: Int, spacing: Float): Array ->
+    native.
+
+/**
+ * Moves zero-frequency bins to centered positions on selected axes.
+ */
+@compiler.native {ndarray.array.fftshift}
+pub fftshift(array: Array, axes: List[Int]): Array ->
+    native.
+
+/**
+ * Reverses centered frequency-bin shifts on selected axes.
+ */
+@compiler.native {ndarray.array.ifftshift}
+pub ifftshift(array: Array, axes: List[Int]): Array ->
+    native.
+
+/**
+ * Returns stable left or right insertion indexes into one sorted rank-one array.
+ */
+@compiler.native {ndarray.array.searchsorted}
+pub searchsorted(sorted: Array, values: Array, right: Bool): Array ->
+    native.
+
+/**
+ * Returns insertion indexes using a validated Int64 permutation of an unsorted rank-one array.
+ */
+@compiler.native {ndarray.array.searchsorted_with_sorter}
+pub searchsorted_with_sorter(array: Array, values: Array, sorter: Array, right: Bool): Array ->
+    native.
+
+/**
+ * Returns stable lexicographic indexes for a [key_count, item_count] matrix using the final key as primary.
+ */
+@compiler.native {ndarray.array.lexsort_keys}
+pub lexsort_keys(keys: Array): Array ->
+    native.
+
+/**
+ * Returns sorted unique values, first indexes, inverse indexes, and occurrence counts.
+ */
+@compiler.native {ndarray.array.unique_all}
+pub unique_all(array: Array): List[Array] ->
+    native.
+
+/**
+ * Returns the sorted flattened union of two equal-dtype arrays.
+ */
+@compiler.native {ndarray.array.union}
+pub union(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns the sorted flattened intersection of two equal-dtype arrays.
+ */
+@compiler.native {ndarray.array.intersect}
+pub intersect(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns sorted flattened values present only in the first array.
+ */
+@compiler.native {ndarray.array.set_difference}
+pub set_difference(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns sorted flattened values present in exactly one input.
+ */
+@compiler.native {ndarray.array.set_xor}
+pub set_xor(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns a same-shape Bool mask indicating membership in the flattened test array.
+ */
+@compiler.native {ndarray.array.is_in}
+pub is_in(elements: Array, test_elements: Array): Array ->
+    native.
+
+/**
+ * Returns a flattened Bool membership mask with optional inversion.
+ */
+@compiler.native {ndarray.array.in1d}
+pub in1d(elements: Array, test_elements: Array, invert: Bool = false): Array ->
+    native.
+
+/**
+ * Returns first-array values absent from the second while preserving order and duplicates.
+ */
+@compiler.native {ndarray.array.set_difference_unique}
+pub set_difference_unique(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns sorted intersections and their first flattened indexes in both inputs.
+ */
+@compiler.native {ndarray.array.intersect_all}
+pub intersect_all(lhs: Array, rhs: Array): List[Array] ->
+    native.
+
+/**
+ * Returns lexicographically unique axis slices, first indexes, inverse indexes, and counts.
+ */
+@compiler.native {ndarray.array.unique_axis_all}
+pub unique_axis_all(array: Array, axis: Int): List[Array] ->
+    native.
+
+/**
+ * Returns flattened consecutive differences with typed values prepended and appended.
+ */
+@compiler.native {ndarray.array.ediff1d_edges}
+pub ediff1d_edges(array: Array, begin: Array, end: Array): Array ->
+    native.
+
+/**
+ * Returns inclusive sums along one normalized axis using reduction accumulator promotion.
+ */
+@compiler.native {ndarray.array.cumulative_sum}
+pub cumulative_sum(array: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Returns inclusive products along one normalized axis using reduction accumulator promotion.
+ */
+@compiler.native {ndarray.array.cumulative_product}
+pub cumulative_product(array: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Exports a pointer-free tensor packet through a package-native DLPack lifecycle.
+ */
+@compiler.native {ndarray.array.export_tensor_packet}
+pub export_tensor_packet(array: Array, consumer: String): Bytes ->
+    native.
+
+/**
+ * Imports a validated pointer-free tensor packet as an owned CPU array.
+ */
+@compiler.native {ndarray.array.import_tensor_packet}
+pub import_tensor_packet(packet: Bytes): Array ->
+    native.
+
+/**
+ * Selects broadcast choice values with raise, wrap, or clip index handling.
+ */
+@compiler.native {ndarray.array.choose}
+pub choose(indexes: Array, choices: List[Array], mode: Int): Array ->
+    native.
+
+/**
+ * Fills the receiver in place from one scalar array using receiver dtype conversion.
+ */
+@compiler.native {ndarray.array.fill}
+pub fill(array: Array, value: Array): Unit ->
+    native.
+
+/**
+ * Returns a resized logical-order array by repeating or truncating source values.
+ */
+@compiler.native {ndarray.array.resize}
+pub resize(array: Array, shape: List[Int]): Array ->
+    native.
+
+/**
+ * Reduces selected values using NumPy-compatible any semantics and a broadcast boolean mask.
+ */
+@compiler.native {ndarray.array.any_where}
+pub any_where(array: Array, mask: Array, axes: List[Int], keep_dims: Bool): Array ->
+    native.
+
+/**
+ * Reduces selected values using NumPy-compatible all semantics and a broadcast boolean mask.
+ */
+@compiler.native {ndarray.array.all_where}
+pub all_where(array: Array, mask: Array, axes: List[Int], keep_dims: Bool): Array ->
+    native.
+
+/**
+ * Selects broadcast choice values and atomically writes them into an exactly shaped destination.
+ */
+@compiler.native {ndarray.array.choose_into}
+pub choose_into(destination: Array, indexes: Array, choices: List[Array], mode: Int): Unit ->
+    native.
+
+/**
+ * Rounds every real or complex component to the requested decimal position using ties-to-even semantics.
+ */
+@compiler.native {ndarray.array.round_decimals}
+pub round_decimals(array: Array, decimals: Int): Array ->
+    native.
+
+/**
+ * Rounds values and atomically writes them into an exactly shaped same-kind destination.
+ */
+@compiler.native {ndarray.array.round_into}
+pub round_into(destination: Array, array: Array, decimals: Int): Unit ->
+    native.
+
+/**
+ * Conjugates values and atomically writes them into an exactly shaped same-kind destination.
+ */
+@compiler.native {ndarray.array.conjugate_into}
+pub conjugate_into(destination: Array, array: Array): Unit ->
+    native.
+
+/**
+ * Multiplies arrays and atomically writes the result into an exactly shaped, exact-dtype destination.
+ */
+@compiler.native {ndarray.array.matmul_into}
+pub matmul_into(destination: Array, lhs: Array, rhs: Array): Unit ->
+    native.
+
+/**
+ * Computes a dot product into an exact-shape, exact-dtype, C-contiguous destination.
+ */
+@compiler.native {ndarray.array.dot_into}
+pub dot_into(destination: Array, lhs: Array, rhs: Array): Unit ->
+    native.
+
+/**
+ * Computes a diagonal sum and atomically writes it into an exactly shaped destination.
+ */
+@compiler.native {ndarray.array.trace_into}
+pub trace_into(destination: Array, array: Array, offset: Int, axis_a: Int, axis_b: Int): Unit ->
+    native.
+
+/**
+ * Disposes an owned array exactly once.
+ */
+@compiler.native {ndarray.array.dispose}
+pub dispose(array: Array): Unit ->
+    native.
+
+/**
+ * Writes the outer product into an exactly shaped writable destination.
+ */
+@compiler.native {ndarray.array.outer_into}
+pub outer_into(destination: Array, lhs: Array, rhs: Array): Unit ->
+    native.
+
+/**
+ * Sums into an exactly shaped writable destination without broadcasting the reduction result.
+ */
+@compiler.native {ndarray.array.sum_into}
+pub sum_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit ->
+    native.
+
+/**
+ * Multiplies into an exactly shaped writable destination without broadcasting the reduction result.
+ */
+@compiler.native {ndarray.array.product_into}
+pub product_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit ->
+    native.
+
+/**
+ * Reduces minima into an exactly shaped writable destination.
+ */
+@compiler.native {ndarray.array.minimum_into}
+pub minimum_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit ->
+    native.
+
+/**
+ * Reduces maxima into an exactly shaped writable destination.
+ */
+@compiler.native {ndarray.array.maximum_into}
+pub maximum_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit ->
+    native.
+
+/**
+ * Sums elements selected by a broadcast-compatible truth mask.
+ */
+@compiler.native {ndarray.array.sum_where}
+pub sum_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Sums elements using a one-element array as the initial accumulator.
+ */
+@compiler.native {ndarray.array.sum_initial}
+pub sum_initial(array: Array, initial: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Sums selected elements from an explicit one-element initial accumulator.
+ */
+@compiler.native {ndarray.array.sum_where_initial}
+pub sum_where_initial(
+    array: Array,
+    mask: Array,
+    initial: Array,
+    axes: List[Int],
+    keep_dims: Int,
+): Array ->
+    native.
+
+/**
+ * Reduces minima using a one-element initial value, including empty lanes.
+ */
+@compiler.native {ndarray.array.minimum_initial}
+pub minimum_initial(array: Array, initial: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces maxima using a one-element initial value, including empty lanes.
+ */
+@compiler.native {ndarray.array.maximum_initial}
+pub maximum_initial(array: Array, initial: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces minima selected by a mask and rejects selected empty lanes.
+ */
+@compiler.native {ndarray.array.minimum_where}
+pub minimum_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces maxima selected by a mask and rejects selected empty lanes.
+ */
+@compiler.native {ndarray.array.maximum_where}
+pub maximum_where(array: Array, mask: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces selected minima from an explicit one-element initial value.
+ */
+@compiler.native {ndarray.array.minimum_where_initial}
+pub minimum_where_initial(
+    array: Array,
+    mask: Array,
+    initial: Array,
+    axes: List[Int],
+    keep_dims: Int,
+): Array ->
+    native.
+
+/**
+ * Reduces selected maxima from an explicit one-element initial value.
+ */
+@compiler.native {ndarray.array.maximum_where_initial}
+pub maximum_where_initial(
+    array: Array,
+    mask: Array,
+    initial: Array,
+    axes: List[Int],
+    keep_dims: Int,
+): Array ->
+    native.
+
+/**
+ * Reduces minima while ignoring NaN operands unless a lane contains only NaNs.
+ */
+@compiler.native {ndarray.array.fmin_reduce}
+pub fmin_reduce(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces maxima while ignoring NaN operands unless a lane contains only NaNs.
+ */
+@compiler.native {ndarray.array.fmax_reduce}
+pub fmax_reduce(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces integer or Bool elements with bitwise AND and a width-preserving all-bits identity.
+ */
+@compiler.native {ndarray.array.bitwise_and_reduce}
+pub bitwise_and_reduce(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces integer or Bool elements with bitwise OR and a zero identity.
+ */
+@compiler.native {ndarray.array.bitwise_or_reduce}
+pub bitwise_or_reduce(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Reduces integer or Bool elements with bitwise XOR and a zero identity.
+ */
+@compiler.native {ndarray.array.bitwise_xor_reduce}
+pub bitwise_xor_reduce(array: Array, axes: List[Int], keep_dims: Int): Array ->
+    native.
+
+/**
+ * Returns live native allocations for lifecycle auditing.
+ */
+@compiler.native {ndarray.array.live_count}
+pub live_count(): Int ->
+    native.
+
+/**
+ * Selects array materialization order.
+ */
 pub type ArrayOrder: Int = C = 0 | FORTRAN = 1 | KEEP = 2 | ANY = 3.
-/** Selects the admissible numerical dtype conversion relationship. */
+
+/**
+ * Selects the admissible numerical dtype conversion relationship.
+ */
 pub type CastingRule: Int = NO = 0 | EQUIVALENT = 1 | SAFE = 2 | SAME_KIND = 3 | UNSAFE = 4.
-/** Returns whether the current view is C-contiguous. */
-pub is_c_contiguous(array: Array): Bool -> contiguous_code(array) == 1.
-/** Returns whether the current view is Fortran-contiguous. */
-pub is_fortran_contiguous(array: Array): Bool -> fortran_contiguous_code(array) == 1.
-/** Returns the ABI code for one array materialization order. */
-array_order_code(order: ArrayOrder): Int -> case order { ArrayOrder.C -> 0; ArrayOrder.FORTRAN -> 1; ArrayOrder.KEEP -> 2; ArrayOrder.ANY -> 3 }.
-/** Returns the ABI code for one numerical casting rule. */
-casting_rule_code(casting: CastingRule): Int -> case casting { CastingRule.NO -> 0; CastingRule.EQUIVALENT -> 1; CastingRule.SAFE -> 2; CastingRule.SAME_KIND -> 3; CastingRule.UNSAFE -> 4 }.
-/** Returns an independently owned copy with explicit memory ordering. */
-pub copy_with_order(array: Array, order: ArrayOrder): Array -> copy(array, array_order_code(order)).
-/** Reshapes with explicit C, Fortran, or input-compatible traversal order. */
-pub reshape_with_order(array: Array, shape: List[Int], order: ArrayOrder): Array -> reshape(array, shape, array_order_code(order)).
-/** Converts an array under explicit NumPy-compatible ordering and casting rules. */
-pub astype_with(array: Array, dtype: Int, order: ArrayOrder, copy_values: Bool, casting: CastingRule): Array ->
+
+/**
+ * Returns whether the current view is C-contiguous.
+ */
+pub is_c_contiguous(array: Array): Bool ->
+    contiguous_code(array) == 1.
+
+/**
+ * Returns whether the current view is Fortran-contiguous.
+ */
+pub is_fortran_contiguous(array: Array): Bool ->
+    fortran_contiguous_code(array) == 1.
+
+/**
+ * Returns the ABI code for one array materialization order.
+ */
+array_order_code(order: ArrayOrder): Int ->
+    case order {
+        ArrayOrder.C -> 0;
+        ArrayOrder.FORTRAN -> 1;
+        ArrayOrder.KEEP -> 2;
+        ArrayOrder.ANY -> 3
+    }.
+
+/**
+ * Returns the ABI code for one numerical casting rule.
+ */
+casting_rule_code(casting: CastingRule): Int ->
+    case casting {
+        CastingRule.NO -> 0;
+        CastingRule.EQUIVALENT -> 1;
+        CastingRule.SAFE -> 2;
+        CastingRule.SAME_KIND -> 3;
+        CastingRule.UNSAFE -> 4
+    }.
+
+/**
+ * Returns an independently owned copy with explicit memory ordering.
+ */
+pub copy_with_order(array: Array, order: ArrayOrder): Array ->
+    copy(array, array_order_code(order)).
+
+/**
+ * Reshapes with explicit C, Fortran, or input-compatible traversal order.
+ */
+pub reshape_with_order(array: Array, shape: List[Int], order: ArrayOrder): Array ->
+    reshape(array, shape, array_order_code(order)).
+
+/**
+ * Converts an array under explicit NumPy-compatible ordering and casting rules.
+ */
+pub astype_with(
+    array: Array,
+    dtype: Int,
+    order: ArrayOrder,
+    copy_values: Bool,
+    casting: CastingRule,
+): Array ->
     astype(array, dtype, array_order_code(order), copy_values, casting_rule_code(casting)).

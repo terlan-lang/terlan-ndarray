@@ -59,17 +59,7 @@ run_command(
             .with_timeout_ms(1800000)
             .with_output_limit_bytes(16777216);
     case Process.run(command) {
-        Err(reason) ->
-            Err(
-                String.concat(
-                    [
-                        "cannot run `",
-                        reason.program,
-                        "`: ",
-                        reason.message,
-                    ],
-                ),
-            );
+        Err(reason) -> Err(String.concat(["cannot run `", reason.program, "`: ", reason.message]));
         Ok(output) ->
             if {
                 expect_success and output.status != 0 -> Err(diagnostic(output));
@@ -96,17 +86,7 @@ run_with_stdin(
             .with_timeout_ms(1800000)
             .with_output_limit_bytes(16777216);
     case Process.run(command) {
-        Err(reason) ->
-            Err(
-                String.concat(
-                    [
-                        "cannot run `",
-                        reason.program,
-                        "`: ",
-                        reason.message,
-                    ],
-                ),
-            );
+        Err(reason) -> Err(String.concat(["cannot run `", reason.program, "`: ", reason.message]));
         Ok(output) ->
             if {
                 output.status != 0 -> Err(diagnostic(output));
@@ -382,24 +362,24 @@ compile_native_test(
         };
     let binary = child(temporary, String.concat([prefix, String.replace(test, ".c", "")]));
     case run_command(
-    compiler,
-    concat(
-        ["-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror"],
+        compiler,
         concat(
-            extra_flags,
+            ["-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror"],
             concat(
-                sources,
+                extra_flags,
                 concat(
-                    [child(child(repository, "tests"), test), "-lm"],
-                    concat(provider_flags, ["-o", binary]),
+                    sources,
+                    concat(
+                        [child(child(repository, "tests"), test), "-lm"],
+                        concat(provider_flags, ["-o", binary]),
+                    ),
                 ),
             ),
         ),
-    ),
-    repository,
-    environment,
-    true,
-) {
+        repository,
+        environment,
+        true,
+    ) {
         Err(reason) -> Err(reason);
         Ok(_output) -> Ok(binary)
     }.
@@ -525,16 +505,7 @@ tooling(
                                         .put("status", Json.string("skipped")),
                                 ),
                         );
-                        true -> Err(
-                            String.concat(
-                                [
-                                    "cannot run `",
-                                    reason.program,
-                                    "`: ",
-                                    reason.message,
-                                ],
-                            ),
-                        )
+                        true -> Err(String.concat(["cannot run `", reason.program, "`: ", reason.message]))
                     };
                 Ok(output) ->
                     if {
@@ -586,8 +557,8 @@ negative_cases(): List[NegativeCase] ->
         NegativeCase(
             name = "integer-overflow",
             code = "c_abi_status_112",
-            operation = "ndarray.array.add",
-            body = "    let lhs = from_ints([9223372036854775807], [1]); let rhs = from_ints([1], [1]); let result = add(lhs, rhs); dispose(result).\n",
+            operation = "ndarray.array.sum",
+            body = "    let source = from_ints([9223372036854775807, 1], [2]); let result = sum(source, [], 0); dispose(result).\n",
         ),
         NegativeCase(
             name = "duplicate-axis",
@@ -764,14 +735,14 @@ fresh_consumer(
             not String.contains(output.stdout, "NDARRAY_PACKAGE_CONSUMER_OK")
                 or String.contains(output.stdout, "NDARRAY_PACKAGE_CONSUMER_FAILED") -> Err(output.stdout);
             true -> case run_negative_consumers(
-    negative_cases(),
-    source,
-    consumer,
-    terlc,
-    temporary,
-    environment,
-    Json.array(),
-) {
+                negative_cases(),
+                source,
+                consumer,
+                terlc,
+                temporary,
+                environment,
+                Json.array(),
+            ) {
                 Err(reason) -> Err(reason);
                 Ok(passed) ->
                     Ok(
@@ -862,19 +833,19 @@ prepare_helper(
         None ->
             let helper = child(target, "debug/native-boundary-helper");
             case run_command(
-    "cargo",
-    [
-        "build",
-        "--offline",
-        "--manifest-path",
-        child(generated, "native/rust/Cargo.toml"),
-        "--bin",
-        "native-boundary-helper",
-    ],
-    repository,
-    concat(environment, [Process.environment_entry("CARGO_TARGET_DIR", target)]),
-    true,
-) {
+                "cargo",
+                [
+                    "build",
+                    "--offline",
+                    "--manifest-path",
+                    child(generated, "native/rust/Cargo.toml"),
+                    "--bin",
+                    "native-boundary-helper",
+                ],
+                repository,
+                concat(environment, [Process.environment_entry("CARGO_TARGET_DIR", target)]),
+                true,
+            ) {
                 Err(reason) -> Err(reason);
                 Ok(_output) -> Ok(helper)
             }

@@ -23,11 +23,13 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: terlan-lang/terlan
-          ref: da84c22e1b0aac0d018c5c338c752cef7bbc34de
+          ref: 0a8085a6f6e1b83b55b0900ada7e2688b0921c32
           path: terlan
 
       - name: Build compiler
-        run: cargo build --manifest-path terlan/Cargo.toml -p terlan --bin terlc
+        run: >-
+          cargo build --manifest-path terlan/Cargo.toml -p terlan
+          --bin terlc --bin terlan-vm
 
       - name: Verify native build tools
         run: command -v cc && command -v curl && command -v make && command -v pkg-config

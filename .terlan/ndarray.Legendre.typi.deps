@@ -1,9 +1,9 @@
 module=ndarray.Legendre
 syntax_contract_schema=terlan-syntax-contract-v1
 syntax_contract_fingerprint_algorithm=fnv1a64
-syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+syntax_contract_fingerprint=fnv1a64:b9e183c0575aeaba
 source_hash=18304999138229955145
-interface_hash=11883745004784512587
+interface_hash=15510482091487751158
 interface_doc_hash=11379413792165976649
 deps=1
-ndarray.Array=10196142311769670942
+ndarray.Array=12095275650109602516

@@ -41,8 +41,8 @@
   "source_policy": {
     "files_checked": 473,
     "maximum_file": {
-      "lines": 999,
-      "path": "bindings/terlan_ndarray_elementwise.c"
+      "lines": 2593,
+      "path": "src/ndarray/Array.terl"
     },
     "maximum_python_function": {
       "lines": 0,
@@ -50,7 +50,7 @@
     },
     "maximum_structural_nesting": {
       "depth": 7,
-      "path": "bindings/ndarray_linalg_analysis.rs"
+      "path": "native/rust/src/ndarray_scalar_math_tests.rs"
     },
     "status": "passed"
   },
