@@ -104,7 +104,9 @@ static void test_arbitrary_rank_rejections_and_operation_cleanup(void) {
   assert(terlan_ndarray_v1_from_bools(bool_values, 2, overflow_shape, 1,
                                       &bools) == TERLAN_NDARRAY_OK);
   assert(terlan_ndarray_v1_sum(bools, NULL, 0, 0, &result) ==
-         TERLAN_NDARRAY_UNSUPPORTED_DTYPE);
+         TERLAN_NDARRAY_OK);
+  assert_int_values(result, (const int64_t[]){1}, 1);
+  assert(terlan_ndarray_v1_delete(result) == TERLAN_NDARRAY_OK);
 
   for (fail_after = 0; fail_after < 4; ++fail_after) {
     terlan_ndarray_test_fail_allocation_after(fail_after);

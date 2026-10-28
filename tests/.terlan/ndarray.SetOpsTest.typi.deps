@@ -1,0 +1,8 @@
+module=ndarray.SetOpsTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=8809404601769836598
+interface_hash=1528316416482967515
+interface_doc_hash=1830191803169356499
+deps=0

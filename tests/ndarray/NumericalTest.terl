@@ -1,0 +1,175 @@
+module ndarray.NumericalTest.
+
+import ndarray.Array.{difference, digitize, dispose, from_complex, from_floats, from_ints, live_count, shape, to_ints, trapezoidal_integral}.
+import ndarray.Numpy.{allclose, bincount, difference_append, difference_prepend, difference_surround, gradient_all, gradient_axes, gradient_coordinates, gradient_edge, gradient_uniform_axes, interpolate_boundaries, interpolate_default, interpolate_periodic, unwrap_integer_period}.
+
+@test
+pub differences_orders_axes_and_boundaries_match_numpy(): Bool ->
+    let source = from_ints([1, 4, 6, 7, 12], [5]);
+    let prepend = from_ints([0], [1]);
+    let append = from_ints([0, 2], [2]);
+    let first = difference(source, 1, -1);
+    let third = difference(source, 3, 0);
+    let prefixed = difference_prepend(source, prepend, 1, 0);
+    let suffixed = difference_append(source, append, 1, 0);
+    let surrounded = difference_surround(source, prepend, append, 1, 0);
+    let valid = to_ints(first) == [3, 2, 1, 5]
+        and to_ints(third) == [0, 5]
+        and to_ints(prefixed) == [1, 3, 2, 1, 5]
+        and to_ints(suffixed) == [3, 2, 1, 5, -12, 2]
+        and to_ints(surrounded) == [1, 3, 2, 1, 5, -12, 2]
+        and to_ints(source) == [1, 4, 6, 7, 12];
+    dispose(surrounded);
+    dispose(suffixed);
+    dispose(prefixed);
+    dispose(third);
+    dispose(first);
+    dispose(append);
+    dispose(prepend);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub gradients_cover_axes_coordinates_edge_orders_and_mixed_spacing(): Bool ->
+    let source = from_floats([1.0, 2.0, 6.0, 3.0, 4.0, 5.0], [2, 3]);
+    let [all_rows, all_columns] = gradient_all(source, 1.0, 1);
+    let expected_rows = from_floats([2.0, 2.0, -1.0, 2.0, 2.0, -1.0], [2, 3]);
+    let expected_columns = from_floats([1.0, 2.5, 4.0, 1.0, 1.0, 1.0], [2, 3]);
+    let [scaled_columns, scaled_rows] = gradient_uniform_axes(
+        source,
+        [2.0, 4.0],
+        [1, 0],
+        1,
+    );
+    let expected_scaled_columns = from_floats([0.5, 1.25, 2.0, 0.5, 0.5, 0.5], [2, 3]);
+    let expected_scaled_rows = from_floats([0.5, 0.5, -0.25, 0.5, 0.5, -0.25], [2, 3]);
+    let row_spacing = from_floats([2.0], []);
+    let column_coordinates = from_floats([1.0, 1.5, 3.5], [3]);
+    let [mixed_rows, mixed_columns] = gradient_axes(
+        source,
+        [row_spacing, column_coordinates],
+        [0, 1],
+        1,
+    );
+    let expected_mixed_rows = from_floats([1.0, 1.0, -0.5, 1.0, 1.0, -0.5], [2, 3]);
+    let expected_mixed_columns = from_floats([2.0, 2.0, 2.0, 2.0, 1.7, 0.5], [2, 3]);
+    let curve = from_floats([0.0, 2.0, 3.0, 4.0, 5.0, 5.0], [6]);
+    let curve_coordinates = from_floats([0.0, 0.5, 1.0, 3.0, 5.0, 7.0], [6]);
+    let coordinate_gradient = gradient_coordinates(curve, curve_coordinates, 0, 2);
+    let expected_coordinate_gradient = from_floats([5.0, 3.0, 1.7, 0.5, 0.25, -0.25], [6]);
+    let quadratic = from_floats([0.0, 1.0, 4.0, 9.0, 16.0], [5]);
+    let quadratic_gradient = gradient_edge(quadratic, 1.0, 0, 2);
+    let expected_quadratic_gradient = from_floats([0.0, 2.0, 4.0, 6.0, 8.0], [5]);
+    let valid = allclose(all_rows, expected_rows, 1e-12, 1e-12, false)
+        and allclose(all_columns, expected_columns, 1e-12, 1e-12, false)
+        and allclose(scaled_columns, expected_scaled_columns, 1e-12, 1e-12, false)
+        and allclose(scaled_rows, expected_scaled_rows, 1e-12, 1e-12, false)
+        and allclose(mixed_rows, expected_mixed_rows, 1e-12, 1e-12, false)
+        and allclose(mixed_columns, expected_mixed_columns, 1e-12, 1e-12, false)
+        and allclose(coordinate_gradient, expected_coordinate_gradient, 1e-12, 1e-12, false)
+        and allclose(quadratic_gradient, expected_quadratic_gradient, 1e-12, 1e-12, false);
+    dispose(expected_quadratic_gradient);
+    dispose(quadratic_gradient);
+    dispose(quadratic);
+    dispose(expected_coordinate_gradient);
+    dispose(coordinate_gradient);
+    dispose(curve_coordinates);
+    dispose(curve);
+    dispose(expected_mixed_columns);
+    dispose(expected_mixed_rows);
+    dispose(mixed_columns);
+    dispose(mixed_rows);
+    dispose(column_coordinates);
+    dispose(row_spacing);
+    dispose(expected_scaled_rows);
+    dispose(expected_scaled_columns);
+    dispose(scaled_rows);
+    dispose(scaled_columns);
+    dispose(expected_columns);
+    dispose(expected_rows);
+    dispose(all_columns);
+    dispose(all_rows);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub calculus_handles_periods_complex_interpolation_and_coordinate_grids(): Bool ->
+    let wrapped = from_ints([0, 75, 150, 225, 50, 180], [6]);
+    let unwrapped = unwrap_integer_period(wrapped, 250, 140, 0);
+    let coordinates = from_floats([0.0, 0.25, 0.5, 0.75, 1.0], [5]);
+    let samples = from_complex(
+        [0.0, 0.25, 0.5, 0.75, 1.0],
+        [1.0, 1.25, 1.5, 1.75, 2.0],
+        [5],
+        13,
+    );
+    let queries = from_floats([-1.0, 0.3, 2.0], [3]);
+    let left = from_complex([2.0], [3.0], [], 13);
+    let right = from_complex([4.0], [5.0], [], 13);
+    let interpolated = interpolate_boundaries(queries, coordinates, samples, left, right);
+    let expected_interpolated = from_complex([2.0, 0.3, 4.0], [3.0, 1.3, 5.0], [3], 13);
+    let periodic_coordinates = from_floats([190.0, -190.0, 350.0, -350.0], [4]);
+    let periodic_samples = from_floats([5.0, 10.0, 3.0, 4.0], [4]);
+    let periodic_queries = from_floats([-180.0, -170.0, -185.0, 185.0, -10.0, -5.0, 0.0, 365.0], [2, 4]);
+    let periodic = interpolate_periodic(periodic_queries, periodic_coordinates, periodic_samples, 360.0);
+    let expected_periodic = from_floats([7.5, 5.0, 8.75, 6.25, 3.0, 3.25, 3.5, 3.75], [2, 4]);
+    let defaults = interpolate_default(periodic_queries, periodic_coordinates, periodic_samples);
+    let volume = from_floats(
+        [0.0, 3.0, 2.0, 5.0, 0.5, 3.5, 2.5, 5.5, 1.0, 4.0, 3.0, 6.0],
+        [3, 2, 2],
+    );
+    let x_grid = from_floats([0.0, 0.5, 1.0], [3, 1, 1]);
+    let integrated = trapezoidal_integral(volume, x_grid, 0);
+    let expected_integrated = from_floats([0.5, 3.5, 2.5, 5.5], [2, 2]);
+    let valid = to_ints(unwrapped) == [0, 75, 150, 225, 300, 430]
+        and allclose(interpolated, expected_interpolated, 1e-12, 1e-12, false)
+        and allclose(periodic, expected_periodic, 1e-12, 1e-12, false)
+        and shape(defaults) == [2, 4]
+        and allclose(integrated, expected_integrated, 1e-12, 1e-12, false);
+    dispose(expected_integrated);
+    dispose(integrated);
+    dispose(x_grid);
+    dispose(volume);
+    dispose(defaults);
+    dispose(expected_periodic);
+    dispose(periodic);
+    dispose(periodic_queries);
+    dispose(periodic_samples);
+    dispose(periodic_coordinates);
+    dispose(expected_interpolated);
+    dispose(interpolated);
+    dispose(right);
+    dispose(left);
+    dispose(queries);
+    dispose(samples);
+    dispose(coordinates);
+    dispose(unwrapped);
+    dispose(wrapped);
+    valid and live_count() == 0.
+
+@test
+pub counts_and_bins_match_numpy_for_repeated_and_decreasing_edges(): Bool ->
+    let values = from_ints([1, 5, 2, 4, 1], [5]);
+    let counts = bincount(values, 8);
+    let probes = from_ints([-1, 0, 1, 2], [2, 2]);
+    let increasing = from_ints([0, 0, 1], [3]);
+    let decreasing = from_ints([1, 1, 0], [3]);
+    let increasing_left = digitize(probes, increasing, false);
+    let increasing_right = digitize(probes, increasing, true);
+    let decreasing_left = digitize(probes, decreasing, false);
+    let decreasing_right = digitize(probes, decreasing, true);
+    let valid = to_ints(counts) == [0, 2, 1, 0, 1, 1, 0, 0]
+        and to_ints(increasing_left) == [0, 2, 3, 3]
+        and to_ints(increasing_right) == [0, 0, 2, 3]
+        and to_ints(decreasing_left) == [3, 2, 0, 0]
+        and to_ints(decreasing_right) == [3, 3, 2, 0];
+    dispose(decreasing_right);
+    dispose(decreasing_left);
+    dispose(increasing_right);
+    dispose(increasing_left);
+    dispose(decreasing);
+    dispose(increasing);
+    dispose(probes);
+    dispose(counts);
+    dispose(values);
+    valid and live_count() == 0.

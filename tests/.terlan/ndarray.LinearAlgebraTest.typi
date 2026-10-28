@@ -1,0 +1,15 @@
+module ndarray.LinearAlgebraTest.
+
+pub condition_orders_match_numpy_matrix_norms(): Bool.
+
+pub decompositions_preserve_dtypes_batches_and_empty_matrix_shapes(): Bool.
+
+pub generalized_norm_supports_orders_axes_keepdims_complex_and_empty_arrays(): Bool.
+
+pub matrix_power_preserves_stacks_and_promotes_negative_integer_powers(): Bool.
+
+pub multi_dot_supports_vector_endpoints_and_atomic_destination_writes(): Bool.
+
+pub rank_least_squares_and_qr_modes_match_numpy_result_contracts(): Bool.
+
+pub stacked_system_operations_preserve_shapes_dtypes_and_broadcast_rhs(): Bool.

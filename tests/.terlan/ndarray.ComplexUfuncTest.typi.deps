@@ -1,0 +1,8 @@
+module=ndarray.ComplexUfuncTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=436631329494205589
+interface_hash=10684478401553956327
+interface_doc_hash=5210725742540652337
+deps=0

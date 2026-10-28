@@ -1,0 +1,29 @@
+module ndarray.HalfNextafterTest.
+
+import ndarray.Array.{dispose, dtype_code, from_floats_as, live_count, nextafter, to_floats_cast}.
+import ndarray.Numpy.{allclose, spacing}.
+
+@test
+pub float16_spacing_and_nextafter_follow_binary16_encodings(): Bool ->
+    let starts = from_floats_as([0.0, 1.0], [2], 14);
+    let infinity = from_floats_as([65520.0], [1], 14);
+    let distances = spacing(starts);
+    let adjacent = nextafter(starts, infinity);
+    let expected = from_floats_as(
+        [0.000000059604644775390625, 1.0009765625],
+        [2],
+        14,
+    );
+    let valid = dtype_code(distances) == 14
+        and to_floats_cast(distances) == [
+            0.000000059604644775390625,
+            0.0009765625,
+        ]
+        and dtype_code(adjacent) == 14
+        and allclose(adjacent, expected, 0.0, 0.0, false);
+    dispose(expected);
+    dispose(adjacent);
+    dispose(distances);
+    dispose(infinity);
+    dispose(starts);
+    valid and live_count() == 0.

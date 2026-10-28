@@ -1,0 +1,142 @@
+module ndarray.CreationTest.
+
+import ndarray.Array.{ArrayOrder, dispose, dtype_code, from_complex, from_floats, from_ints, live_count, shape, strides, to_floats, to_ints_cast}.
+import ndarray.Creation.{eye, geomspace_arrays, linspace_with_step, logspace_arrays}.
+import ndarray.Numpy.{allclose, diag, full_from}.
+
+@test
+pub linspace_spacing_wrapper_owns_samples_and_step(): Bool ->
+    let start = from_floats([0.0], []);
+    let stop = from_floats([1.0], []);
+    let spacing = linspace_with_step(start, stop, 3, 1, 0, 3);
+    let valid = to_floats(spacing.samples) == [0.0, 0.5, 1.0]
+        and to_floats(spacing.step) == [0.5];
+    dispose(spacing.step);
+    dispose(spacing.samples);
+    dispose(stop);
+    dispose(start);
+    valid and live_count() == 0.
+
+@test
+pub logarithmic_spaces_broadcast_axis_and_complex_values(): Bool ->
+    let exponent_start = from_floats([0.0, 1.0], [2]);
+    let exponent_stop = from_floats([6.0, 7.0], [2]);
+    let logarithmic = logspace_arrays(exponent_start, exponent_stop, 7, 1, 0, 10.0, 3);
+    let expected_logarithmic = from_floats(
+        [
+            1.0, 10.0, 10.0, 100.0, 100.0, 1000.0, 1000.0,
+            10000.0, 10000.0, 100000.0, 100000.0, 1000000.0,
+            1000000.0, 10000000.0,
+        ],
+        [7, 2],
+    );
+    let geometric_start = from_floats([1.0, 32.0], [2]);
+    let geometric_stop = from_floats([10000.0, 2.0], [2]);
+    let geometric = geomspace_arrays(geometric_start, geometric_stop, 5, 1, -1, 3);
+    let expected_geometric = from_floats(
+        [1.0, 10.0, 100.0, 1000.0, 10000.0, 32.0, 16.0, 8.0, 4.0, 2.0],
+        [2, 5],
+    );
+    let imaginary_start = from_complex([0.0], [1.0], [], 13);
+    let imaginary_stop = from_complex([0.0], [16.0], [], 13);
+    let imaginary = geomspace_arrays(imaginary_start, imaginary_stop, 5, 1, 0, 13);
+    let expected_imaginary = from_complex(
+        [0.0, 0.0, 0.0, 0.0, 0.0],
+        [1.0, 2.0, 4.0, 8.0, 16.0],
+        [5],
+        13,
+    );
+    let valid = shape(logarithmic) == [7, 2]
+        and allclose(logarithmic, expected_logarithmic, 0.0000000001, 0.0000000001, false)
+        and shape(geometric) == [2, 5]
+        and allclose(geometric, expected_geometric, 0.0000000001, 0.0000000001, false)
+        and allclose(imaginary, expected_imaginary, 0.0000000001, 0.0000000001, false);
+    dispose(expected_imaginary);
+    dispose(imaginary);
+    dispose(imaginary_stop);
+    dispose(imaginary_start);
+    dispose(expected_geometric);
+    dispose(geometric);
+    dispose(geometric_stop);
+    dispose(geometric_start);
+    dispose(expected_logarithmic);
+    dispose(logarithmic);
+    dispose(exponent_stop);
+    dispose(exponent_start);
+    valid and live_count() == 0.
+
+@test
+pub eye_defaults_rectangles_diagonals_dtypes_and_orders_match_numpy(): Bool ->
+    let square = eye(3);
+    let rectangular = eye(3, columns = 4, diagonal = 2, dtype = 1);
+    let column_major = eye(
+        4,
+        columns = 3,
+        diagonal = -1,
+        dtype = 2,
+        order = ArrayOrder.FORTRAN,
+    );
+    let valid = shape(square) == [3, 3]
+        and to_floats(square) == [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+        and shape(rectangular) == [3, 4]
+        and dtype_code(rectangular) == 1
+        and to_ints_cast(rectangular) == [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+        and strides(column_major) == [1, 4]
+        and to_ints_cast(column_major) == [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1];
+    dispose(column_major);
+    dispose(rectangular);
+    dispose(square);
+    valid and live_count() == 0.
+
+@test
+pub array_valued_full_broadcasts_the_fill_pattern(): Bool ->
+    let fill_values = from_floats([5.0, 6.0], [2]);
+    let first = full_from([2, 2], fill_values);
+    let second = full_from([3, 2], fill_values);
+    let valid = shape(first) == [2, 2]
+        and to_floats(first) == [5.0, 6.0, 5.0, 6.0]
+        and shape(second) == [3, 2]
+        and to_floats(second) == [5.0, 6.0, 5.0, 6.0, 5.0, 6.0];
+    dispose(second);
+    dispose(first);
+    dispose(fill_values);
+    valid and live_count() == 0.
+
+@test
+pub diag_constructs_and_extracts_offsets_bounds_dtypes_and_fortran_views(): Bool ->
+    let vector = from_ints([100, 200, 300], [3]);
+    let centered = diag(vector);
+    let upper = diag(vector, 2);
+    let lower = diag(vector, -2);
+    let matrix = from_ints([1, 2, 3, 4, 5, 6], [3, 2]);
+    let main = diag(matrix);
+    let above = diag(matrix, 1);
+    let below = diag(matrix, -2);
+    let beyond = diag(matrix, -3);
+    let column_major = eye(4, columns = 3, diagonal = -1, dtype = 2, order = ArrayOrder.FORTRAN);
+    let column_major_diagonal = diag(column_major, -1);
+    let valid = shape(centered) == [3, 3]
+        and dtype_code(centered) == 2
+        and to_ints_cast(centered) == [100, 0, 0, 0, 200, 0, 0, 0, 300]
+        and shape(upper) == [5, 5]
+        and to_ints_cast(upper) == [0, 0, 100, 0, 0, 0, 0, 0, 200, 0, 0, 0, 0, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        and to_ints_cast(lower) == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 200, 0, 0, 0, 0, 0, 300, 0, 0]
+        and to_ints_cast(main) == [1, 4]
+        and to_ints_cast(above) == [2]
+        and to_ints_cast(below) == [5]
+        and shape(beyond) == [0]
+        and to_ints_cast(beyond) == []
+        and strides(column_major) == [1, 4]
+        and to_ints_cast(column_major_diagonal) == [1, 1, 1];
+    dispose(column_major_diagonal);
+    dispose(column_major);
+    dispose(beyond);
+    dispose(below);
+    dispose(above);
+    dispose(main);
+    dispose(matrix);
+    dispose(lower);
+    dispose(upper);
+    dispose(centered);
+    dispose(vector);
+    valid and live_count() == 0.

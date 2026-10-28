@@ -1,0 +1,5 @@
+module ndarray.ComplexUfuncTest.
+
+pub complex_exp_log_and_sqrt_match_numpy_principal_values(): Bool.
+
+pub complex_power_absolute_square_and_conjugate_support_strided_dtypes(): Bool.

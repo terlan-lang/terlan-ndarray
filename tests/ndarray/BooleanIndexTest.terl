@@ -1,0 +1,30 @@
+module ndarray.BooleanIndexTest.
+
+import ndarray.Array.{dispose, from_bools, from_ints, live_count, mask_assign, mask_select, shape, to_ints}.
+
+@test
+pub boolean_prefix_indexes_preserve_suffix_shape_and_assign_values(): Bool ->
+    let matrix = from_ints([1, 2, 3, 4, 5, 6, 7, 8, 9], [3, 3]);
+    let rows = from_bools([false, true, false], [3]);
+    let selected = mask_select(matrix, rows);
+    let replacement = from_ints([10, 11, 12], [1, 3]);
+    mask_assign(matrix, rows, replacement);
+    let scalar_true = from_bools([true], []);
+    let scalar_false = from_bools([false], []);
+    let scalar_selected = mask_select(matrix, scalar_true);
+    let scalar_empty = mask_select(matrix, scalar_false);
+    let valid =
+        shape(selected) == [1, 3]
+            and to_ints(selected) == [4, 5, 6]
+            and to_ints(matrix) == [1, 2, 3, 10, 11, 12, 7, 8, 9]
+            and shape(scalar_selected) == [1, 3, 3]
+            and shape(scalar_empty) == [0, 3, 3];
+    dispose(scalar_empty);
+    dispose(scalar_selected);
+    dispose(scalar_false);
+    dispose(scalar_true);
+    dispose(replacement);
+    dispose(selected);
+    dispose(rows);
+    dispose(matrix);
+    valid and live_count() == 0.

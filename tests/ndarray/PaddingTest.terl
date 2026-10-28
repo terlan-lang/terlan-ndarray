@@ -1,0 +1,98 @@
+module ndarray.PaddingTest.
+
+import ndarray.Array.{dispose, from_ints, live_count, shape, to_ints_cast}.
+import ndarray.Indexing.{pad_constant, pad_constant_values, pad_edge, pad_empty, pad_linear_ramp, pad_maximum, pad_mean, pad_median, pad_minimum, pad_reflect, pad_reflect_odd, pad_symmetric, pad_symmetric_odd, pad_wrap}.
+
+@test
+pub standard_padding_modes_match_numpy(): Bool ->
+    let source = from_ints([1, 2, 3], [3]);
+    let constant = pad_constant(source, [2], [2], [-1.0], [9.0]);
+    let default_constant = pad_constant(source, [1], [1]);
+    let edge = pad_edge(source, [2], [2]);
+    let reflect = pad_reflect(source, [2], [2]);
+    let symmetric = pad_symmetric(source, [2], [2]);
+    let wrapped = pad_wrap(source, [2], [2]);
+    let valid =
+        to_ints_cast(constant) == [-1, -1, 1, 2, 3, 9, 9]
+            and to_ints_cast(default_constant) == [0, 1, 2, 3, 0]
+            and to_ints_cast(edge) == [1, 1, 1, 2, 3, 3, 3]
+            and to_ints_cast(reflect) == [3, 2, 1, 2, 3, 2, 1]
+            and to_ints_cast(symmetric) == [2, 1, 1, 2, 3, 3, 2]
+            and to_ints_cast(wrapped) == [2, 3, 1, 2, 3, 1, 2];
+    dispose(wrapped);
+    dispose(symmetric);
+    dispose(reflect);
+    dispose(edge);
+    dispose(default_constant);
+    dispose(constant);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub ramp_and_odd_reflections_match_numpy(): Bool ->
+    let source = from_ints([1, 2, 3], [3]);
+    let odd_reflect = pad_reflect_odd(source, [5], [5]);
+    let odd_symmetric = pad_symmetric_odd(source, [5], [5]);
+    let ramp = pad_linear_ramp(source, [3], [3]);
+    let valid =
+        to_ints_cast(odd_reflect) == [-4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8]
+            and to_ints_cast(odd_symmetric) == [-2, -1, -1, 0, 1, 1, 2, 3, 3, 4, 5, 5, 6]
+            and to_ints_cast(ramp) == [0, 0, 0, 1, 2, 3, 2, 1, 0];
+    dispose(ramp);
+    dispose(odd_symmetric);
+    dispose(odd_reflect);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub shared_widths_and_exact_constants_match_numpy(): Bool ->
+    let matrix = from_ints([1, 2, 3, 4], [2, 2]);
+    let matrix_edge = pad_edge(matrix, [1], [1]);
+    let large_source = from_ints([18014398509481987], [1]);
+    let leading = from_ints([18014398509481985], [1]);
+    let trailing = from_ints([18014398509481985], [1]);
+    let large_padded = pad_constant_values(large_source, [1], [1], leading, trailing);
+    let valid =
+        shape(matrix_edge) == [4, 4]
+            and to_ints_cast(matrix_edge) == [1, 1, 2, 2, 1, 1, 2, 2, 3, 3, 4, 4, 3, 3, 4, 4]
+            and to_ints_cast(large_padded) == [18014398509481985, 18014398509481987, 18014398509481985];
+    dispose(large_padded);
+    dispose(trailing);
+    dispose(leading);
+    dispose(large_source);
+    dispose(matrix_edge);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub statistical_padding_defaults_and_clips_match_numpy(): Bool ->
+    let source = from_ints([1, 2, 3], [3]);
+    let minimum = pad_minimum(source, [1], [1]);
+    let maximum = pad_maximum(source, [1], [1]);
+    let mean = pad_mean(source, [1], [1]);
+    let median = pad_median(source, [1], [1]);
+    let clipped = pad_mean(source, [1], [1], [30], [30]);
+    let valid =
+        to_ints_cast(minimum) == [1, 1, 2, 3, 1]
+            and to_ints_cast(maximum) == [3, 1, 2, 3, 3]
+            and to_ints_cast(mean) == [2, 1, 2, 3, 2]
+            and to_ints_cast(median) == [2, 1, 2, 3, 2]
+            and to_ints_cast(clipped) == [2, 1, 2, 3, 2];
+    dispose(clipped);
+    dispose(median);
+    dispose(mean);
+    dispose(maximum);
+    dispose(minimum);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub empty_axis_padding_preserves_shape(): Bool ->
+    let empty = from_ints([], [2, 0, 2]);
+    let padded = pad_empty(empty, [3, 0, 1], [3, 0, 1]);
+    let wrapped = pad_wrap(empty, [3, 0, 1], [3, 0, 1]);
+    let valid = shape(padded) == [8, 0, 4] and shape(wrapped) == [8, 0, 4];
+    dispose(wrapped);
+    dispose(padded);
+    dispose(empty);
+    valid and live_count() == 0.

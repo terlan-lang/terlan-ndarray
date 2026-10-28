@@ -1,0 +1,230 @@
+module ndarray.StatisticsTest.
+
+import ndarray.Array.{dispose, dtype_code, from_bools, from_complex, from_floats, from_floats_as, from_ints, is_nan, live_count, mean, mean_as, mean_into, mean_where, median, percentiles, quantiles, shape, standard_deviation, standard_deviation_as, standard_deviation_into, standard_deviation_where, to_bools, to_floats, to_floats_cast, variance, variance_as, variance_into, variance_where}.
+import ndarray.Numpy.{average, average_weighted, average_weighted_with_sum, average_with_sum, correlation_pair, covariance_analytic_weighted, covariance_frequency_weighted, covariance_pair, covariance_typed, covariance_weighted, median_into, nanmedian_axes, nanmedian_into, nanpercentile_axes, nanpercentiles, percentiles_into}.
+
+@test
+pub masked_statistics_broadcast_and_preserve_numpy_shapes(): Bool ->
+    let source = from_ints(
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        [4, 4],
+    );
+    let mask = from_bools(
+        [false, true, false, true, true, false, true, false,
+         true, true, false, false, false, false, true, true],
+        [4, 4],
+    );
+    let partial = from_bools([false, true, true, false], [4, 1]);
+    let row_means = mean_where(source, mask, [1], 0);
+    let column_means = mean_where(source, mask, [0], 0);
+    let partial_means = mean_where(source, partial, [0], 0);
+    let all = from_bools([true], []);
+    let variances = variance_where(source, all, [0], 0, 0);
+    let deviations = standard_deviation_where(source, all, [1], 0, 0);
+    let valid = shape(row_means) == [4]
+        and to_floats(row_means) == [2.0, 5.0, 8.5, 14.5]
+        and to_floats(column_means) == [6.0, 5.0, 10.0, 9.0]
+        and to_floats(partial_means) == [6.0, 7.0, 8.0, 9.0]
+        and to_floats(variances) == [20.0, 20.0, 20.0, 20.0]
+        and shape(deviations) == [4];
+    dispose(deviations);
+    dispose(variances);
+    dispose(all);
+    dispose(partial_means);
+    dispose(column_means);
+    dispose(row_means);
+    dispose(partial);
+    dispose(mask);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub statistic_dtype_out_empty_and_complex_semantics_match_numpy(): Bool ->
+    let source = from_ints([1, 0, 0, 0, 1, 0, 0, 0, 1], [3, 3]);
+    let typed_mean = mean_as(source, [1], 0, 11);
+    let typed_variance = variance_as(source, [1], 0, 0, 11);
+    let typed_deviation = standard_deviation_as(source, [1], 0, 0, 11);
+    let destination = from_floats([0.0, 0.0, 0.0], [3]);
+    mean_into(destination, source, [1], 0);
+    let means_written = to_floats(destination) == [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0];
+    variance_into(destination, source, [1], 0, 0);
+    let variances_written = to_floats(destination) == [2.0 / 9.0, 2.0 / 9.0, 2.0 / 9.0];
+    standard_deviation_into(destination, source, [1], 0, 0);
+    let empty = from_floats([], [0, 3]);
+    let empty_mean = mean(empty, [0], 0);
+    let empty_variance = variance(empty, [0], 0, 0);
+    let empty_deviation = standard_deviation(empty, [0], 0, 0);
+    let mean_nans = is_nan(empty_mean);
+    let variance_nans = is_nan(empty_variance);
+    let deviation_nans = is_nan(empty_deviation);
+    let complex = from_complex([1.0, 3.0], [1.0, 3.0], [2], 13);
+    let complex_variance = variance(complex, [], 0, 0);
+    let valid = dtype_code(typed_mean) == 11
+        and dtype_code(typed_variance) == 11
+        and dtype_code(typed_deviation) == 11
+        and means_written
+        and variances_written
+        and to_bools(mean_nans) == [true, true, true]
+        and to_bools(variance_nans) == [true, true, true]
+        and to_bools(deviation_nans) == [true, true, true]
+        and dtype_code(complex_variance) == 3
+        and to_floats(complex_variance) == [2.0];
+    dispose(complex_variance);
+    dispose(complex);
+    dispose(deviation_nans);
+    dispose(variance_nans);
+    dispose(mean_nans);
+    dispose(empty_deviation);
+    dispose(empty_variance);
+    dispose(empty_mean);
+    dispose(empty);
+    dispose(destination);
+    dispose(typed_deviation);
+    dispose(typed_variance);
+    dispose(typed_mean);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub percentile_sequences_axes_keepdims_and_nan_dispatch_match_numpy(): Bool ->
+    let matrix = from_floats(
+        [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0],
+        [3, 4],
+    );
+    let rows = percentiles(matrix, [25.0, 50.0, 100.0], [1], 0, 0);
+    let cube = from_floats([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0], [2, 2, 2]);
+    let bounds = quantiles(cube, [0.0, 1.0], [0, 2], 1, 0);
+    let skipped = nanpercentiles(matrix, [25.0, 50.0], [0], 0, 0);
+    let kept = nanpercentile_axes(matrix, 50.0, [0], 1, 0);
+    let destination = from_floats([0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [2, 3]);
+    percentiles_into(destination, matrix, [25.0, 50.0], [1], 0, 0);
+    let valid = shape(rows) == [3, 3]
+        and to_floats(rows) == [0.75, 4.75, 8.75, 1.5, 5.5, 9.5, 3.0, 7.0, 11.0]
+        and shape(bounds) == [2, 1, 2, 1]
+        and to_floats(bounds) == [0.0, 2.0, 5.0, 7.0]
+        and shape(skipped) == [2, 4]
+        and to_floats(skipped) == [2.0, 3.0, 4.0, 5.0, 4.0, 5.0, 6.0, 7.0]
+        and shape(kept) == [1, 4]
+        and to_floats(kept) == [4.0, 5.0, 6.0, 7.0]
+        and to_floats(destination) == [0.75, 4.75, 8.75, 1.5, 5.5, 9.5];
+    dispose(destination);
+    dispose(kept);
+    dispose(skipped);
+    dispose(bounds);
+    dispose(cube);
+    dispose(rows);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub median_axes_empty_and_destination_semantics_match_numpy(): Bool ->
+    let matrix = from_floats(
+        [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0],
+        [3, 4],
+    );
+    let rows = median(matrix, [1], 0);
+    let kept = nanmedian_axes(matrix, [0], 1);
+    let destination = from_floats([0.0, 0.0, 0.0], [3]);
+    median_into(destination, matrix, [1], 0);
+    let median_written = to_floats(destination) == [1.5, 5.5, 9.5];
+    nanmedian_into(destination, matrix, [1], 0);
+    let nanmedian_written = to_floats(destination) == [1.5, 5.5, 9.5];
+    let empty = from_floats([], [0, 3]);
+    let empty_median = median(empty, [0], 0);
+    let empty_nanmedian = nanmedian_axes(empty, [0], 0);
+    let empty_median_nans = is_nan(empty_median);
+    let empty_nanmedian_nans = is_nan(empty_nanmedian);
+    let valid = shape(rows) == [3]
+        and to_floats(rows) == [1.5, 5.5, 9.5]
+        and shape(kept) == [1, 4]
+        and to_floats(kept) == [4.0, 5.0, 6.0, 7.0]
+        and median_written
+        and nanmedian_written
+        and to_bools(empty_median_nans) == [true, true, true]
+        and to_bools(empty_nanmedian_nans) == [true, true, true];
+    dispose(empty_nanmedian_nans);
+    dispose(empty_median_nans);
+    dispose(empty_nanmedian);
+    dispose(empty_median);
+    dispose(empty);
+    dispose(destination);
+    dispose(kept);
+    dispose(rows);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub average_weights_returned_sums_and_dtypes_match_numpy(): Bool ->
+    let matrix = from_ints([1, 2, 3, 4, 5, 6], [2, 3]);
+    let rows = average(matrix, [1], false);
+    let row_weights = from_ints([1, 2], [2]);
+    let columns = average_weighted(matrix, row_weights, [0], false);
+    let column_weights = from_ints([1, 2, 3], [3]);
+    let [weighted_rows, row_weight_sums] =
+        average_weighted_with_sum(matrix, column_weights, [1], false);
+    let [unweighted_rows, row_counts] = average_with_sum(matrix, [1], false);
+    let float32 = from_floats_as([1.0, 2.0], [2], 11);
+    let float32_weights = from_floats_as([1.0, 2.0], [2], 11);
+    let float64_weights = from_floats([1.0, 2.0], [2]);
+    let narrow = average_weighted(float32, float32_weights, [], false);
+    let wide = average_weighted(float32, float64_weights, [], false);
+    let valid = to_floats(rows) == [2.0, 5.0]
+        and to_floats(columns) == [3.0, 4.0, 5.0]
+        and to_floats(weighted_rows) == [14.0 / 6.0, 32.0 / 6.0]
+        and to_floats(row_weight_sums) == [6.0, 6.0]
+        and to_floats(unweighted_rows) == [2.0, 5.0]
+        and to_floats(row_counts) == [3.0, 3.0]
+        and dtype_code(narrow) == 11
+        and dtype_code(wide) == 3;
+    dispose(wide);
+    dispose(narrow);
+    dispose(float64_weights);
+    dispose(float32_weights);
+    dispose(float32);
+    dispose(row_counts);
+    dispose(unweighted_rows);
+    dispose(row_weight_sums);
+    dispose(weighted_rows);
+    dispose(column_weights);
+    dispose(columns);
+    dispose(row_weights);
+    dispose(rows);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub covariance_pair_weights_and_dtype_match_numpy(): Bool ->
+    let matrix = from_floats([0.0, 1.0, 2.0, 2.0, 1.0, 0.0], [2, 3]);
+    let other = from_floats([0.0, 1.0, 2.0], [1, 3]);
+    let frequency = from_ints([1, 4, 1], [3]);
+    let analytic = from_floats([1.0, 4.0, 1.0], [3]);
+    let unit = from_ints([1, 1, 1], [3]);
+    let typed = covariance_typed(matrix, 1, 1, 11);
+    let paired = covariance_pair(matrix, other, 1, 1, 3);
+    let frequency_covariance =
+        covariance_frequency_weighted(matrix, frequency, 1, 1, 3);
+    let analytic_covariance =
+        covariance_analytic_weighted(matrix, analytic, 1, 1, 3);
+    let combined_covariance =
+        covariance_weighted(matrix, unit, analytic, 1, 1, 3);
+    let paired_correlation = correlation_pair(matrix, other, 1, 3);
+    let valid = dtype_code(typed) == 11
+        and to_floats_cast(typed) == [1.0, -1.0, -1.0, 1.0]
+        and shape(paired) == [3, 3]
+        and to_floats(paired) == [1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0]
+        and to_floats(frequency_covariance) == [0.4, -0.4, -0.4, 0.4]
+        and to_floats(analytic_covariance) == [2.0 / 3.0, -2.0 / 3.0, -2.0 / 3.0, 2.0 / 3.0]
+        and to_floats(combined_covariance) == [2.0 / 3.0, -2.0 / 3.0, -2.0 / 3.0, 2.0 / 3.0]
+        and to_floats(paired_correlation) == [1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0];
+    dispose(paired_correlation);
+    dispose(combined_covariance);
+    dispose(analytic_covariance);
+    dispose(frequency_covariance);
+    dispose(paired);
+    dispose(typed);
+    dispose(unit);
+    dispose(analytic);
+    dispose(frequency);
+    dispose(other);
+    dispose(matrix);
+    valid and live_count() == 0.

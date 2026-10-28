@@ -1,0 +1,10 @@
+module=ndarray.BlockTypeProbe
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=17304013886676750514
+interface_hash=8395974767454394886
+interface_doc_hash=5664019855418065965
+deps=2
+ndarray.Array=1782562769267395241
+std.collections.List=5599785960849014878

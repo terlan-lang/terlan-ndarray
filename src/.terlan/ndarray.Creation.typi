@@ -1,0 +1,94 @@
+//! NumPy-compatible array creation and triangular matrix operations.
+
+module ndarray.Creation.
+
+/// Owns the samples and broadcast-shaped step returned by a linspace call.
+
+pub struct LinspaceWithStep {
+    samples: Array,
+    step: Array
+}.
+
+/// Flattens an array and places its values on an indexed diagonal of a new square matrix.
+
+pub diagflat(array: Array, diagonal: Int): Array.
+
+/// Allocates an uninitialized array with the source shape and dtype.
+
+pub empty_like(array: Array): Array.
+
+/// Creates a diagonal-unit matrix with NumPy-compatible defaults.
+
+pub eye(rows: Int, columns: Int = - 1, diagonal: Int = 0, dtype: Int = 3, order: ndarray.Array.ArrayOrder = ArrayOrder.C): Array.
+
+/// Creates a rectangular diagonal-unit matrix with explicit C or Fortran storage order.
+
+pub eye_ordered(rows: Int, columns: Int, diagonal: Int, dtype: Int, order: Int): Array.
+
+/// Fills a new source-shaped and source-typed array with a floating scalar.
+
+pub full_like_float(array: Array, value: Float): Array.
+
+/// Fills a new source-shaped and source-typed array with an integer scalar.
+
+pub full_like_int(array: Array, value: Int): Array.
+
+/// Returns evenly spaced values on a same-sign geometric progression.
+
+pub geomspace(start: Float, stop: Float, count: Int, endpoint: Int, dtype: Int): Array.
+
+/// Broadcasts nonzero endpoints and inserts geometrically spaced samples at the requested axis.
+
+pub geomspace_arrays(start: Array, stop: Array, count: Int, endpoint: Int, axis: Int, dtype: Int): Array.
+
+/// Returns one dense numeric coordinate grid for every dimension of a shape.
+
+pub indices(shape: List[Int], dtype: Int): Array.
+
+/// Returns one sparse numeric coordinate grid per dimension, with singleton dimensions elsewhere.
+
+pub indices_sparse(shape: List[Int], dtype: Int): List[Array].
+
+/// Broadcasts numerical endpoint arrays and inserts evenly spaced samples at the requested axis.
+
+pub linspace_arrays(start: Array, stop: Array, count: Int, endpoint: Int, axis: Int, dtype: Int): Array.
+
+/// Returns the broadcast-shaped spacing for array endpoints, including NaN for an undefined spacing.
+
+pub linspace_steps(start: Array, stop: Array, count: Int, endpoint: Int): Array.
+
+/// Returns evenly spaced samples together with their broadcast-shaped step.
+
+pub linspace_with_step(start: Array, stop: Array, count: Int, endpoint: Int, axis: Int, dtype: Int): LinspaceWithStep.
+
+/// Returns powers of a positive base with evenly spaced exponents.
+
+pub logspace(start: Float, stop: Float, count: Int, endpoint: Int, base: Float, dtype: Int): Array.
+
+/// Broadcasts exponent arrays and inserts powers of a positive base at the requested axis.
+
+pub logspace_arrays(start: Array, stop: Array, count: Int, endpoint: Int, axis: Int, base: Float, dtype: Int): Array.
+
+/// Allocates a one-filled array with the source shape and dtype.
+
+pub ones_like(array: Array): Array.
+
+/// Creates a matrix with ones at and below an indexed diagonal.
+
+pub tri(rows: Int, columns: Int = - 1, diagonal: Int = 0, dtype: Int = 3): Array.
+
+/// Copies an array while zeroing entries above an indexed diagonal in every matrix plane.
+
+pub tril(array: Array, diagonal: Int = 0): Array.
+
+/// Copies an array while zeroing entries below an indexed diagonal in every matrix plane.
+
+pub triu(array: Array, diagonal: Int = 0): Array.
+
+/// Builds a Vandermonde matrix with explicit column count and exponent order.
+
+pub vander(array: Array, columns: Int, increasing: Int): Array.
+
+/// Allocates a zero-filled array with the source shape and dtype.
+
+pub zeros_like(array: Array): Array.

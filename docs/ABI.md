@@ -40,6 +40,23 @@ compiler-specific packed structures.
 | 110 | `ndarray.axis.out_of_range` | A normalized axis is outside the array rank |
 | 111 | `ndarray.axis.duplicate` | A reduction names one normalized axis more than once |
 | 112 | `ndarray.arithmetic.overflow` | Int64 arithmetic or reduction overflowed |
+| 113 | `ndarray.dlpack.version` | DLPack version is unsupported |
+| 114 | `ndarray.dlpack.device` | DLPack device is unsupported |
+| 115 | `ndarray.dlpack.dtype` | DLPack dtype is unsupported or malformed |
+| 116 | `ndarray.dlpack.layout` | DLPack layout is unsupported or malformed |
+| 117 | `ndarray.dlpack.deleter` | Required DLPack ownership callback is absent |
+| 118 | `ndarray.blas.missing` | The admitted BLAS provider is unavailable |
+| 119 | `ndarray.blas.integer_width` | BLAS integer width is incompatible |
+| 120 | `ndarray.index.out_of_range` | An index is outside its normalized axis |
+| 121 | `ndarray.storage.read_only` | Mutation targeted read-only storage |
+| 122 | `ndarray.slice.invalid` | Slice parameters are invalid |
+| 123 | `ndarray.layout.unsupported` | Memory or serialization layout is unsupported |
+| 124 | `ndarray.cast.overflow` | A value cannot be represented by the destination dtype |
+| 125 | `ndarray.divide_by_zero` | Integer division used a zero divisor |
+| 126 | `ndarray.domain.error` | An input lies outside the operation's admitted domain |
+| 127 | `ndarray.data.malformed` | Serialized or exchanged data is malformed |
+| 128 | `ndarray.data.integrity` | Serialized payload integrity validation failed |
+| 129 | `ndarray.io.error` | File mapping, reading, writing, or flushing failed |
 
 The generated Terlan boundary translates statuses into typed errors. Raw
 native pointers and status integers are not part of the eventual public
@@ -53,9 +70,9 @@ high-level array API.
   row-major output. Negative axes count from the end. Scalar transpose accepts
   the identity pair `(0, 0)`; rank-one transpose accepts the only normalized
   axis pair.
-- `add`, `subtract`, and `multiply` require identical dtype, rank, and shape.
-  Bool arithmetic, implicit conversion, scalar expansion, singleton expansion,
-  and broadcasting are rejected.
+- Elementwise numeric operations use the canonical promotion table and
+  trailing-axis broadcasting. Scalar and singleton expansion are admitted;
+  incompatible dimensions and unsupported Bool arithmetic are rejected.
 - Int64 operations are checked and return status 112 instead of wrapping or
   invoking C signed-overflow behavior.
 - Float64 operations preserve IEEE-754 behavior, including NaN and infinity.
@@ -64,6 +81,10 @@ high-level array API.
   zero or one.
 - Float64 reduction accumulates sequentially in canonical row-major order.
   Int64 reduction rejects overflow.
+- Ordinary extrema propagate NaN and argument extrema return the first NaN or
+  first tied extremum. Infinity follows IEEE-754 ordering. Variance and
+  standard deviation reject corrections greater than or equal to the reduced
+  sample count; empty sum/product/any/all use `0`/`1`/`false`/`true` identities.
 - Every operation returns independently owned storage. Sources remain valid and
   may be disposed before or after their results.
 

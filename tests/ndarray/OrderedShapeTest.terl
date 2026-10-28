@@ -1,0 +1,31 @@
+/**
+ * NumPy-compatible ordered reshape, ravel, and flatten tests.
+ */
+module ndarray.OrderedShapeTest.
+
+import ndarray.Array.{ArrayOrder, copy_with_order, dispose, from_ints, live_count, reshape_with_order, to_ints_cast}.
+import ndarray.Shape.{flatten_with_order, ravel_with_order}.
+
+/** Verifies explicit C, Fortran, input-compatible, and physical traversal. */
+@test
+pub ordered_shape_methods_match_numpy(): Bool ->
+    let matrix = from_ints([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [4, 3]);
+    let reshaped = reshape_with_order(matrix, [3, 4], ArrayOrder.FORTRAN);
+    let small = from_ints([0, 1, 2, 3], [2, 2]);
+    let fortran = copy_with_order(small, ArrayOrder.FORTRAN);
+    let flattened = flatten_with_order(small, ArrayOrder.FORTRAN);
+    let raveled_any = ravel_with_order(fortran, ArrayOrder.ANY);
+    let raveled_keep = ravel_with_order(fortran, ArrayOrder.KEEP);
+    let valid =
+        to_ints_cast(reshaped) == [1, 10, 8, 6, 4, 2, 11, 9, 7, 5, 3, 12]
+        and to_ints_cast(flattened) == [0, 2, 1, 3]
+        and to_ints_cast(raveled_any) == [0, 2, 1, 3]
+        and to_ints_cast(raveled_keep) == [0, 2, 1, 3];
+    dispose(raveled_keep);
+    dispose(raveled_any);
+    dispose(flattened);
+    dispose(fortran);
+    dispose(small);
+    dispose(reshaped);
+    dispose(matrix);
+    valid and live_count() == 0.

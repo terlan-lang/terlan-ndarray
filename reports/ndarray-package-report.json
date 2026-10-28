@@ -1,16 +1,22 @@
 {
-  "abi_report_sha256": "61480ff11d7d1765e0a38803c828b6c0240f98048bc78fa18f82b71a1c5f4f4b",
+  "abi_report_sha256": "68cf50840d00ec2a497f7ef80e8523109986e094c71a33cac1939a6e60267a05",
   "consumer": {
     "negative_cases": [
       "broadcast",
-      "bool-arithmetic",
       "integer-overflow",
       "duplicate-axis",
       "axis-range",
-      "reshape-count"
+      "reshape-count",
+      "matmul-shape",
+      "matmul-rank"
     ],
     "revision_locked": true,
     "status": "passed"
+  },
+  "decomposition_provider": {
+    "crate": "faer",
+    "provider_mode": "pinned_rust",
+    "version": "0.24.4"
   },
   "dtypes": [
     "bool8",
@@ -24,26 +30,34 @@
     "stale_handle": "passed",
     "wrong_resource_kind": "passed"
   },
+  "openblas_provider": {
+    "provider_mode": "pinned_source",
+    "revision": "62bcfb0dc9f1cfa685fc04135c50e2780c303137"
+  },
   "operations": [
     "add",
-    "multiply",
+    "argpartition",
+    "argsort_unstable",
+    "cholesky",
+    "determinant",
+    "matmul",
     "reshape",
-    "subtract",
-    "sum",
-    "transpose"
+    "serialize",
+    "solve",
+    "svd",
+    "transpose",
+    "unique_all",
+    "is_in"
   ],
   "package": "terlan-ndarray",
   "schema": "terlan.ndarray.package-report.v1",
   "status": "passed",
   "terlan_tests": {
-    "passed": 4,
+    "passed": 98,
     "status": "passed"
   },
   "tooling": {
     "sanitizers": {
-      "leak_detection": {
-        "status": "passed"
-      },
       "status": "passed",
       "tools": [
         "address",

@@ -1,0 +1,254 @@
+/**
+ * Polynomial evaluation, fitting, arithmetic, roots, calculus, and basis conversion.
+ */
+module ndarray.Polynomial.
+
+import ndarray.Array.
+
+/**
+ * Evaluates low-to-high power-basis coefficients at every coordinate.
+ */
+@compiler.native {ndarray.array.polyval}
+pub polyval(coordinates: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Returns all complex roots of a finite nonconstant power-basis polynomial.
+ */
+@compiler.native {ndarray.array.polyroots}
+pub polyroots(coefficients: Array): Array ->
+    native.
+
+/**
+ * Fits low-to-high power-basis coefficients by finite SVD least squares.
+ */
+@compiler.native {ndarray.array.polyfit}
+pub polyfit(coordinates: Array, values: Array, degree: Int): Array ->
+    native.
+
+/**
+ * Adds two low-to-high polynomial coefficient vectors.
+ */
+@compiler.native {ndarray.array.polyadd}
+pub polyadd(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Subtracts two low-to-high polynomial coefficient vectors.
+ */
+@compiler.native {ndarray.array.polysub}
+pub polysub(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Multiplies two low-to-high polynomial coefficient vectors.
+ */
+@compiler.native {ndarray.array.polymul}
+pub polymul(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns polynomial quotient and remainder as two owned arrays.
+ */
+@compiler.native {ndarray.array.polydiv_all}
+pub polydiv_all(lhs: Array, rhs: Array): List[Array] ->
+    native.
+
+/**
+ * Differentiates low-to-high polynomial coefficients by a nonnegative order.
+ */
+@compiler.native {ndarray.array.polyder}
+pub polyder(coefficients: Array, order: Int): Array ->
+    native.
+
+/**
+ * Integrates low-to-high polynomial coefficients with a repeated constant.
+ */
+@compiler.native {ndarray.array.polyint}
+pub polyint(coefficients: Array, order: Int, constant: Float): Array ->
+    native.
+
+/**
+ * Returns the power-basis companion matrix used for root finding.
+ */
+@compiler.native {ndarray.array.polycompanion}
+pub polycompanion(coefficients: Array): Array ->
+    native.
+
+/**
+ * Converts coefficients among power, Chebyshev, and Legendre bases over a finite domain and window.
+ */
+@compiler.native {ndarray.array.polyconvert}
+pub polyconvert(
+    coefficients: Array,
+    source_basis: Int,
+    target_basis: Int,
+    domain_minimum: Float,
+    domain_maximum: Float,
+    window_minimum: Float,
+    window_maximum: Float,
+): Array ->
+    native.
+
+/**
+ * Returns low-to-high coefficients for a monic polynomial with the supplied roots.
+ */
+@compiler.native {ndarray.array.polyfromroots}
+pub polyfromroots(roots: Array): Array ->
+    native.
+
+/**
+ * Returns coefficients for offset plus scale times x.
+ */
+@compiler.native {ndarray.array.polyline}
+pub polyline(offset: Float, scale: Float): Array ->
+    native.
+
+/**
+ * Multiplies a coefficient vector by x.
+ */
+@compiler.native {ndarray.array.polymulx}
+pub polymulx(coefficients: Array): Array ->
+    native.
+
+/**
+ * Raises a coefficient vector to a nonnegative integer power.
+ */
+@compiler.native {ndarray.array.polypow}
+pub polypow(coefficients: Array, exponent: Int): Array ->
+    native.
+
+/**
+ * Removes redundant leading coefficients under a tolerance.
+ */
+@compiler.native {ndarray.array.polytrim}
+pub polytrim(coefficients: Array, tolerance: Float): Array ->
+    native.
+
+/**
+ * Evaluates a monic polynomial directly from roots.
+ */
+@compiler.native {ndarray.array.polyvalfromroots}
+pub polyvalfromroots(coordinates: Array, roots: Array): Array ->
+    native.
+
+/**
+ * Differentiates tensor coefficients along one axis with linear-variable scaling.
+ */
+@compiler.native {ndarray.array.polyder_axis}
+pub polyder_axis(coefficients: Array, order: Int, scale: Float, axis: Int): Array ->
+    native.
+
+/**
+ * Integrates tensor coefficients along one axis with per-order constants, a lower bound, and scaling.
+ */
+@compiler.native {ndarray.array.polyint_axis}
+pub polyint_axis(
+    coefficients: Array,
+    order: Int,
+    constants: Array,
+    lower_bound: Float,
+    scale: Float,
+    axis: Int,
+): Array ->
+    native.
+
+/**
+ * Evaluates root-defined polynomial tensors in Cartesian or broadcast mode.
+ */
+@compiler.native {ndarray.array.polyvalfromroots_tensor}
+pub polyvalfromroots_tensor(coordinates: Array, roots: Array, tensor: Bool): Array ->
+    native.
+
+/**
+ * Fits selected power-basis degrees to vector or matrix observations.
+ */
+@compiler.native {ndarray.array.polyfit_degrees}
+pub polyfit_degrees(coordinates: Array, values: Array, degrees: Array): Array ->
+    native.
+
+/**
+ * Fits selected power-basis degrees with one weight per observation.
+ */
+@compiler.native {ndarray.array.polyfit_weighted_degrees}
+pub polyfit_weighted_degrees(
+    coordinates: Array,
+    values: Array,
+    degrees: Array,
+    weights: Array,
+): Array ->
+    native.
+
+/**
+ * Fits contiguous power degrees and returns coefficients plus scaled or unscaled covariance.
+ */
+@compiler.native {ndarray.array.polyfit_covariance}
+pub polyfit_covariance(
+    coordinates: Array,
+    values: Array,
+    degree: Int,
+    scale_covariance: Bool,
+): List[Array] ->
+    native.
+
+/**
+ * Fits weighted contiguous power degrees and returns coefficients plus scaled or unscaled covariance.
+ */
+@compiler.native {ndarray.array.polyfit_weighted_covariance}
+pub polyfit_weighted_covariance(
+    coordinates: Array,
+    values: Array,
+    degree: Int,
+    weights: Array,
+    scale_covariance: Bool,
+): List[Array] ->
+    native.
+
+/**
+ * Builds a power Vandermonde matrix with columns from degree zero upward.
+ */
+@compiler.native {ndarray.array.polyvander}
+pub polyvander(coordinates: Array, degree: Int): Array ->
+    native.
+
+/**
+ * Evaluates a two-dimensional coefficient grid over broadcast coordinates.
+ */
+@compiler.native {ndarray.array.polyval2d}
+pub polyval2d(x: Array, y: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Evaluates a three-dimensional coefficient grid over broadcast coordinates.
+ */
+@compiler.native {ndarray.array.polyval3d}
+pub polyval3d(x: Array, y: Array, z: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Evaluates a two-dimensional coefficient grid over a Cartesian product.
+ */
+@compiler.native {ndarray.array.polygrid2d}
+pub polygrid2d(x: Array, y: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Evaluates a three-dimensional coefficient grid over a Cartesian product.
+ */
+@compiler.native {ndarray.array.polygrid3d}
+pub polygrid3d(x: Array, y: Array, z: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Builds a two-dimensional broadcast power Vandermonde matrix.
+ */
+@compiler.native {ndarray.array.polyvander2d}
+pub polyvander2d(x: Array, y: Array, x_degree: Int, y_degree: Int): Array ->
+    native.
+
+/**
+ * Builds a three-dimensional broadcast power Vandermonde matrix.
+ */
+@compiler.native {ndarray.array.polyvander3d}
+pub polyvander3d(x: Array, y: Array, z: Array, x_degree: Int, y_degree: Int, z_degree: Int): Array ->
+    native.

@@ -1,0 +1,98 @@
+module ndarray.MethodOutputTest.
+
+import ndarray.Array.{all_where, any_where, choose_into, complex_imags, complex_reals, conjugate_into, dispose, dot_into, fill, from_bools, from_complex, from_floats, from_ints, inner, live_count, matmul_into, round_decimals, round_into, shape, to_bools, to_floats, to_ints_cast, trace_into, vdot}.
+
+@test
+pub fill_mutates_the_receiver_with_scalar_dtype_conversion(): Bool ->
+    let target = from_ints([1, 2, 3, 4, 5, 6], [3, 2, 1]);
+    let scalar = from_floats([7.9], []);
+    fill(target, scalar);
+    let valid = to_ints_cast(target) == [7, 7, 7, 7, 7, 7];
+    dispose(scalar);
+    dispose(target);
+    valid and live_count() == 0.
+
+@test
+pub inner_and_vdot_preserve_rank_and_complex_conjugation(): Bool ->
+    let matrix = from_ints([1, 2, 3, 4], [2, 2]);
+    let vector = from_ints([1, 1], [2]);
+    let contracted = inner(matrix, vector);
+    let lhs = from_complex([1.0, 3.0], [2.0, -1.0], [2], 13);
+    let rhs = from_complex([2.0, 1.0], [-1.0, 2.0], [2], 13);
+    let product = vdot(lhs, rhs);
+    let valid = shape(contracted) == [2]
+        and to_ints_cast(contracted) == [3, 7]
+        and shape(product) == []
+        and complex_reals(product) == [1.0]
+        and complex_imags(product) == [2.0];
+    dispose(product);
+    dispose(rhs);
+    dispose(lhs);
+    dispose(contracted);
+    dispose(vector);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub masked_truth_and_choose_outputs_match_numpy(): Bool ->
+    let values = from_bools(
+        [true, false, true, false, false, false, true, true, true],
+        [3, 3],
+    );
+    let lower = from_bools([false, false, true], [3, 1]);
+    let middle = from_bools([false, true, false], [3, 1]);
+    let selected_all = all_where(values, lower, [0], false);
+    let selected_any = any_where(values, middle, [0], false);
+    let indexes = from_ints([0, 1, 0, 1], [2, 2]);
+    let low = from_ints([10], []);
+    let high = from_ints([20], []);
+    let destination = from_ints([0, 0, 0, 0], [2, 2]);
+    choose_into(destination, indexes, [low, high], 0);
+    let valid = to_bools(selected_all) == [true, true, true]
+        and to_bools(selected_any) == [false, false, false]
+        and to_ints_cast(destination) == [10, 20, 10, 20];
+    dispose(destination);
+    dispose(high);
+    dispose(low);
+    dispose(indexes);
+    dispose(selected_any);
+    dispose(selected_all);
+    dispose(middle);
+    dispose(lower);
+    dispose(values);
+    valid and live_count() == 0.
+
+@test
+pub rounded_complex_and_linear_algebra_outputs_match_numpy(): Bool ->
+    let decimals = from_floats([12.15, 15.51], [2]);
+    let rounded = round_decimals(decimals, 1);
+    let rounded_destination = from_floats([0.0, 0.0], [2]);
+    round_into(rounded_destination, decimals, -1);
+    let complex = from_complex([4.5, 12.5], [1.5, 15.5], [2], 13);
+    let conjugated = from_complex([0.0, 0.0], [0.0, 0.0], [2], 13);
+    conjugate_into(conjugated, complex);
+    let identity = from_floats([1.0, 0.0, 0.0, 1.0], [2, 2]);
+    let swap = from_floats([0.0, 1.0, 1.0, 0.0], [2, 2]);
+    let dot_destination = from_floats([0.0, 0.0, 0.0, 0.0], [2, 2]);
+    let matmul_destination = from_floats([0.0, 0.0, 0.0, 0.0], [2, 2]);
+    let trace_destination = from_floats([0.0], []);
+    dot_into(dot_destination, identity, swap);
+    matmul_into(matmul_destination, identity, swap);
+    trace_into(trace_destination, identity, 0, 0, 1);
+    let valid = to_floats(rounded) == [12.2, 15.5]
+        and to_floats(rounded_destination) == [10.0, 20.0]
+        and complex_imags(conjugated) == [-1.5, -15.5]
+        and to_floats(dot_destination) == [0.0, 1.0, 1.0, 0.0]
+        and to_floats(matmul_destination) == [0.0, 1.0, 1.0, 0.0]
+        and to_floats(trace_destination) == [2.0];
+    dispose(trace_destination);
+    dispose(matmul_destination);
+    dispose(dot_destination);
+    dispose(swap);
+    dispose(identity);
+    dispose(conjugated);
+    dispose(complex);
+    dispose(rounded_destination);
+    dispose(rounded);
+    dispose(decimals);
+    valid and live_count() == 0.

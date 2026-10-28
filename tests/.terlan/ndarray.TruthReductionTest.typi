@@ -1,0 +1,5 @@
+module ndarray.TruthReductionTest.
+
+pub axis_keep_dims_and_empty_identities_match_numpy(): Bool.
+
+pub scalar_truth_reductions_match_numpy_defaults(): Bool.

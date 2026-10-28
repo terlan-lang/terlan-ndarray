@@ -1,0 +1,7 @@
+module ndarray.TensorAlgebraTest.
+
+pub einsum_exposes_typed_c_and_fortran_output_order(): Bool.
+
+pub einsum_into_stages_results_before_overlapping_destination_writes(): Bool.
+
+pub einsum_supports_ellipsis_singleton_broadcasting_and_scalar_terms(): Bool.

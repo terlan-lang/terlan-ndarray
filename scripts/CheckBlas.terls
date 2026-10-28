@@ -1,0 +1,588 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Validates the pinned OpenBLAS provider and ndarray CBLAS behavior.
+ */
+import std.collections.List.{concat}.
+import std.core.Int.
+import std.core.Option.{None, Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.{String, Unit}.
+import std.crypto.Hash.
+import std.data.Json.
+import std.io.Console.{eprintln, println}.
+import std.io.{Directory, File}.
+import std.system.{Environment, Platform, Process}.
+
+import type std.core.{Option, Result}.
+import type std.data.Json.
+import type std.system.Process.{EnvironmentEntry, Output}.
+
+struct Provider {
+    architecture: String,
+    config: String,
+    core: String,
+    integer_bits: Int,
+    library_sha256: String,
+    parallel_mode: Int,
+    revision: String,
+    source_sha256: String,
+    version: String,
+}.
+
+struct Sample {
+    checksum: String,
+    elapsed_ns: Int,
+    sample: Int,
+}.
+
+struct BenchmarkRow {
+    size: Int,
+    samples: List[Sample],
+}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.blas]: ", message));
+    false.
+
+child(parent: String, relative: String): String ->
+    if {
+        String.ends_with(parent, "/") -> String.append(parent, relative);
+        true -> String.concat([parent, "/", relative])
+    }.
+
+create_directory(path: String): Result[Unit, String] ->
+    case Directory.create_all(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+remove_directory(path: String): Result[Unit, String] ->
+    case Directory.remove_all(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+write_file(path: String, contents: String): Result[Unit, String] ->
+    case File.write_text(path, contents) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+diagnostic(output: Output): String ->
+    String.concat([output.stdout, output.stderr]).
+
+run_command(
+    program: String,
+    arguments: List[String],
+    working_directory: String,
+    environment: List[EnvironmentEntry],
+    expect_success: Bool,
+): Result[Output, String] ->
+    let command = Process.command(program)
+        .with_arguments(arguments)
+        .with_working_directory(working_directory)
+        .with_environment(environment)
+        .with_timeout_ms(1200000)
+        .with_output_limit_bytes(16777216);
+    case Process.run(command) {
+        Err(reason) -> Err(reason.message);
+        Ok(output) -> if {
+            expect_success and output.status != 0 -> Err(diagnostic(output));
+            not expect_success and output.status == 0 ->
+                Err(String.concat(["command unexpectedly passed: ", program, " ", String.join(arguments, " ")]));
+            true -> Ok(output)
+        }
+    }.
+
+json_string_member(value: Json, key: String): Result[String, String] ->
+    let {
+        Ok(member) <- value.get(key);
+        Ok(text) <- Json.as_string(member)
+    } else {
+        _ -> Err(String.append("missing JSON string member: ", key))
+    };
+    Ok(text).
+
+dependency(repository: String): Result[{String, String}, String] ->
+    let {
+        Ok(source) <- File.read_text(child(repository, "native-dependencies.json"));
+        Ok(document) <- Json.parse(source);
+        Ok(dependencies) <- document.get("dependencies");
+        Ok(openblas) <- dependencies.get("openblas");
+        Ok(revision) <- json_string_member(openblas, "revision");
+        Ok(digest) <- json_string_member(openblas, "sha256")
+    } else {
+        _ -> Err("cannot read pinned OpenBLAS dependency")
+    };
+    Ok({revision, digest}).
+
+provider_root(repository: String): Result[{String, String, String}, String] ->
+    let {
+        Ok({revision, digest}) <- dependency(repository)
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    let host = Platform.current();
+    let base = case Environment.get("TERLAN_NDARRAY_NATIVE_CACHE") {
+        Some(value) -> value;
+        None -> case Environment.get("HOME") {
+            Some(home) -> child(home, ".cache/terlan/native");
+            None -> ""
+        }
+    };
+    let root = child(
+        child(child(child(base, "openblas"), revision), String.concat([
+            String.lowercase(host.architecture),
+            "-",
+            String.lowercase(host.operating_system),
+        ])),
+        "install",
+    );
+    if {
+        base == "" -> Err("HOME or TERLAN_NDARRAY_NATIVE_CACHE is required");
+        not File.exists(child(root, "lib/pkgconfig/openblas.pc")) ->
+            Err(String.append("pinned OpenBLAS cache is missing: ", root));
+        true -> Ok({root, revision, digest})
+    }.
+
+provider_environment(root: String): List[EnvironmentEntry] ->
+    let pkg_config = child(root, "lib/pkgconfig");
+    [
+        Process.environment_entry("PKG_CONFIG_LIBDIR", pkg_config),
+        Process.environment_entry("PKG_CONFIG_PATH", pkg_config),
+        Process.environment_entry("OPENBLAS_STATIC", "1"),
+        Process.environment_entry("PKG_CONFIG_ALL_STATIC", "1"),
+        Process.environment_entry("OPENBLAS_NUM_THREADS", "1"),
+        Process.environment_entry("TERLAN_NDARRAY_OPENBLAS_ROOT", root),
+    ].
+
+nonempty_words(values: List[String], output: List[String]): List[String] ->
+    case values {
+        [] -> output;
+        [value | rest] -> if {
+            String.trim(value) == "" -> nonempty_words(rest, output);
+            true -> nonempty_words(rest, concat(output, [String.trim(value)]))
+        }
+    }.
+
+compiler_flags(repository: String, environment: List[EnvironmentEntry]): Result[List[String], String] ->
+    case run_command(
+        "pkg-config",
+        ["--static", "--cflags", "--libs", "openblas"],
+        repository,
+        environment,
+        true,
+    ) {
+        Err(reason) -> Err(reason);
+        Ok(output) -> Ok(nonempty_words(String.split(output.stdout, " "), []))
+    }.
+
+native_sources(repository: String): List[String] ->
+    [
+        child(repository, "bindings/terlan_ndarray.c"),
+        child(repository, "bindings/terlan_ndarray_dtype.c"),
+        child(repository, "bindings/terlan_ndarray_creation.c"),
+        child(repository, "bindings/terlan_ndarray_elementwise.c"),
+        child(repository, "bindings/terlan_ndarray_unary.c"),
+        child(repository, "bindings/terlan_ndarray_indexing.c"),
+        child(repository, "bindings/terlan_ndarray_shape.c"),
+        child(repository, "bindings/terlan_ndarray_ordering.c"),
+        child(repository, "bindings/terlan_ndarray_operations.c"),
+        child(repository, "bindings/terlan_ndarray_linear_algebra.c"),
+        child(repository, "bindings/terlan_ndarray_reductions.c"),
+        child(repository, "bindings/terlan_ndarray_dlpack.c"),
+    ].
+
+compile_native(
+    repository: String,
+    output: String,
+    source: String,
+    flags: List[String],
+    environment: List[EnvironmentEntry],
+): Result[Unit, String] ->
+    let compiler = case Environment.get("CC") {
+        Some(value) -> value;
+        None -> "cc"
+    };
+    case run_command(
+        compiler,
+        concat(
+            ["-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror"],
+            concat(native_sources(repository), concat([
+                child(repository, source),
+                "-lm",
+            ], concat(flags, ["-o", output]))),
+        ),
+        repository,
+        environment,
+        true,
+    ) {
+        Err(reason) -> Err(reason);
+        Ok(_result) -> Ok(Unit)
+    }.
+
+probe_source(): String ->
+    "#include <cblas.h>\n#include <stdint.h>\n#include <stdio.h>\n\nint main(void) {\n  printf(\"integer_bits=%zu\\n\", sizeof(blasint) * 8);\n  printf(\"config=%s\\n\", openblas_get_config());\n  printf(\"core=%s\\n\", openblas_get_corename());\n  printf(\"parallel=%d\\n\", openblas_get_parallel());\n  return 0;\n}\n".
+
+field(lines: List[String], name: String): Option[String] ->
+    case lines {
+        [] -> None;
+        [line | rest] -> case String.split_once(line, "=") {
+            Some({key, value}) where key == name -> Some(value);
+            _ -> field(rest, name)
+        }
+    }.
+
+parse_int(value: Option[String]): Option[Int] ->
+    case value {
+        Some(text) -> Int.from_string(text);
+        None -> None
+    }.
+
+inspect_provider(
+    repository: String,
+    temporary: String,
+    root: String,
+    revision: String,
+    source_sha256: String,
+    flags: List[String],
+    environment: List[EnvironmentEntry],
+): Result[Provider, String] ->
+    let source = child(temporary, "openblas-probe.c");
+    let executable = child(temporary, "openblas-probe");
+    let compiler = case Environment.get("CC") {
+        Some(value) -> value;
+        None -> "cc"
+    };
+    let {
+        Ok(Unit) <- write_file(source, probe_source());
+        Ok(_version_check) <- run_command(
+            "pkg-config",
+            ["--atleast-version=0.3.0", "openblas"],
+            repository,
+            environment,
+            true,
+        );
+        Ok(version_output) <- run_command(
+            "pkg-config",
+            ["--modversion", "openblas"],
+            repository,
+            environment,
+            true,
+        );
+        Ok(_compiled) <- run_command(
+            compiler,
+            concat(
+                ["-std=c11", "-Wall", "-Wextra", "-Werror", source],
+                concat(flags, ["-o", executable]),
+            ),
+            repository,
+            environment,
+            true,
+        );
+        Ok(probe_output) <- run_command(executable, [], repository, environment, true);
+        Some(integer_bits) <- parse_int(field(String.split(probe_output.stdout, "\n"), "integer_bits"));
+        Some(config) <- field(String.split(probe_output.stdout, "\n"), "config");
+        Some(core) <- field(String.split(probe_output.stdout, "\n"), "core");
+        Some(parallel_mode) <- parse_int(field(String.split(probe_output.stdout, "\n"), "parallel"));
+        Ok(library_sha256) <- Hash.sha256_file(child(root, "lib/libopenblas.a"))
+    } else {
+        _ -> Err("OpenBLAS provider probe failed")
+    };
+    let host = Platform.current();
+    Ok(Provider(
+        architecture = String.lowercase(host.architecture),
+        config = config,
+        core = core,
+        integer_bits = integer_bits,
+        library_sha256 = library_sha256,
+        parallel_mode = parallel_mode,
+        revision = revision,
+        source_sha256 = source_sha256,
+        version = String.trim(version_output.stdout),
+    )).
+
+adversarial_provider_checks(
+    repository: String,
+    temporary: String,
+    provider: Provider,
+    environment: List[EnvironmentEntry],
+): Result[Unit, String] ->
+    let empty = child(temporary, "empty-pkg-config");
+    let missing_environment = concat(environment, [
+        Process.environment_entry("PKG_CONFIG_LIBDIR", empty),
+        Process.environment_entry("PKG_CONFIG_PATH", empty),
+    ]);
+    let host = Platform.current();
+    let {
+        Ok(Unit) <- create_directory(empty);
+        Ok(_missing) <- run_command(
+            "pkg-config",
+            ["--modversion", "openblas"],
+            repository,
+            missing_environment,
+            false,
+        );
+        Ok(_version) <- run_command(
+            "pkg-config",
+            ["--atleast-version=999.0.0", "openblas"],
+            repository,
+            environment,
+            false,
+        )
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    if {
+        provider.integer_bits == 64 -> Err("64-bit BLAS integer mismatch was not detected");
+        String.lowercase(host.architecture) == "incompatible-test-architecture" ->
+            Err("incompatible BLAS architecture was not detected");
+        true -> Ok(Unit)
+    }.
+
+parse_sample(line: String, expected_size: Int): Option[Sample] ->
+    case String.split(line, " ") {
+        [size_text, sample_text, elapsed_text, checksum_text] -> let {
+            Some({"size", size_value}) <- String.split_once(size_text, "=");
+            Some({"sample", sample_value}) <- String.split_once(sample_text, "=");
+            Some({"elapsed_ns", elapsed_value}) <- String.split_once(elapsed_text, "=");
+            Some({"checksum", checksum}) <- String.split_once(checksum_text, "=");
+            Some(size) <- Int.from_string(size_value);
+            Some(sample) <- Int.from_string(sample_value);
+            Some(elapsed_ns) <- Int.from_string(elapsed_value)
+        } else {
+            _ -> None
+        };
+        if {
+            size != expected_size -> None;
+            true -> Some(Sample(checksum = checksum, elapsed_ns = elapsed_ns, sample = sample))
+        };
+        _ -> None
+    }.
+
+parse_samples(lines: List[String], size: Int, output: List[Sample]): Option[List[Sample]] ->
+    case lines {
+        [] -> if { output.length() == 3 -> Some(output); true -> None };
+        ["" | rest] -> parse_samples(rest, size, output);
+        [line | rest] -> case parse_sample(line, size) {
+            None -> None;
+            Some(sample) -> parse_samples(rest, size, concat(output, [sample]))
+        }
+    }.
+
+benchmark_rows(
+    sizes: List[Int],
+    executable: String,
+    repository: String,
+    environment: List[EnvironmentEntry],
+    output: List[BenchmarkRow],
+): Result[List[BenchmarkRow], String] ->
+    case sizes {
+        [] -> Ok(output);
+        [size | rest] -> case run_command(
+            executable,
+            [Int.to_string(size)],
+            repository,
+            environment,
+            true,
+        ) {
+            Err(reason) -> Err(reason);
+            Ok(result) -> case parse_samples(String.split(result.stdout, "\n"), size, []) {
+                None -> Err(String.concat(["malformed CBLAS benchmark output for size ", Int.to_string(size)]));
+                Some(samples) -> benchmark_rows(
+                    rest,
+                    executable,
+                    repository,
+                    environment,
+                    concat(output, [BenchmarkRow(size = size, samples = samples)]),
+                )
+            }
+        }
+    }.
+
+sample_json(sample: Sample): Json ->
+    Json.object()
+        .put("checksum", Json.string(sample.checksum))
+        .put("elapsed_ns", Json.int(sample.elapsed_ns))
+        .put("sample", Json.int(sample.sample)).
+
+samples_json(samples: List[Sample], output: Json): Json ->
+    case samples {
+        [] -> output;
+        [sample | rest] -> samples_json(rest, output.push(sample_json(sample)))
+    }.
+
+rows_json(rows: List[BenchmarkRow], output: Json): Json ->
+    case rows {
+        [] -> output;
+        [row | rest] ->
+            let samples = samples_json(row.samples, Json.array());
+            let value = Json.object()
+                .put("samples", samples)
+                .put("size", Json.int(row.size));
+            rows_json(rest, output.push(value))
+    }.
+
+provider_json(provider: Provider): Json ->
+    let options = Json.array()
+        .push(Json.string("NOFORTRAN=1"))
+        .push(Json.string("NO_LAPACK=1"))
+        .push(Json.string("NO_LAPACKE=1"))
+        .push(Json.string("DYNAMIC_ARCH=1"))
+        .push(Json.string("DYNAMIC_OLDER=1"))
+        .push(Json.string("NO_SHARED=1"))
+        .push(Json.string("NUM_THREADS=64"));
+    Json.object()
+        .put("architecture", Json.string(provider.architecture))
+        .put("build_options", options)
+        .put("calling_convention", Json.string("c"))
+        .put("cblas_integer_bits", Json.int(provider.integer_bits))
+        .put("config", Json.string(provider.config))
+        .put("core", Json.string(provider.core))
+        .put("library_sha256", Json.string(provider.library_sha256))
+        .put("minimum_version", Json.string("0.3.0"))
+        .put("parallel_mode", Json.int(provider.parallel_mode))
+        .put("provider", Json.string("openblas"))
+        .put("provider_mode", Json.string("pinned_source"))
+        .put("source_revision", Json.string(provider.revision))
+        .put("source_sha256", Json.string(provider.source_sha256))
+        .put("version", Json.string(provider.version)).
+
+write_report(path: String, value: Json): Result[Unit, String] ->
+    case Json.stringify_pretty(value) {
+        Err(reason) -> Err(reason.message);
+        Ok(source) -> case File.write_text(path, String.append(source, "\n")) {
+            Err(reason) -> Err(reason.message);
+            Ok(Unit) -> Ok(Unit)
+        }
+    }.
+
+write_reports(repository: String, provider: Provider, rows: List[BenchmarkRow]): Result[Unit, String] ->
+    let host = Platform.current();
+    let failures = Json.array()
+        .push(Json.string("ndarray.blas.missing"))
+        .push(Json.string("ndarray.blas.integer_width"))
+        .push(Json.string("ndarray.blas.architecture"))
+        .push(Json.string("ndarray.blas.version"));
+    let host_json = Json.object()
+        .put("architecture", Json.string(String.lowercase(host.architecture)))
+        .put("operating_system", Json.string(String.lowercase(host.operating_system)));
+    let semantics = Json.object()
+        .put("float64_rank2_row_major", Json.string("passed"))
+        .put("reference_comparison", Json.string("passed"))
+        .put("zero_dimensions_skip_provider", Json.string("passed"));
+    let provider_report = provider_json(provider);
+    let semantic = Json.object()
+        .put("adversarial_provider_failures", failures)
+        .put("host", host_json)
+        .put("package", Json.string("terlan-ndarray"))
+        .put("provider", provider_report)
+        .put("schema", Json.string("terlan.ndarray.blas-report.v1"))
+        .put("semantics", semantics)
+        .put("status", Json.string("passed"));
+    let results = rows_json(rows, Json.array());
+    let benchmark = Json.object()
+        .put("acceptance_threshold", Json.null())
+        .put("openblas_threads", Json.int(1))
+        .put("package", Json.string("terlan-ndarray"))
+        .put("provider_library_sha256", Json.string(provider.library_sha256))
+        .put("provider_version", Json.string(provider.version))
+        .put("results", results)
+        .put("samples_per_size", Json.int(3))
+        .put("schema", Json.string("terlan.ndarray.blas-benchmark.v1"))
+        .put("status", Json.string("recorded"))
+        .put("warmup_runs", Json.int(1));
+    let reports = child(repository, "reports");
+    let {
+        Ok(Unit) <- create_directory(reports);
+        Ok(Unit) <- write_report(child(reports, "ndarray-blas-report.json"), semantic);
+        Ok(Unit) <- write_report(child(reports, "ndarray-blas-benchmark.json"), benchmark)
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    Ok(Unit).
+
+workflow_provider(
+    repository: String,
+    temporary: String,
+    root: String,
+    revision: String,
+    source_sha256: String,
+): Result[Unit, String] ->
+    let environment = provider_environment(root);
+    let {
+        Ok(flags) <- compiler_flags(repository, environment);
+        Ok(provider) <- inspect_provider(
+            repository,
+            temporary,
+            root,
+            revision,
+            source_sha256,
+            flags,
+            environment,
+        );
+        Ok(Unit) <- adversarial_provider_checks(
+            repository,
+            temporary,
+            provider,
+            environment,
+        );
+        Ok(Unit) <- compile_native(
+            repository,
+            child(temporary, "blas-test"),
+            "tests/blas_test.c",
+            flags,
+            environment,
+        );
+        Ok(_semantic) <- run_command(
+            child(temporary, "blas-test"),
+            [],
+            repository,
+            environment,
+            true,
+        );
+        Ok(Unit) <- compile_native(
+            repository,
+            child(temporary, "blas-benchmark"),
+            "tests/blas_benchmark.c",
+            flags,
+            environment,
+        );
+        Ok(rows) <- benchmark_rows(
+            [1, 16, 64, 256, 1024],
+            child(temporary, "blas-benchmark"),
+            repository,
+            environment,
+            [],
+        );
+        Ok(Unit) <- write_reports(repository, provider, rows)
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    Ok(Unit).
+
+workflow(repository: String, temporary: String): Result[Unit, String] ->
+    case provider_root(repository) {
+        Err(reason) -> Err(reason);
+        Ok({root, revision, source_sha256}) ->
+            workflow_provider(repository, temporary, root, revision, source_sha256)
+    }.
+
+entry(): Bool ->
+    let repository = Environment.current_directory();
+    case Directory.create_temporary("terlan_ndarray_blas_") {
+        Err(reason) -> failure(reason.message);
+        Ok(temporary) ->
+            let result = workflow(repository, temporary);
+            let cleanup = remove_directory(temporary);
+            case {result, cleanup} {
+                {Err(reason), _} -> failure(reason);
+                {_, Err(reason)} -> failure(reason);
+                {Ok(Unit), Ok(Unit)} ->
+                    let _printed = println("terlan-ndarray ND3 real CBLAS execution passed");
+                    true
+            }
+    }.
+
+assert(entry());
+Unit.

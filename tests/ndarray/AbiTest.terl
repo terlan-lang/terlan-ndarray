@@ -1,34 +1,37 @@
 module ndarray.AbiTest.
 
-import ndarray.Array.{add, byte_count, contiguous_code, device_type_code, dispose, dtype_code, from_bools, from_floats, from_ints, live_count, multiply, numel, rank, reshape, shape, strides, subtract, sum, to_bools, to_floats, to_ints, transpose}.
+import ndarray.Array.{add, arange, arange_float, arange_int, byte_count, complex_imags, complex_reals, contiguous, contiguous_code, device_type_code, dispose, dtype_code, export_tensor_packet, from_bools, from_complex, from_floats, from_ints, import_tensor_packet, is_nan, live_count, matmul, multiply, numel, rank, reshape, set_int, shape, strides, subtract, sum, to_bools, to_floats, to_floats_cast, to_ints, transpose}.
+import ndarray.Creation.{linspace_arrays, linspace_steps}.
 
 @test
 pub owned_cpu_metadata_is_observable(): Bool ->
     let integers = from_ints([1, 2, 3, 4, 5, 6], [2, 3]);
     let integer_shape = shape(integers);
-    let integer_ok = rank(integers) == 2 and
-        integer_shape == [2, 3] and
-        strides(integers) == [3, 1] and
-        numel(integers) == 6 and
-        byte_count(integers) == 48 and
-        dtype_code(integers) == 2 and
-        contiguous_code(integers) == 1 and
-        device_type_code(integers) == 1 and
-        to_ints(integers) == [1, 2, 3, 4, 5, 6];
+    let integer_ok =
+        rank(integers) == 2
+            and integer_shape == [2, 3]
+            and strides(integers) == [3, 1]
+            and numel(integers) == 6
+            and byte_count(integers) == 48
+            and dtype_code(integers) == 2
+            and contiguous_code(integers) == 1
+            and device_type_code(integers) == 1
+            and to_ints(integers) == [1, 2, 3, 4, 5, 6];
     let booleans = from_bools([true, false, true], [3]);
-    let boolean_ok = shape(booleans) == [3] and
-        dtype_code(booleans) == 1 and
-        to_bools(booleans) == [true, false, true];
+    let boolean_ok =
+        shape(booleans) == [3]
+            and dtype_code(booleans) == 1
+            and to_bools(booleans) == [true, false, true];
     let first = 1.0 + 0.25;
     let float_values = [first, first + 1.0, first + 2.0, first + 3.0, first + 4.0, first + 5.0];
     let floats = from_floats(float_values, [2, 3]);
-    let float_ok = shape(floats) == [2, 3] and
-        strides(floats) == [3, 1] and
-        byte_count(floats) == 48 and
-        to_floats(floats) == float_values;
+    let float_ok =
+        shape(floats) == [2, 3]
+            and strides(floats) == [3, 1]
+            and byte_count(floats) == 48
+            and to_floats(floats) == float_values;
     let scalar = from_floats([2.5], []);
-    let scalar_ok = rank(scalar) == 0 and numel(scalar) == 1 and
-        dtype_code(scalar) == 3;
+    let scalar_ok = rank(scalar) == 0 and numel(scalar) == 1 and dtype_code(scalar) == 3;
     dispose(integers);
     dispose(booleans);
     dispose(floats);
@@ -39,26 +42,41 @@ pub owned_cpu_metadata_is_observable(): Bool ->
 pub scalar_and_zero_dimension_layouts_are_exact(): Bool ->
     let scalar = from_floats([2.5], []);
     let empty = from_ints([], [2, 0, 3]);
-    let layout_ok = shape(scalar) == [] and strides(scalar) == [] and
-        to_floats(scalar) == [2.5] and shape(empty) == [2, 0, 3] and
-        strides(empty) == [0, 3, 1] and numel(empty) == 0 and
-        byte_count(empty) == 0 and to_ints(empty) == [];
+    let layout_ok =
+        shape(scalar) == []
+            and strides(scalar) == []
+            and to_floats(scalar) == [2.5]
+            and shape(empty) == [2, 0, 3]
+            and strides(empty) == [0, 3, 1]
+            and numel(empty) == 0
+            and byte_count(empty) == 0
+            and to_ints(empty) == [];
     dispose(scalar);
     dispose(empty);
     layout_ok and live_count() == 0.
 
 @test
-pub owned_shape_operations_are_exact(): Bool ->
+pub shared_shape_views_and_owned_materialization_are_exact(): Bool ->
     let source = from_ints([1, 2, 3, 4, 5, 6], [2, 3]);
     let reshaped = reshape(source, [3, 2]);
     let transposed = transpose(reshaped, 0, -1);
-    let valid = shape(reshaped) == [3, 2] and
-        strides(reshaped) == [2, 1] and
-        to_ints(reshaped) == [1, 2, 3, 4, 5, 6] and
-        shape(transposed) == [2, 3] and
-        strides(transposed) == [3, 1] and
-        to_ints(transposed) == [1, 3, 5, 2, 4, 6];
+    set_int(transposed, [0, 0], 9);
+    let materialized = contiguous(transposed);
+    set_int(materialized, [0, 0], 11);
+    let valid =
+        shape(reshaped) == [3, 2]
+            and strides(reshaped) == [2, 1]
+            and to_ints(reshaped) == [9, 2, 3, 4, 5, 6]
+            and to_ints(source) == [9, 2, 3, 4, 5, 6]
+            and shape(transposed) == [2, 3]
+            and strides(transposed) == [1, 2]
+            and contiguous_code(transposed) == 0
+            and to_ints(transposed) == [9, 3, 5, 2, 4, 6]
+            and strides(materialized) == [3, 1]
+            and to_ints(materialized) == [11, 3, 5, 2, 4, 6]
+            and to_ints(transposed) == [9, 3, 5, 2, 4, 6];
     dispose(source);
+    dispose(materialized);
     dispose(transposed);
     dispose(reshaped);
     valid and live_count() == 0.
@@ -72,12 +90,14 @@ pub exact_shape_arithmetic_and_reductions_are_exact(): Bool ->
     let multiplied = multiply(left, right);
     let row_sums = sum(left, [-1], 1);
     let total = sum(left, [], 0);
-    let valid = to_ints(added) == [6, 4, -4, -12] and
-        to_ints(subtracted) == [-4, -8, 10, 4] and
-        to_ints(multiplied) == [5, -12, -21, 32] and
-        shape(row_sums) == [2, 1] and
-        to_ints(row_sums) == [-1, -1] and
-        shape(total) == [] and to_ints(total) == [-2];
+    let valid =
+        to_ints(added) == [6, 4, -4, -12]
+            and to_ints(subtracted) == [-4, -8, 10, 4]
+            and to_ints(multiplied) == [5, -12, -21, 32]
+            and shape(row_sums) == [2, 1]
+            and to_ints(row_sums) == [-1, -1]
+            and shape(total) == []
+            and to_ints(total) == [-2];
     dispose(total);
     dispose(left);
     dispose(added);
@@ -85,4 +105,147 @@ pub exact_shape_arithmetic_and_reductions_are_exact(): Bool ->
     dispose(multiplied);
     dispose(row_sums);
     dispose(subtracted);
+    valid and live_count() == 0.
+
+@test
+pub cblas_matrix_multiplication_is_exact(): Bool ->
+    let left = from_floats([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [2, 3]);
+    let right = from_floats([7.0, 8.0, 9.0, 10.0, 11.0, 12.0], [3, 2]);
+    let result = matmul(left, right);
+    let valid = shape(result) == [2, 2] and to_floats(result) == [58.0, 64.0, 139.0, 154.0];
+    dispose(result);
+    dispose(right);
+    dispose(left);
+    valid and live_count() == 0.
+
+@test
+pub dlpack_exchange_round_trip_is_owned(): Bool ->
+    let source = from_ints([1, 2, 3, 4, 5, 6], [2, 3]);
+    let token = export_tensor_packet(source, "ndarray");
+    let imported = import_tensor_packet(token);
+    let valid =
+        shape(imported) == [2, 3]
+            and strides(imported) == [3, 1]
+            and to_ints(imported) == [1, 2, 3, 4, 5, 6]
+            and to_ints(source) == [1, 2, 3, 4, 5, 6];
+    dispose(imported);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub arange_call_forms_preserve_types_and_direction(): Bool ->
+    let integer_stop = arange(5);
+    let keyword_stop = arange(stop = 3);
+    let keyword_start_stop = arange(start = 3, stop = 9);
+    let float_stop = arange_float(3.0);
+    let integer_default_step = arange(2, 7);
+    let integer_explicit_step = arange_int(5, -2, -2);
+    let float_default_step = arange_float(1.0, 4.0);
+    let float_explicit_step = arange(0.0, 1.0, 0.25);
+    let float32 = arange(0.0, 1.0, 0.25, 11);
+    let valid =
+        to_ints(integer_stop) == [0, 1, 2, 3, 4]
+            and dtype_code(integer_stop) == 2
+            and to_ints(keyword_stop) == [0, 1, 2]
+            and to_ints(keyword_start_stop) == [3, 4, 5, 6, 7, 8]
+            and to_floats(float_stop) == [0.0, 1.0, 2.0]
+            and dtype_code(float_stop) == 3
+            and to_ints(integer_default_step) == [2, 3, 4, 5, 6]
+            and to_ints(integer_explicit_step) == [5, 3, 1, -1]
+            and to_floats(float_default_step) == [1.0, 2.0, 3.0]
+            and to_floats(float_explicit_step) == [0.0, 0.25, 0.5, 0.75]
+            and to_floats_cast(float32) == [0.0, 0.25, 0.5, 0.75]
+            and dtype_code(float32) == 11;
+    dispose(float32);
+    dispose(float_explicit_step);
+    dispose(float_default_step);
+    dispose(integer_explicit_step);
+    dispose(integer_default_step);
+    dispose(float_stop);
+    dispose(keyword_start_stop);
+    dispose(keyword_stop);
+    dispose(integer_stop);
+    valid and live_count() == 0.
+
+@test
+pub linspace_arrays_are_broadcast_complex_axis_and_retstep_compatible(): Bool ->
+    let start = from_floats([-120.0, 120.0], [2]);
+    let stop = from_floats([100.0, -100.0], [2]);
+    let axis_zero = linspace_arrays(start, stop, 5, 1, 0, 3);
+    let axis_last = linspace_arrays(start, stop, 5, 1, -1, 3);
+    let spacing = linspace_steps(start, stop, 5, 1);
+    let complex_start = from_complex([1.0], [2.0], [], 13);
+    let complex_stop = from_complex([3.0], [4.0], [], 13);
+    let complex_samples = linspace_arrays(complex_start, complex_stop, 5, 1, 0, 13);
+    let mixed_start = from_complex([0.0], [1.0], [], 13);
+    let mixed_stop = from_complex([10.0], [0.0], [], 13);
+    let mixed_samples = linspace_arrays(mixed_start, mixed_stop, 5, 1, 0, 13);
+    let scalar_start = from_floats([0.0], []);
+    let scalar_stop = from_floats([1.0], []);
+    let closed_zero = linspace_arrays(scalar_start, scalar_stop, 0, 1, 0, 3);
+    let closed_zero_step = linspace_steps(scalar_start, scalar_stop, 0, 1);
+    let open_zero = linspace_arrays(scalar_start, scalar_stop, 0, 0, 0, 3);
+    let open_zero_step = linspace_steps(scalar_start, scalar_stop, 0, 0);
+    let closed_one = linspace_arrays(scalar_start, scalar_stop, 1, 1, 0, 3);
+    let closed_one_step = linspace_steps(scalar_start, scalar_stop, 1, 1);
+    let open_one = linspace_arrays(scalar_start, scalar_stop, 1, 0, 0, 3);
+    let open_one_step = linspace_steps(scalar_start, scalar_stop, 1, 0);
+    let closed_two = linspace_arrays(scalar_start, scalar_stop, 2, 1, 0, 3);
+    let closed_two_step = linspace_steps(scalar_start, scalar_stop, 2, 1);
+    let open_two = linspace_arrays(scalar_start, scalar_stop, 2, 0, 0, 3);
+    let open_two_step = linspace_steps(scalar_start, scalar_stop, 2, 0);
+    let closed_zero_nan = is_nan(closed_zero_step);
+    let open_zero_nan = is_nan(open_zero_step);
+    let closed_one_nan = is_nan(closed_one_step);
+    let valid =
+        shape(axis_zero) == [5, 2]
+            and to_floats(axis_zero) == [-120.0, 120.0, -65.0, 65.0, -10.0, 10.0, 45.0, -45.0, 100.0, -100.0]
+            and shape(axis_last) == [2, 5]
+            and to_floats(axis_last) == [-120.0, -65.0, -10.0, 45.0, 100.0, 120.0, 65.0, 10.0, -45.0, -100.0]
+            and to_floats(spacing) == [55.0, -55.0]
+            and shape(complex_samples) == [5]
+            and complex_reals(complex_samples) == [1.0, 1.5, 2.0, 2.5, 3.0]
+            and complex_imags(complex_samples) == [2.0, 2.5, 3.0, 3.5, 4.0]
+            and complex_reals(mixed_samples) == [0.0, 2.5, 5.0, 7.5, 10.0]
+            and complex_imags(mixed_samples) == [1.0, 0.75, 0.5, 0.25, 0.0]
+            and to_floats(closed_zero) == []
+            and to_bools(closed_zero_nan) == [true]
+            and to_floats(open_zero) == []
+            and to_bools(open_zero_nan) == [true]
+            and to_floats(closed_one) == [0.0]
+            and to_bools(closed_one_nan) == [true]
+            and to_floats(open_one) == [0.0]
+            and to_floats(open_one_step) == [1.0]
+            and to_floats(closed_two) == [0.0, 1.0]
+            and to_floats(closed_two_step) == [1.0]
+            and to_floats(open_two) == [0.0, 0.5]
+            and to_floats(open_two_step) == [0.5];
+    dispose(closed_one_nan);
+    dispose(open_zero_nan);
+    dispose(closed_zero_nan);
+    dispose(open_two_step);
+    dispose(open_two);
+    dispose(closed_two_step);
+    dispose(closed_two);
+    dispose(open_one_step);
+    dispose(open_one);
+    dispose(closed_one_step);
+    dispose(closed_one);
+    dispose(open_zero_step);
+    dispose(open_zero);
+    dispose(closed_zero_step);
+    dispose(closed_zero);
+    dispose(scalar_stop);
+    dispose(scalar_start);
+    dispose(mixed_samples);
+    dispose(mixed_stop);
+    dispose(mixed_start);
+    dispose(complex_samples);
+    dispose(complex_stop);
+    dispose(complex_start);
+    dispose(spacing);
+    dispose(axis_last);
+    dispose(axis_zero);
+    dispose(stop);
+    dispose(start);
     valid and live_count() == 0.

@@ -1,0 +1,58 @@
+{
+  "coverage": {
+    "categories": {
+      "adversarial": {
+        "covered": 843,
+        "percent": 100,
+        "total": 843
+      },
+      "boundary": {
+        "covered": 843,
+        "percent": 100,
+        "total": 843
+      },
+      "positive": {
+        "covered": 843,
+        "percent": 100,
+        "total": 843
+      }
+    },
+    "public_functions": 843,
+    "status": "passed"
+  },
+  "independence": {
+    "compiler_special_case": false,
+    "cuda_required": false,
+    "local_package_dependencies": false,
+    "numpy_required": false,
+    "openblas_provider": "pinned_source",
+    "python_required": false,
+    "status": "passed",
+    "std_native_required": false,
+    "validated_host": "x86_64-unknown-linux-gnu"
+  },
+  "package": "terlan-ndarray",
+  "rust": {
+    "deprecations": "denied",
+    "documentation": "passed",
+    "warnings": "denied"
+  },
+  "schema": "terlan.ndarray.quality-report.v1",
+  "source_policy": {
+    "files_checked": 473,
+    "maximum_file": {
+      "lines": 999,
+      "path": "bindings/terlan_ndarray_elementwise.c"
+    },
+    "maximum_python_function": {
+      "lines": 0,
+      "path": ""
+    },
+    "maximum_structural_nesting": {
+      "depth": 7,
+      "path": "bindings/ndarray_linalg_analysis.rs"
+    },
+    "status": "passed"
+  },
+  "status": "passed"
+}

@@ -1,0 +1,71 @@
+//! Compositional basic indexing and shape transforms.
+
+module ndarray.Indexing.
+
+/// Builds one shared basic-indexing view; Int minimum denotes an omitted bound and ellipsis_index expands omitted source axes.
+
+pub basic_slice(array: Array, starts: List[Int], stops: List[Int], steps: List[Int], ellipsis_index: Int, squeeze_axes: List[Int], new_axes: List[Int]): Array.
+
+/// Pads each axis with explicit leading and trailing constants.
+
+pub pad_constant(array: Array, leading: List[Int], trailing: List[Int], leading_values: List[Float] = [0.0], trailing_values: List[Float] = [0.0]): Array.
+
+/// Pads each axis with exact numerical values supplied by scalar or rank-sized arrays.
+
+pub pad_constant_values(array: Array, leading: List[Int], trailing: List[Int], leading_values: Array, trailing_values: Array): Array.
+
+/// Pads each axis by repeating its nearest edge value.
+
+pub pad_edge(array: Array, leading: List[Int], trailing: List[Int]): Array.
+
+/// Allocates padded regions without exposing uninitialized memory and preserves source values.
+
+pub pad_empty(array: Array, leading: List[Int], trailing: List[Int]): Array.
+
+/// Pads each axis with linear ramps from explicit end values to source edges.
+
+pub pad_linear_ramp(array: Array, leading: List[Int], trailing: List[Int], leading_values: List[Float] = [0.0], trailing_values: List[Float] = [0.0]): Array.
+
+/// Pads each axis with linear ramps using exact numerical endpoints from scalar or rank-sized arrays.
+
+pub pad_linear_ramp_values(array: Array, leading: List[Int], trailing: List[Int], leading_values: Array, trailing_values: Array): Array.
+
+/// Pads with edge maximums over optional clipped statistic lengths.
+
+pub pad_maximum(array: Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): Array.
+
+/// Pads with edge means over optional clipped statistic lengths.
+
+pub pad_mean(array: Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): Array.
+
+/// Pads with edge medians over optional clipped statistic lengths.
+
+pub pad_median(array: Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): Array.
+
+/// Pads with edge minimums over optional clipped statistic lengths.
+
+pub pad_minimum(array: Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int] = [], trailing_lengths: List[Int] = []): Array.
+
+/// Pads each axis with a reflection that excludes the edge value.
+
+pub pad_reflect(array: Array, leading: List[Int], trailing: List[Int]): Array.
+
+/// Pads each axis with odd reflection excluding the edge value.
+
+pub pad_reflect_odd(array: Array, leading: List[Int], trailing: List[Int]): Array.
+
+/// Pads with minimum, maximum, mean, or median values selected by mode 0 through 3 over explicit edge lengths.
+
+pub pad_statistical(array: Array, leading: List[Int], trailing: List[Int], leading_lengths: List[Int], trailing_lengths: List[Int], mode: Int): Array.
+
+/// Pads each axis with a reflection that includes the edge value.
+
+pub pad_symmetric(array: Array, leading: List[Int], trailing: List[Int]): Array.
+
+/// Pads each axis with odd reflection including the edge value.
+
+pub pad_symmetric_odd(array: Array, leading: List[Int], trailing: List[Int]): Array.
+
+/// Pads each axis by wrapping values from its opposite end.
+
+pub pad_wrap(array: Array, leading: List[Int], trailing: List[Int]): Array.

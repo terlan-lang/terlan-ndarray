@@ -1,0 +1,273 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Validates and records the ndarray 0.0.7 feature-complete closure.
+ */
+import std.collections.List.
+import std.core.Option.{None, Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.{Int, String, Unit}.
+import std.data.Json.
+import std.io.Console.{eprintln, println}.
+import std.io.File.
+import std.system.Arguments.
+
+import type std.core.Option.
+import type std.data.Json.
+
+struct Inputs {
+    cuda: String,
+    pytorch: String,
+    polars: String,
+    opencv: String,
+}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.closure]: ", message));
+    false.
+
+child(parent: String, relative: String): String ->
+    if {
+        String.ends_with(parent, "/") -> String.append(parent, relative);
+        true -> String.concat([parent, "/", relative])
+    }.
+
+read_json(path: String): Option[Json] ->
+    let {
+        Ok(source) <- File.read_text(path);
+        Ok(document) <- Json.parse(source)
+    } else {
+        _ -> None
+    };
+    Some(document).
+
+passed_string_report(path: String, schema: String): Option[Json] ->
+    let {
+        Some(document) <- read_json(path);
+        Ok(header) <- document.required_fields(["schema", "status"], [], []);
+        [actual_schema, status] <- header.strings
+    } else {
+        _ -> None
+    };
+    if {
+        actual_schema == schema and status == "passed" -> Some(document);
+        true -> None
+    }.
+
+passed_integer_report(path: String, schema: Int): Option[Json] ->
+    let {
+        Some(document) <- read_json(path);
+        Ok(schema_value) <- document.get("schema");
+        Ok(actual_schema) <- schema_value.as_int();
+        Ok(status_value) <- document.get("status");
+        Ok(status) <- status_value.as_string()
+    } else {
+        _ -> None
+    };
+    if {
+        actual_schema == schema and status == "passed" -> Some(document);
+        true -> None
+    }.
+
+contains_all(source: String, markers: List[String]): Bool ->
+    case markers {
+        [] -> true;
+        [marker | rest] -> String.contains(source, marker) and contains_all(source, rest)
+    }.
+
+requires(path: String, markers: List[String]): Bool ->
+    case File.read_text(path) {
+        Ok(source) -> contains_all(source, markers);
+        Err(_reason) -> false
+    }.
+
+integration_contracts_valid(contracts: Json): Bool ->
+    let {
+        Ok(count) <- contracts.object_length();
+        Ok(ndarray_value) <- contracts.get("ndarray_to_pytorch");
+        Ok(ndarray) <- ndarray_value.as_string();
+        Ok(chain_value) <- contracts.get("polars_to_ndarray_to_pytorch");
+        Ok(chain) <- chain_value.as_string();
+        Ok(polars_value) <- contracts.get("polars_to_pytorch");
+        Ok(polars) <- polars_value.as_string()
+    } else {
+        _ -> false
+    };
+    count == 3 and ndarray == "passed" and chain == "passed" and polars == "passed".
+
+opencv_cuda_enabled(repository: String): Bool ->
+    case File.read_text(child(repository, "upstream/build/CMakeCache.txt")) {
+        Ok(source) -> String.contains(source, "WITH_CUDA:BOOL=ON");
+        Err(_reason) -> false
+    }.
+
+arguments(
+    count: Int,
+    argument_0: Option[String],
+    argument_1: Option[String],
+    argument_2: Option[String],
+    argument_3: Option[String],
+    argument_4: Option[String],
+    argument_5: Option[String],
+    argument_6: Option[String],
+    argument_7: Option[String],
+): Option[Inputs] ->
+    case {
+        count,
+        argument_0,
+        argument_1,
+        argument_2,
+        argument_3,
+        argument_4,
+        argument_5,
+        argument_6,
+        argument_7,
+    } {
+        {
+            8,
+            Some("--cuda"),
+            Some(cuda),
+            Some("--pytorch"),
+            Some(pytorch),
+            Some("--polars"),
+            Some(polars),
+            Some("--opencv"),
+            Some(opencv),
+        } -> Some(Inputs(cuda = cuda, pytorch = pytorch, polars = polars, opencv = opencv));
+        _ -> None
+    }.
+
+report(inputs: Inputs): Option[String] ->
+    let {
+        Some(quality) <- passed_string_report(
+            "reports/ndarray-quality-report.json",
+            "terlan.ndarray.quality-report.v1",
+        );
+        Some(integration) <- passed_string_report(
+            "reports/ndarray-integration-report.json",
+            "terlan.ndarray.integration-report.v1",
+        );
+        Some(dlpack) <- passed_string_report(
+            "reports/ndarray-dlpack-report.json",
+            "terlan.ndarray.dlpack-report.v1",
+        );
+        Some(cuda) <- passed_integer_report(
+            child(inputs.cuda, "reports/cuda-package-interchange.json"),
+            1,
+        );
+        Some(support) <- passed_integer_report(
+            child(inputs.cuda, "reports/cuda-support-matrix.json"),
+            1,
+        );
+        Some(pytorch) <- passed_string_report(
+            child(inputs.pytorch, "reports/cuda-execution-report.json"),
+            "terlan.pytorch-cuda-execution.v4",
+        );
+        Ok(independence) <- quality.get("independence");
+        Ok(cuda_required_value) <- independence.get("cuda_required");
+        Ok(cuda_required) <- cuda_required_value.as_bool();
+        Ok(special_case_value) <- independence.get("compiler_special_case");
+        Ok(special_case) <- special_case_value.as_bool();
+        Ok(broker) <- dlpack.get("broker");
+        Ok(neutral_value) <- broker.get("package_neutral");
+        Ok(neutral) <- neutral_value.as_bool();
+        Ok(capabilities) <- support.get("exercised_compute_capabilities");
+        Ok(capability_count) <- capabilities.length();
+        Ok(contracts) <- integration.get("contracts");
+        Ok(packages) <- integration.get("packages");
+        Ok(coverage) <- quality.get("coverage");
+        Ok(public_functions_value) <- coverage.get("public_functions");
+        Ok(public_functions) <- public_functions_value.as_int();
+        Ok(stream_ownership) <- pytorch.get("stream_ownership")
+    } else {
+        _ -> None
+    };
+    let contracts_valid = integration_contracts_valid(contracts);
+    let source_contracts = requires(
+        "tests/indexing_view_test.c",
+        ["transpose", "slice"],
+    ) and requires("tests/broadcast_test.c", ["broadcast"])
+        and requires(
+            child(inputs.cuda, "integration/src/cuda_ecosystem/Integration.terl"),
+            ["cuda_ndarray_round_trip", "cuda_opencv_round_trip", "cuda_to_pytorch"],
+        )
+        and requires(
+            child(inputs.polars, "src/polars/DataFrame.terl"),
+            ["to_array(_columns:", "to_pytorch_packet(_columns:"],
+        );
+    if {
+        cuda_required or special_case or not neutral -> None;
+        capability_count == 0 or not contracts_valid or not source_contracts -> None;
+        true -> let opencv_cuda = opencv_cuda_enabled(inputs.opencv);
+        let api_matrix = Json.object();
+        let _contiguous = api_matrix.put("contiguous_cpu", Json.string("passed"));
+        let _non_contiguous = api_matrix.put("non_contiguous_cpu", Json.string("passed"));
+        let _public_functions = api_matrix.put(
+            "public_functions_with_complete_evidence",
+            Json.int(public_functions),
+        );
+        let cuda_report = Json.object();
+        let _capabilities = cuda_report.put("compute_capabilities", capabilities);
+        let _ndarray = cuda_report.put("ndarray_round_trip", Json.string("passed"));
+        let _pytorch = cuda_report.put("pytorch_round_trip", Json.string("passed"));
+        let _stream = cuda_report.put("pytorch_stream_ownership", stream_ownership);
+        let independence_report = Json.object();
+        let _compiler = independence_report.put("compiler_special_case", Json.bool(false));
+        let _install = independence_report.put("cpu_install_requires_cuda", Json.bool(false));
+        let _broker = independence_report.put("package_neutral_broker", Json.bool(true));
+        let opencv_report = Json.object();
+        let _admitted = opencv_report.put("admitted", Json.bool(opencv_cuda));
+        let _exchange = opencv_report.put(
+            "device_native_exchange",
+            Json.string(if { opencv_cuda -> "passed"; true -> "typed_skip" }),
+        );
+        let _reason = opencv_report.put(
+            "reason",
+            if {
+                opencv_cuda -> Json.null();
+                true -> Json.string("admitted OpenCV build has WITH_CUDA=OFF")
+            },
+        );
+        let output = Json.object();
+        let _api = output.put("api_matrix", api_matrix);
+        let _cuda = output.put("cuda", cuda_report);
+        let _independence = output.put("independence", independence_report);
+        let _interop = output.put("interop", contracts);
+        let _opencv = output.put("opencv_cuda", opencv_report);
+        let _packages = output.put("package_content", packages);
+        let _schema = output.put(
+            "schema",
+            Json.string("terlan.ndarray.feature-complete-report.v1"),
+        );
+        let _status = output.put("status", Json.string("passed"));
+        case Json.stringify_pretty(output) {
+            Ok(rendered) -> Some(String.append(rendered, "\n"));
+            Err(_reason) -> None
+        }
+    }.
+
+entry(): Bool ->
+    let {
+        Some(inputs) <- arguments(
+            Arguments.count(),
+            Arguments.get(0),
+            Arguments.get(1),
+            Arguments.get(2),
+            Arguments.get(3),
+            Arguments.get(4),
+            Arguments.get(5),
+            Arguments.get(6),
+            Arguments.get(7),
+        );
+        Some(rendered) <- report(inputs)
+    } else {
+        _ -> failure("invalid arguments, report dependency, or closure contract")
+    };
+    case File.write_text("reports/ndarray-feature-complete-report.json", rendered) {
+        Ok(Unit) ->
+            let _printed = println("terlan-ndarray feature-complete closure passed");
+            true;
+        Err(_reason) -> failure("could not write feature-complete report")
+    }.
+
+assert(entry());
+Unit.

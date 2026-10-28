@@ -1,0 +1,26 @@
+{
+  "cache_only_immutable_consumer": "passed",
+  "contracts": {
+    "ndarray_to_pytorch": "passed",
+    "polars_to_ndarray_to_pytorch": "passed",
+    "polars_to_pytorch": "passed"
+  },
+  "network_disabled_after_fetch": true,
+  "package_source_access_after_fetch": false,
+  "packages": {
+    "ndarray": {
+      "content_sha256": "a8d7449a1e3a00434d445ab779c76998bee1ae48010068411bf0bfd92e2220a5",
+      "version": "0.0.7"
+    },
+    "polars": {
+      "content_sha256": "7efc73bafaa0a73f5b42215f99d625c2de39a05ea881ddeb211f215eb237f2c4",
+      "version": "0.1.0-dev"
+    },
+    "pytorch": {
+      "content_sha256": "b0465db1c22c3b1927c3c3297becaf9e94bc8c221cfd76f5f84162c7bd845385",
+      "version": "0.0.7"
+    }
+  },
+  "schema": "terlan.ndarray.integration-report.v1",
+  "status": "passed"
+}

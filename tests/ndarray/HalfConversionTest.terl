@@ -1,0 +1,41 @@
+module ndarray.HalfConversionTest.
+
+import ndarray.Array.{astype, dispose, dtype_code, from_floats_as, is_infinite, live_count, sign_bit, to_bools, to_floats_cast}.
+
+@test
+pub float16_casts_round_to_even_without_float32_intermediates(): Bool ->
+    let source = from_floats_as(
+        [
+            0.000000029831426218152046,
+            0.0000000298023223876953125,
+            0.00000001490116119384765625,
+            1.0005035400390625,
+            1.00048828125,
+            1.000244140625,
+            65519.0,
+        ],
+        [7],
+        3,
+    );
+    let half = astype(source, 14);
+    let overflow = from_floats_as([65520.0, -65520.0], [2], 14);
+    let infinities = is_infinite(overflow);
+    let signs = sign_bit(overflow);
+    let valid = dtype_code(half) == 14
+        and to_floats_cast(half) == [
+            0.000000059604644775390625,
+            0.0,
+            0.0,
+            1.0009765625,
+            1.0,
+            1.0,
+            65504.0,
+        ]
+        and to_bools(infinities) == [true, true]
+        and to_bools(signs) == [false, true];
+    dispose(signs);
+    dispose(infinities);
+    dispose(overflow);
+    dispose(half);
+    dispose(source);
+    valid and live_count() == 0.

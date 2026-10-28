@@ -1,0 +1,17 @@
+module ndarray.AbiTest.
+
+pub arange_call_forms_preserve_types_and_direction(): Bool.
+
+pub cblas_matrix_multiplication_is_exact(): Bool.
+
+pub dlpack_exchange_round_trip_is_owned(): Bool.
+
+pub exact_shape_arithmetic_and_reductions_are_exact(): Bool.
+
+pub linspace_arrays_are_broadcast_complex_axis_and_retstep_compatible(): Bool.
+
+pub owned_cpu_metadata_is_observable(): Bool.
+
+pub scalar_and_zero_dimension_layouts_are_exact(): Bool.
+
+pub shared_shape_views_and_owned_materialization_are_exact(): Bool.

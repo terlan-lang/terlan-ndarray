@@ -1,0 +1,79 @@
+/** Selects a named vector or matrix norm. */
+pub type NormOrder: Int =
+    DEFAULT = 0
+    | NEG_INFINITY = 1
+    | INFINITY = 2
+    | FROBENIUS = 3
+    | NUCLEAR = 4.
+
+/** Selects the lower or upper triangle of a Hermitian matrix. */
+pub type HermitianTriangle: Int = LOWER = 0 | UPPER = 1.
+
+/** Selects the result contract produced by a QR decomposition. */
+pub type QrMode: Int =
+    REDUCED = 0
+    | COMPLETE = 1
+    | R = 2
+    | RAW = 3.
+
+/** Computes a Hermitian eigendecomposition from the selected triangle. */
+pub symmetric_eigen(
+    array: Array,
+    tolerance: Float,
+    triangle: HermitianTriangle,
+): List[Array] ->
+    symmetric_eigen_general(array, tolerance, triangle == HermitianTriangle.UPPER).
+
+/** Computes Hermitian eigenvalues from the selected triangle. */
+pub eigvalsh(array: Array, triangle: HermitianTriangle): Array ->
+    eigvalsh_general(array, triangle == HermitianTriangle.UPPER).
+
+/** Computes numerical rank for a scalar, vector, matrix, or matrix stack. */
+pub matrix_rank(
+    array: Array,
+    tolerance: Float = 0.0,
+    hermitian: Bool = false,
+): Array ->
+    matrix_rank_general(array, tolerance, hermitian).
+
+/** Returns solution, residuals, rank, and singular values for a least-squares system. */
+pub lstsq(
+    coefficients: Array,
+    rhs: Array,
+    rcond: Float = 0.0,
+): List[Array] ->
+    lstsq_general(coefficients, rhs, rcond).
+
+/** Computes reduced, complete, R-only, or raw QR output. */
+pub qr(array: Array, mode: QrMode = QrMode.REDUCED): List[Array] ->
+    qr_mode(array, mode).
+
+/** Computes a named norm over all dimensions or one/two explicit axes. */
+pub norm(
+    array: Array,
+    order: NormOrder,
+    axes: List[Int] = [],
+    keepdims: Bool = false,
+): Array ->
+    norm_general(
+        array,
+        if {
+            order == NormOrder.NEG_INFINITY -> 1;
+            order == NormOrder.INFINITY -> 2;
+            order == NormOrder.FROBENIUS -> 3;
+            order == NormOrder.NUCLEAR -> 4;
+            true -> 0
+        },
+        0.0,
+        axes,
+        keepdims,
+    ).
+
+/** Computes a finite p-norm over all dimensions or one/two explicit axes. */
+pub norm(
+    array: Array,
+    order: Float,
+    axes: List[Int] = [],
+    keepdims: Bool = false,
+): Array ->
+    norm_general(array, 5, order, axes, keepdims).

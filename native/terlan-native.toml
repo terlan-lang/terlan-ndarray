@@ -9,9 +9,19 @@ producer = "terlan-curated-metadata"
 format = "reviewed-declaration-json"
 abi_version = 1
 
-[runtime]
-bridge = "native_boundary"
+[public_adapter]
+adapter_abi_version = 1
+target = "x86_64-unknown-linux-gnu"
+calling_convention = "system_v"
+execution_context = "explicit"
 ownership = "opaque_handles"
+capability_lifetimes = "explicit"
+resource_lifetimes = "execution_context_scoped"
+max_frame_bytes = 1048576
+max_transfer_bytes = 16777216
+status_model = "status_values"
+callback_reentrancy = "forbidden"
+async_completion = "single_shot"
 raw_pointers_public = false
 raw_pointers_contained_in_adapter = true
 exceptions_cross_boundary = false
@@ -33,6 +43,209 @@ resource = "opaque_handle"
 [functions."ndarray.Array.from_floats"]
 operation = "ndarray.array.from_floats"
 arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.from_ints_as"]
+operation = "ndarray.array.from_ints_as"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.from_floats_as"]
+operation = "ndarray.array.from_floats_as"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.from_complex"]
+operation = "ndarray.array.from_complex"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.empty"]
+operation = "ndarray.array.empty"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.zeros"]
+operation = "ndarray.array.zeros"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.zeros_ordered"]
+operation = "ndarray.array.zeros_ordered"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.subtract_reduce"]
+operation = "ndarray.array.subtract_reduce"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.subtract_accumulate"]
+operation = "ndarray.array.subtract_accumulate"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.divide_reduce"]
+operation = "ndarray.array.divide_reduce"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.divide_accumulate"]
+operation = "ndarray.array.divide_accumulate"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.ones"]
+operation = "ndarray.array.ones"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.full_int"]
+operation = "ndarray.array.full_int"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.full_float"]
+operation = "ndarray.array.full_float"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arange/1"]
+operation = "ndarray.array.arange_int_stop"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arange_float/1"]
+operation = "ndarray.array.arange_float_stop"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arange/2"]
+operation = "ndarray.array.arange_int_interval"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arange_float/2"]
+operation = "ndarray.array.arange_float_interval"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arange_int"]
+operation = "ndarray.array.arange_int"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arange/3"]
+operation = "ndarray.array.arange_float_step"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arange/4"]
+operation = "ndarray.array.arange"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.linspace"]
+operation = "ndarray.array.linspace"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.identity"]
+operation = "ndarray.array.identity"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.random_uniform"]
+operation = "ndarray.array.random_uniform"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.random_normal"]
+operation = "ndarray.array.random_normal"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.random_integers"]
+operation = "ndarray.array.random_integers"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.random_bernoulli"]
+operation = "ndarray.array.random_bernoulli"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.random_permutation"]
+operation = "ndarray.array.random_permutation"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.random_shuffle"]
+operation = "ndarray.array.random_shuffle"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.diagonal"]
+operation = "ndarray.array.diagonal"
+arity = 4
 returns = "Array"
 blocking = "fast"
 resource = "opaque_handle"
@@ -86,6 +299,13 @@ returns = "Int"
 blocking = "fast"
 resource = "borrowed_handle"
 
+[functions."ndarray.Array.fortran_contiguous_code"]
+operation = "ndarray.array.fortran_contiguous_code"
+arity = 1
+returns = "Int"
+blocking = "fast"
+resource = "borrowed_handle"
+
 [functions."ndarray.Array.device_type_code"]
 operation = "ndarray.array.device_type_code"
 arity = 1
@@ -114,12 +334,54 @@ returns = "List[Float]"
 blocking = "fast"
 resource = "value"
 
-[functions."ndarray.Array.reshape"]
+[functions."ndarray.Array.to_ints_cast"]
+operation = "ndarray.array.to_ints_cast"
+arity = 1
+returns = "List[Int]"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.Array.to_floats_cast"]
+operation = "ndarray.array.to_floats_cast"
+arity = 1
+returns = "List[Float]"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.Array.complex_reals"]
+operation = "ndarray.array.complex_reals"
+arity = 1
+returns = "List[Float]"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.Array.complex_imags"]
+operation = "ndarray.array.complex_imags"
+arity = 1
+returns = "List[Float]"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.Array.reshape/2"]
 operation = "ndarray.array.reshape"
 arity = 2
 returns = "Array"
 blocking = "fast"
 resource = "opaque_handle"
+
+[functions."ndarray.Array.reshape/3"]
+operation = "ndarray.array.reshape_ordered"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.resize_in_place"]
+operation = "ndarray.array.resize_in_place"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "borrowed_handle"
 
 [functions."ndarray.Array.transpose"]
 operation = "ndarray.array.transpose"
@@ -127,6 +389,195 @@ arity = 3
 returns = "Array"
 blocking = "fast"
 resource = "opaque_handle"
+
+[functions."ndarray.Array.copy/1"]
+operation = "ndarray.array.copy"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.copy/2"]
+operation = "ndarray.array.copy_ordered"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.astype/2"]
+operation = "ndarray.array.astype"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.astype/5"]
+operation = "ndarray.array.astype_ordered"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.contiguous"]
+operation = "ndarray.array.contiguous"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.index_axis"]
+operation = "ndarray.array.index_axis"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.slice_axis"]
+operation = "ndarray.array.slice_axis"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.permute"]
+operation = "ndarray.array.permute"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.take"]
+operation = "ndarray.array.take"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.take_mode"]
+operation = "ndarray.array.take_mode"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.take_along_axis"]
+operation = "ndarray.array.take_along_axis"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.put"]
+operation = "ndarray.array.put"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.put_along_axis"]
+operation = "ndarray.array.put_along_axis"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.compress"]
+operation = "ndarray.array.compress"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.compress_flat"]
+operation = "ndarray.array.compress_flat"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.mask_select"]
+operation = "ndarray.array.mask_select"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.mask_assign"]
+operation = "ndarray.array.mask_assign"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.gather_coordinates"]
+operation = "ndarray.array.gather_coordinates"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.put_coordinates"]
+operation = "ndarray.array.put_coordinates"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.item_bool"]
+operation = "ndarray.array.item_bool"
+arity = 1
+returns = "Bool"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.item_int"]
+operation = "ndarray.array.item_int"
+arity = 1
+returns = "Int"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.get_bool"]
+operation = "ndarray.array.get_bool"
+arity = 2
+returns = "Bool"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.get_int"]
+operation = "ndarray.array.get_int"
+arity = 2
+returns = "Int"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.get_float"]
+operation = "ndarray.array.get_float"
+arity = 2
+returns = "Float"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.set_bool"]
+operation = "ndarray.array.set_bool"
+arity = 3
+returns = "Unit"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.set_int"]
+operation = "ndarray.array.set_int"
+arity = 3
+returns = "Unit"
+blocking = "fast"
+resource = "borrowed_handle"
+
+[functions."ndarray.Array.set_float"]
+operation = "ndarray.array.set_float"
+arity = 3
+returns = "Unit"
+blocking = "fast"
+resource = "borrowed_handle"
 
 [functions."ndarray.Array.add"]
 operation = "ndarray.array.add"
@@ -149,12 +600,1706 @@ returns = "Array"
 blocking = "fast"
 resource = "opaque_handle"
 
+[functions."ndarray.Array.matmul"]
+operation = "ndarray.array.matmul"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.dot"]
+operation = "ndarray.array.dot"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.inner"]
+operation = "ndarray.array.inner"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.outer"]
+operation = "ndarray.array.outer"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.vdot"]
+operation = "ndarray.array.vdot"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.trace"]
+operation = "ndarray.array.trace"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.determinant"]
+operation = "ndarray.array.determinant"
+arity = 1
+returns = "Float"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.solve"]
+operation = "ndarray.array.solve"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.inverse"]
+operation = "ndarray.array.inverse"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.norm_l1"]
+operation = "ndarray.array.norm_l1"
+arity = 1
+returns = "Float"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.norm_l2"]
+operation = "ndarray.array.norm_l2"
+arity = 1
+returns = "Float"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.norm_max"]
+operation = "ndarray.array.norm_max"
+arity = 1
+returns = "Float"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.frobenius_norm"]
+operation = "ndarray.array.frobenius_norm"
+arity = 1
+returns = "Float"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.nuclear_norm"]
+operation = "ndarray.array.nuclear_norm"
+arity = 1
+returns = "Float"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.matrix_rank"]
+operation = "ndarray.array.matrix_rank"
+arity = 2
+returns = "Int"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.to_npy"]
+operation = "ndarray.array.to_npy"
+arity = 1
+returns = "Bytes"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.from_npy"]
+operation = "ndarray.array.from_npy"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.save_npy"]
+operation = "ndarray.array.save_npy"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.load_npy"]
+operation = "ndarray.array.load_npy"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.serialize"]
+operation = "ndarray.array.serialize"
+arity = 1
+returns = "Bytes"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.Array.deserialize"]
+operation = "ndarray.array.deserialize"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.mmap_npy"]
+operation = "ndarray.array.mmap_npy"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.flush"]
+operation = "ndarray.array.flush"
+arity = 1
+returns = "Unit"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.to_arrow"]
+operation = "ndarray.array.to_arrow"
+arity = 1
+returns = "ArrowArray"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.from_arrow"]
+operation = "ndarray.array.from_arrow"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.split"]
+operation = "ndarray.array.split"
+arity = 3
+returns = "List[Array]"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.array_split"]
+operation = "ndarray.array.array_split"
+arity = 3
+returns = "List[Array]"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.split_at"]
+operation = "ndarray.array.split_at"
+arity = 3
+returns = "List[Array]"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.count_nonzero"]
+operation = "ndarray.array.count_nonzero"
+arity = 1
+returns = "Int"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.count_nonzero_axes"]
+operation = "ndarray.array.count_nonzero_axes"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.flatnonzero"]
+operation = "ndarray.array.flatnonzero"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.argwhere"]
+operation = "ndarray.array.argwhere"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.nonzero"]
+operation = "ndarray.array.nonzero"
+arity = 1
+returns = "List[Array]"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.expand_dims/2"]
+operation = "ndarray.array.expand_dims"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.expand_dims/2"]
+operation = "ndarray.array.expand_dims_axes"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.squeeze"]
+operation = "ndarray.array.squeeze"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.flip"]
+operation = "ndarray.array.flip"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.roll/3"]
+operation = "ndarray.array.roll"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.roll/2"]
+operation = "ndarray.array.roll_flat"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.roll/3"]
+operation = "ndarray.array.roll_axes_by"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.roll/3"]
+operation = "ndarray.array.roll_axes"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.repeat"]
+operation = "ndarray.array.repeat"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.repeat_counts"]
+operation = "ndarray.array.repeat_counts"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.repeat_flat"]
+operation = "ndarray.array.repeat_flat"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.tile"]
+operation = "ndarray.array.tile"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.concatenate"]
+operation = "ndarray.array.concatenate"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.stack"]
+operation = "ndarray.array.stack"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sort"]
+operation = "ndarray.array.sort"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.argsort"]
+operation = "ndarray.array.argsort"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sort_unstable"]
+operation = "ndarray.array.sort_unstable"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.argsort_unstable"]
+operation = "ndarray.array.argsort_unstable"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sort_flat"]
+operation = "ndarray.array.sort_flat"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.argsort_flat"]
+operation = "ndarray.array.argsort_flat"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sort_inplace"]
+operation = "ndarray.array.sort_inplace"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.partition/3"]
+operation = "ndarray.array.partition"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.argpartition/3"]
+operation = "ndarray.array.argpartition"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.partition/3"]
+operation = "ndarray.array.partition_kths"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.argpartition/3"]
+operation = "ndarray.array.argpartition_kths"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.partition_flat/2"]
+operation = "ndarray.array.partition_flat"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.argpartition_flat/2"]
+operation = "ndarray.array.argpartition_flat"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.partition_flat/2"]
+operation = "ndarray.array.partition_kths_flat"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.argpartition_flat/2"]
+operation = "ndarray.array.argpartition_kths_flat"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.partition_inplace/3"]
+operation = "ndarray.array.partition_inplace"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.partition_inplace/3"]
+operation = "ndarray.array.partition_kths_inplace"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.broadcast_to"]
+operation = "ndarray.array.broadcast_to"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.true_divide"]
+operation = "ndarray.array.true_divide"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.floor_divide"]
+operation = "ndarray.array.floor_divide"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.remainder"]
+operation = "ndarray.array.remainder"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.power"]
+operation = "ndarray.array.power"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.elementwise_minimum"]
+operation = "ndarray.array.elementwise_minimum"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.elementwise_maximum"]
+operation = "ndarray.array.elementwise_maximum"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.fmin"]
+operation = "ndarray.array.fmin"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.fmax"]
+operation = "ndarray.array.fmax"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.clip"]
+operation = "ndarray.array.clip"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.clip_lower"]
+operation = "ndarray.array.clip_lower"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.clip_upper"]
+operation = "ndarray.array.clip_upper"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.clip_into"]
+operation = "ndarray.array.clip_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.clip_lower_into"]
+operation = "ndarray.array.clip_lower_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.clip_upper_into"]
+operation = "ndarray.array.clip_upper_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.clip_inplace"]
+operation = "ndarray.array.clip_inplace"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.clip_lower_inplace"]
+operation = "ndarray.array.clip_lower_inplace"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.clip_upper_inplace"]
+operation = "ndarray.array.clip_upper_inplace"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.equal"]
+operation = "ndarray.array.equal"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.not_equal"]
+operation = "ndarray.array.not_equal"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.less"]
+operation = "ndarray.array.less"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.less_equal"]
+operation = "ndarray.array.less_equal"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.greater"]
+operation = "ndarray.array.greater"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.greater_equal"]
+operation = "ndarray.array.greater_equal"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.logical_and"]
+operation = "ndarray.array.logical_and"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.logical_or"]
+operation = "ndarray.array.logical_or"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.logical_xor"]
+operation = "ndarray.array.logical_xor"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.bitwise_and"]
+operation = "ndarray.array.bitwise_and"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.bitwise_or"]
+operation = "ndarray.array.bitwise_or"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.bitwise_xor"]
+operation = "ndarray.array.bitwise_xor"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.left_shift"]
+operation = "ndarray.array.left_shift"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.right_shift"]
+operation = "ndarray.array.right_shift"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.gcd"]
+operation = "ndarray.array.gcd"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.lcm"]
+operation = "ndarray.array.lcm"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.hypot"]
+operation = "ndarray.array.hypot"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arctan2"]
+operation = "ndarray.array.arctan2"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.logaddexp"]
+operation = "ndarray.array.logaddexp"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.logaddexp2"]
+operation = "ndarray.array.logaddexp2"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.copysign"]
+operation = "ndarray.array.copysign"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.nextafter"]
+operation = "ndarray.array.nextafter"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.is_close"]
+operation = "ndarray.array.is_close"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.select_where"]
+operation = "ndarray.array.select_where"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.negative"]
+operation = "ndarray.array.negative"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.positive"]
+operation = "ndarray.array.positive"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.absolute"]
+operation = "ndarray.array.absolute"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sign"]
+operation = "ndarray.array.sign"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.square"]
+operation = "ndarray.array.square"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sqrt"]
+operation = "ndarray.array.sqrt"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.reciprocal"]
+operation = "ndarray.array.reciprocal"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.exp"]
+operation = "ndarray.array.exp"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.expm1"]
+operation = "ndarray.array.expm1"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.log"]
+operation = "ndarray.array.log"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.log1p"]
+operation = "ndarray.array.log1p"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.log2"]
+operation = "ndarray.array.log2"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.log10"]
+operation = "ndarray.array.log10"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sinh"]
+operation = "ndarray.array.sinh"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.cosh"]
+operation = "ndarray.array.cosh"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.tanh"]
+operation = "ndarray.array.tanh"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arcsin"]
+operation = "ndarray.array.arcsin"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arccos"]
+operation = "ndarray.array.arccos"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arctan"]
+operation = "ndarray.array.arctan"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arcsinh"]
+operation = "ndarray.array.arcsinh"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arccosh"]
+operation = "ndarray.array.arccosh"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.arctanh"]
+operation = "ndarray.array.arctanh"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sin"]
+operation = "ndarray.array.sin"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.cos"]
+operation = "ndarray.array.cos"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.tan"]
+operation = "ndarray.array.tan"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.floor"]
+operation = "ndarray.array.floor"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.ceil"]
+operation = "ndarray.array.ceil"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.round"]
+operation = "ndarray.array.round"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.logical_not"]
+operation = "ndarray.array.logical_not"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.is_nan"]
+operation = "ndarray.array.is_nan"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.is_infinite"]
+operation = "ndarray.array.is_infinite"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.is_finite"]
+operation = "ndarray.array.is_finite"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.conjugate"]
+operation = "ndarray.array.conjugate"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.exp2"]
+operation = "ndarray.array.exp2"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.cbrt"]
+operation = "ndarray.array.cbrt"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.degrees"]
+operation = "ndarray.array.degrees"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.radians"]
+operation = "ndarray.array.radians"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sign_bit"]
+operation = "ndarray.array.sign_bit"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.frexp_all"]
+operation = "ndarray.array.frexp_all"
+arity = 1
+returns = "List[Array]"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.modf_all"]
+operation = "ndarray.array.modf_all"
+arity = 1
+returns = "List[Array]"
+blocking = "fast"
+resource = "opaque_handle"
+
 [functions."ndarray.Array.sum"]
 operation = "ndarray.array.sum"
 arity = 3
 returns = "Array"
 blocking = "fast"
 resource = "opaque_handle"
+
+[functions."ndarray.Array.product"]
+operation = "ndarray.array.product"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.mean"]
+operation = "ndarray.array.mean"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.mean_where"]
+operation = "ndarray.array.mean_where"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.mean_as"]
+operation = "ndarray.array.mean_as"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.mean_into"]
+operation = "ndarray.array.mean_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.minimum"]
+operation = "ndarray.array.minimum"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.maximum"]
+operation = "ndarray.array.maximum"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.any"]
+operation = "ndarray.array.any"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.all"]
+operation = "ndarray.array.all"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.argmin"]
+operation = "ndarray.array.argmin"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.argmax"]
+operation = "ndarray.array.argmax"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.argmin_into"]
+operation = "ndarray.array.argmin_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.argmax_into"]
+operation = "ndarray.array.argmax_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.variance"]
+operation = "ndarray.array.variance"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.standard_deviation"]
+operation = "ndarray.array.standard_deviation"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.variance_where"]
+operation = "ndarray.array.variance_where"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.variance_as"]
+operation = "ndarray.array.variance_as"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.variance_into"]
+operation = "ndarray.array.variance_into"
+arity = 5
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.standard_deviation_where"]
+operation = "ndarray.array.standard_deviation_where"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.standard_deviation_as"]
+operation = "ndarray.array.standard_deviation_as"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.standard_deviation_into"]
+operation = "ndarray.array.standard_deviation_into"
+arity = 5
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.median"]
+operation = "ndarray.array.median"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.quantile"]
+operation = "ndarray.array.quantile"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.percentile"]
+operation = "ndarray.array.percentile"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.quantiles"]
+operation = "ndarray.array.quantiles"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.percentiles"]
+operation = "ndarray.array.percentiles"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.peak_to_peak"]
+operation = "ndarray.array.peak_to_peak"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.weighted_average"]
+operation = "ndarray.array.weighted_average"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.covariance"]
+operation = "ndarray.array.covariance"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.correlation"]
+operation = "ndarray.array.correlation"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.nan_sum"]
+operation = "ndarray.array.nan_sum"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.nan_product"]
+operation = "ndarray.array.nan_product"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.nan_mean"]
+operation = "ndarray.array.nan_mean"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.nan_minimum"]
+operation = "ndarray.array.nan_minimum"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.nan_maximum"]
+operation = "ndarray.array.nan_maximum"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.nan_variance"]
+operation = "ndarray.array.nan_variance"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.nan_standard_deviation"]
+operation = "ndarray.array.nan_standard_deviation"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.histogram"]
+operation = "ndarray.array.histogram"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.histogram_bin_edges"]
+operation = "ndarray.array.histogram_bin_edges"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.histogramdd"]
+operation = "ndarray.array.histogramdd"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.bincount"]
+operation = "ndarray.array.bincount"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.digitize"]
+operation = "ndarray.array.digitize"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.difference"]
+operation = "ndarray.array.difference"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.gradient"]
+operation = "ndarray.array.gradient"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.unwrap"]
+operation = "ndarray.array.unwrap"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.interpolate"]
+operation = "ndarray.array.interpolate"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.trapezoidal_integral"]
+operation = "ndarray.array.trapezoidal_integral"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.trapezoidal_integral_uniform"]
+operation = "ndarray.array.trapezoidal_integral_uniform"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.fft/3"]
+operation = "ndarray.array.fft"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.fft/4"]
+operation = "ndarray.array.fft_sized"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.ifft/3"]
+operation = "ndarray.array.ifft"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.ifft/4"]
+operation = "ndarray.array.ifft_sized"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.fftn"]
+operation = "ndarray.array.fftn"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.ifftn"]
+operation = "ndarray.array.ifftn"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.rfft/3"]
+operation = "ndarray.array.rfft"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.rfft/4"]
+operation = "ndarray.array.rfft_sized"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.irfft"]
+operation = "ndarray.array.irfft"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.rfftn"]
+operation = "ndarray.array.rfftn"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.irfftn"]
+operation = "ndarray.array.irfftn"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.hfft"]
+operation = "ndarray.array.hfft"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.ihfft/3"]
+operation = "ndarray.array.ihfft"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.ihfft/4"]
+operation = "ndarray.array.ihfft_sized"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.fftfreq"]
+operation = "ndarray.array.fftfreq"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.rfftfreq"]
+operation = "ndarray.array.rfftfreq"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.fftshift"]
+operation = "ndarray.array.fftshift"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.ifftshift"]
+operation = "ndarray.array.ifftshift"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.searchsorted"]
+operation = "ndarray.array.searchsorted"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.searchsorted_with_sorter"]
+operation = "ndarray.array.searchsorted_with_sorter"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.lexsort_keys"]
+operation = "ndarray.array.lexsort_keys"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.unique_all"]
+operation = "ndarray.array.unique_all"
+arity = 1
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.union"]
+operation = "ndarray.array.union"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.intersect"]
+operation = "ndarray.array.intersect"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.set_difference"]
+operation = "ndarray.array.set_difference"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.set_xor"]
+operation = "ndarray.array.set_xor"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.is_in"]
+operation = "ndarray.array.is_in"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.in1d"]
+operation = "ndarray.array.in1d"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.set_difference_unique"]
+operation = "ndarray.array.set_difference_unique"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.intersect_all"]
+operation = "ndarray.array.intersect_all"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.unique_axis_all"]
+operation = "ndarray.array.unique_axis_all"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.ediff1d_edges"]
+operation = "ndarray.array.ediff1d_edges"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.cumulative_sum"]
+operation = "ndarray.array.cumulative_sum"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.cumulative_product"]
+operation = "ndarray.array.cumulative_product"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.export_tensor_packet"]
+operation = "ndarray.array.export_tensor_packet"
+arity = 2
+returns = "Bytes"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.Array.import_tensor_packet"]
+operation = "ndarray.array.import_tensor_packet"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.choose"]
+operation = "ndarray.array.choose"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.fill"]
+operation = "ndarray.array.fill"
+arity = 2
+returns = "Unit"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.Array.resize"]
+operation = "ndarray.array.resize"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.any_where"]
+operation = "ndarray.array.any_where"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.all_where"]
+operation = "ndarray.array.all_where"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.choose_into"]
+operation = "ndarray.array.choose_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.round_decimals"]
+operation = "ndarray.array.round_decimals"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.round_into"]
+operation = "ndarray.array.round_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.conjugate_into"]
+operation = "ndarray.array.conjugate_into"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.matmul_into"]
+operation = "ndarray.array.matmul_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.dot_into"]
+operation = "ndarray.array.dot_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.trace_into"]
+operation = "ndarray.array.trace_into"
+arity = 5
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
 
 [functions."ndarray.Array.dispose"]
 operation = "ndarray.array.dispose"
@@ -163,6 +2308,139 @@ returns = "Unit"
 blocking = "fast"
 resource = "dispose_handle"
 
+[functions."ndarray.Array.outer_into"]
+operation = "ndarray.array.outer_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.sum_into"]
+operation = "ndarray.array.sum_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.product_into"]
+operation = "ndarray.array.product_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.minimum_into"]
+operation = "ndarray.array.minimum_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.maximum_into"]
+operation = "ndarray.array.maximum_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Array.sum_where"]
+operation = "ndarray.array.sum_where"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sum_initial"]
+operation = "ndarray.array.sum_initial"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.sum_where_initial"]
+operation = "ndarray.array.sum_where_initial"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.minimum_initial"]
+operation = "ndarray.array.minimum_initial"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.maximum_initial"]
+operation = "ndarray.array.maximum_initial"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.minimum_where"]
+operation = "ndarray.array.minimum_where"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.maximum_where"]
+operation = "ndarray.array.maximum_where"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.minimum_where_initial"]
+operation = "ndarray.array.minimum_where_initial"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.maximum_where_initial"]
+operation = "ndarray.array.maximum_where_initial"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.fmin_reduce"]
+operation = "ndarray.array.fmin_reduce"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.fmax_reduce"]
+operation = "ndarray.array.fmax_reduce"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.bitwise_and_reduce"]
+operation = "ndarray.array.bitwise_and_reduce"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.bitwise_or_reduce"]
+operation = "ndarray.array.bitwise_or_reduce"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Array.bitwise_xor_reduce"]
+operation = "ndarray.array.bitwise_xor_reduce"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
 [functions."ndarray.Array.live_count"]
 operation = "ndarray.array.live_count"
 arity = 0
@@ -170,3 +2448,3208 @@ returns = "Int"
 blocking = "fast"
 resource = "value"
 
+[functions."ndarray.Creation.linspace_arrays"]
+operation = "ndarray.creation.linspace_arrays"
+arity = 6
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.linspace_steps"]
+operation = "ndarray.creation.linspace_steps"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.eye_ordered"]
+operation = "ndarray.creation.eye_ordered"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.empty_like"]
+operation = "ndarray.creation.empty_like"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.zeros_like"]
+operation = "ndarray.creation.zeros_like"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.ones_like"]
+operation = "ndarray.creation.ones_like"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.full_like_int"]
+operation = "ndarray.creation.full_like_int"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.full_like_float"]
+operation = "ndarray.creation.full_like_float"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.logspace"]
+operation = "ndarray.creation.logspace"
+arity = 6
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.geomspace"]
+operation = "ndarray.creation.geomspace"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.logspace_arrays"]
+operation = "ndarray.creation.logspace_arrays"
+arity = 7
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.geomspace_arrays"]
+operation = "ndarray.creation.geomspace_arrays"
+arity = 6
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.tri"]
+operation = "ndarray.creation.tri"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.tril"]
+operation = "ndarray.creation.tril"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.triu"]
+operation = "ndarray.creation.triu"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.diagflat"]
+operation = "ndarray.creation.diagflat"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.indices"]
+operation = "ndarray.creation.indices"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.indices_sparse"]
+operation = "ndarray.creation.indices_sparse"
+arity = 2
+returns = "List[Array]"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Creation.vander"]
+operation = "ndarray.creation.vander"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.atleast_1d"]
+operation = "ndarray.shape.atleast_1d"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.atleast_2d"]
+operation = "ndarray.shape.atleast_2d"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.atleast_3d"]
+operation = "ndarray.shape.atleast_3d"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.ravel/1"]
+operation = "ndarray.shape.ravel"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.ravel/2"]
+operation = "ndarray.shape.ravel_ordered"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.flatten/1"]
+operation = "ndarray.shape.flatten"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.flatten/2"]
+operation = "ndarray.shape.flatten_ordered"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.moveaxis"]
+operation = "ndarray.shape.moveaxis"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.rollaxis"]
+operation = "ndarray.shape.rollaxis"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.flip_all"]
+operation = "ndarray.shape.flip_all"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.flipud"]
+operation = "ndarray.shape.flipud"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.fliplr"]
+operation = "ndarray.shape.fliplr"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.rot90"]
+operation = "ndarray.shape.rot90"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.concatenate_flat"]
+operation = "ndarray.shape.concatenate_flat"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.concatenate_with_dtype"]
+operation = "ndarray.shape.concatenate_with_dtype"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.concatenate_flat_with_dtype"]
+operation = "ndarray.shape.concatenate_flat_with_dtype"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.concatenate_into"]
+operation = "ndarray.shape.concatenate_into"
+arity = 4
+returns = "Unit"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Shape.concatenate_flat_into"]
+operation = "ndarray.shape.concatenate_flat_into"
+arity = 3
+returns = "Unit"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.basic_slice"]
+operation = "ndarray.shape.basic_slice"
+arity = 7
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.take_indices"]
+operation = "ndarray.indexing.take_indices"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.take_indices_mode"]
+operation = "ndarray.indexing.take_indices_mode"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.take_indices_into"]
+operation = "ndarray.indexing.take_indices_into"
+arity = 5
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Indexing.compress_into"]
+operation = "ndarray.indexing.compress_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Indexing.compress_flat_into"]
+operation = "ndarray.indexing.compress_flat_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Indexing.add_at_coordinates"]
+operation = "ndarray.indexing.add_at_coordinates"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Indexing.pad_constant"]
+operation = "ndarray.shape.pad_constant"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_edge"]
+operation = "ndarray.shape.pad_edge"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_reflect"]
+operation = "ndarray.shape.pad_reflect"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_symmetric"]
+operation = "ndarray.shape.pad_symmetric"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_wrap"]
+operation = "ndarray.shape.pad_wrap"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_reflect_odd"]
+operation = "ndarray.shape.pad_reflect_odd"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_symmetric_odd"]
+operation = "ndarray.shape.pad_symmetric_odd"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_linear_ramp"]
+operation = "ndarray.shape.pad_linear_ramp"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_empty"]
+operation = "ndarray.shape.pad_empty"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_minimum"]
+operation = "ndarray.shape.pad_minimum"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_maximum"]
+operation = "ndarray.shape.pad_maximum"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_mean"]
+operation = "ndarray.shape.pad_mean"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_median"]
+operation = "ndarray.shape.pad_median"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_constant_values"]
+operation = "ndarray.shape.pad_constant_values"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_linear_ramp_values"]
+operation = "ndarray.shape.pad_linear_ramp_values"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Indexing.pad_statistical"]
+operation = "ndarray.shape.pad_statistical"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.det"]
+operation = "ndarray.array.det"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.least_squares"]
+operation = "ndarray.array.least_squares"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.matrix_rank_general"]
+operation = "ndarray.array.matrix_rank_general"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.lstsq_general"]
+operation = "ndarray.array.lstsq"
+arity = 3
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.cholesky"]
+operation = "ndarray.array.cholesky"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.qr_factors"]
+operation = "ndarray.array.qr"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.svd"]
+operation = "ndarray.array.svd"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.singular_values"]
+operation = "ndarray.array.singular_values"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.qr_mode"]
+operation = "ndarray.array.qr_mode"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.symmetric_eigen"]
+operation = "ndarray.array.symmetric_eigen"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.symmetric_eigen_general"]
+operation = "ndarray.array.symmetric_eigen_general"
+arity = 3
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.cond"]
+operation = "ndarray.array.cond"
+arity = 2
+returns = "Float"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.LinearAlgebra.eig"]
+operation = "ndarray.array.eig"
+arity = 1
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.condition"]
+operation = "ndarray.array.condition"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.eigvals"]
+operation = "ndarray.array.eigvals"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.eigvalsh"]
+operation = "ndarray.array.eigvalsh"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.eigvalsh_general"]
+operation = "ndarray.array.eigvalsh_general"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.matrix_power"]
+operation = "ndarray.array.matrix_power"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.multi_dot"]
+operation = "ndarray.array.multi_dot"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.multi_dot_into"]
+operation = "ndarray.array.multi_dot_into"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.LinearAlgebra.norm"]
+operation = "ndarray.array.norm"
+arity = 1
+returns = "Float"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.LinearAlgebra.norm_general"]
+operation = "ndarray.array.norm_general"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.pinv"]
+operation = "ndarray.array.pinv"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.slogdet"]
+operation = "ndarray.array.slogdet"
+arity = 1
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.tensorinv"]
+operation = "ndarray.array.tensorinv"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.LinearAlgebra.tensorsolve"]
+operation = "ndarray.array.tensorsolve"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyval"]
+operation = "ndarray.array.polyval"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyroots"]
+operation = "ndarray.array.polyroots"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyfit"]
+operation = "ndarray.array.polyfit"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyadd"]
+operation = "ndarray.array.polyadd"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polysub"]
+operation = "ndarray.array.polysub"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polymul"]
+operation = "ndarray.array.polymul"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polydiv_all"]
+operation = "ndarray.array.polydiv_all"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyder"]
+operation = "ndarray.array.polyder"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyint"]
+operation = "ndarray.array.polyint"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polycompanion"]
+operation = "ndarray.array.polycompanion"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyconvert"]
+operation = "ndarray.array.polyconvert"
+arity = 7
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyfromroots"]
+operation = "ndarray.array.polyfromroots"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyline"]
+operation = "ndarray.array.polyline"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polymulx"]
+operation = "ndarray.array.polymulx"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polypow"]
+operation = "ndarray.array.polypow"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polytrim"]
+operation = "ndarray.array.polytrim"
+arity = 2
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyvalfromroots"]
+operation = "ndarray.array.polyvalfromroots"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyder_axis"]
+operation = "ndarray.array.polyder_axis"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyint_axis"]
+operation = "ndarray.array.polyint_axis"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyvalfromroots_tensor"]
+operation = "ndarray.array.polyvalfromroots_tensor"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyfit_degrees"]
+operation = "ndarray.array.polyfit_degrees"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyfit_weighted_degrees"]
+operation = "ndarray.array.polyfit_weighted_degrees"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyfit_covariance"]
+operation = "ndarray.array.polyfit_covariance"
+arity = 4
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyfit_weighted_covariance"]
+operation = "ndarray.array.polyfit_weighted_covariance"
+arity = 5
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyvander"]
+operation = "ndarray.array.polyvander"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyval2d"]
+operation = "ndarray.array.polyval2d"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyval3d"]
+operation = "ndarray.array.polyval3d"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polygrid2d"]
+operation = "ndarray.array.polygrid2d"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polygrid3d"]
+operation = "ndarray.array.polygrid3d"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyvander2d"]
+operation = "ndarray.array.polyvander2d"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Polynomial.polyvander3d"]
+operation = "ndarray.array.polyvander3d"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.TensorAlgebra.tensordot"]
+operation = "ndarray.array.tensordot"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.TensorAlgebra.kron"]
+operation = "ndarray.array.kron"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.TensorAlgebra.cross"]
+operation = "ndarray.array.cross"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.TensorAlgebra.einsum"]
+operation = "ndarray.array.einsum"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.TensorAlgebra.einsum_into"]
+operation = "ndarray.array.einsum_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.TensorAlgebra.einsum_ordered"]
+operation = "ndarray.array.einsum_ordered"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.ArrowArray.length"]
+operation = "ndarray.arrow_array.length"
+arity = 1
+returns = "Int"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.ArrowArray.null_count"]
+operation = "ndarray.arrow_array.null_count"
+arity = 1
+returns = "Int"
+blocking = "fast"
+resource = "value"
+
+[functions."ndarray.ArrowArray.dispose"]
+operation = "ndarray.arrow_array.dispose"
+arity = 1
+returns = "Unit"
+blocking = "fast"
+resource = "dispose_handle"
+
+[functions."ndarray.RandomStream.new"]
+operation = "ndarray.random_stream.new"
+arity = 1
+returns = "RandomStream"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.sample_broadcast"]
+operation = "ndarray.random_stream.sample_broadcast"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.uniform"]
+operation = "ndarray.random_stream.uniform"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.uniform_into"]
+operation = "ndarray.random_stream.uniform_into"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.RandomStream.normal"]
+operation = "ndarray.random_stream.normal"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.beta"]
+operation = "ndarray.random_stream.beta"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.gamma"]
+operation = "ndarray.random_stream.gamma"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.binomial"]
+operation = "ndarray.random_stream.binomial"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.poisson"]
+operation = "ndarray.random_stream.poisson"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.standard_normal"]
+operation = "ndarray.random_stream.standard_normal"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.standard_normal_into"]
+operation = "ndarray.random_stream.standard_normal_into"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.RandomStream.chisquare"]
+operation = "ndarray.random_stream.chisquare"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.f"]
+operation = "ndarray.random_stream.f"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.gumbel"]
+operation = "ndarray.random_stream.gumbel"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.lognormal"]
+operation = "ndarray.random_stream.lognormal"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.pareto"]
+operation = "ndarray.random_stream.pareto"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.power"]
+operation = "ndarray.random_stream.power"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.exponential"]
+operation = "ndarray.random_stream.exponential"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.standard_exponential"]
+operation = "ndarray.random_stream.standard_exponential"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.standard_exponential_into"]
+operation = "ndarray.random_stream.standard_exponential_into"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.RandomStream.standard_gamma"]
+operation = "ndarray.random_stream.standard_gamma"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.standard_gamma_into"]
+operation = "ndarray.random_stream.standard_gamma_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.RandomStream.standard_t"]
+operation = "ndarray.random_stream.standard_t"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.triangular"]
+operation = "ndarray.random_stream.triangular"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.weibull"]
+operation = "ndarray.random_stream.weibull"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.geometric"]
+operation = "ndarray.random_stream.geometric"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.hypergeometric"]
+operation = "ndarray.random_stream.hypergeometric"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.zipf"]
+operation = "ndarray.random_stream.zipf"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.standard_cauchy"]
+operation = "ndarray.random_stream.standard_cauchy"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.laplace"]
+operation = "ndarray.random_stream.laplace"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.logistic"]
+operation = "ndarray.random_stream.logistic"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.negative_binomial"]
+operation = "ndarray.random_stream.negative_binomial"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.noncentral_chisquare"]
+operation = "ndarray.random_stream.noncentral_chisquare"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.noncentral_f"]
+operation = "ndarray.random_stream.noncentral_f"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.rayleigh"]
+operation = "ndarray.random_stream.rayleigh"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.wald"]
+operation = "ndarray.random_stream.wald"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.logseries"]
+operation = "ndarray.random_stream.logseries"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.vonmises"]
+operation = "ndarray.random_stream.vonmises"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.choice"]
+operation = "ndarray.random_stream.choice"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.sample_choice_axis"]
+operation = "ndarray.random_stream.choice_axis"
+arity = 7
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.sample_choice_uniform_axis"]
+operation = "ndarray.random_stream.choice_uniform_axis"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.dirichlet"]
+operation = "ndarray.random_stream.dirichlet"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.multinomial"]
+operation = "ndarray.random_stream.multinomial"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.multivariate_hypergeometric"]
+operation = "ndarray.random_stream.multivariate_hypergeometric"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.multivariate_normal"]
+operation = "ndarray.random_stream.multivariate_normal"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.integers"]
+operation = "ndarray.random_stream.integers"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.bernoulli"]
+operation = "ndarray.random_stream.bernoulli"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.permutation"]
+operation = "ndarray.random_stream.permutation"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.shuffle"]
+operation = "ndarray.random_stream.shuffle"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.RandomStream.dispose"]
+operation = "ndarray.random_stream.dispose"
+arity = 1
+returns = "Unit"
+blocking = "fast"
+resource = "dispose_handle"
+
+[functions."ndarray.Chebyshev.cheb2poly"]
+operation = "ndarray.array.cheb2poly"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.poly2cheb"]
+operation = "ndarray.array.poly2cheb"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebadd"]
+operation = "ndarray.array.chebadd"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebsub"]
+operation = "ndarray.array.chebsub"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebmul"]
+operation = "ndarray.array.chebmul"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebdiv"]
+operation = "ndarray.array.chebdiv"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebmulx"]
+operation = "ndarray.array.chebmulx"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebpow"]
+operation = "ndarray.array.chebpow"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebder/2"]
+operation = "ndarray.array.chebder"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebint/3"]
+operation = "ndarray.array.chebint"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebfit/3"]
+operation = "ndarray.array.chebfit"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebfromroots"]
+operation = "ndarray.array.chebfromroots"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebcompanion"]
+operation = "ndarray.array.chebcompanion"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebroots"]
+operation = "ndarray.array.chebroots"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebtrim"]
+operation = "ndarray.array.chebtrim"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebline"]
+operation = "ndarray.array.chebline"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebval/2"]
+operation = "ndarray.array.chebval"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebval2d"]
+operation = "ndarray.array.chebval2d"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebval3d"]
+operation = "ndarray.array.chebval3d"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebgrid2d"]
+operation = "ndarray.array.chebgrid2d"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebgrid3d"]
+operation = "ndarray.array.chebgrid3d"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebvander"]
+operation = "ndarray.array.chebvander"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebvander2d"]
+operation = "ndarray.array.chebvander2d"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebvander3d"]
+operation = "ndarray.array.chebvander3d"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebgauss"]
+operation = "ndarray.array.chebgauss"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebweight"]
+operation = "ndarray.array.chebweight"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebpts1"]
+operation = "ndarray.array.chebpts1"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebpts2"]
+operation = "ndarray.array.chebpts2"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebinterpolate"]
+operation = "ndarray.array.chebinterpolate"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebder/4"]
+operation = "ndarray.array.chebder_axis"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebint/6"]
+operation = "ndarray.array.chebint_axis"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebval/3"]
+operation = "ndarray.array.chebval_tensor"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebfit/3"]
+operation = "ndarray.array.chebfit_degrees"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Chebyshev.chebfit/4"]
+operation = "ndarray.array.chebfit_weighted_degrees"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.leg2poly"]
+operation = "ndarray.array.leg2poly"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.poly2leg"]
+operation = "ndarray.array.poly2leg"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legadd"]
+operation = "ndarray.array.legadd"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legsub"]
+operation = "ndarray.array.legsub"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legmul"]
+operation = "ndarray.array.legmul"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legdiv"]
+operation = "ndarray.array.legdiv"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legmulx"]
+operation = "ndarray.array.legmulx"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legpow"]
+operation = "ndarray.array.legpow"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legder/2"]
+operation = "ndarray.array.legder"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legint/3"]
+operation = "ndarray.array.legint"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legfit/3"]
+operation = "ndarray.array.legfit"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legfromroots"]
+operation = "ndarray.array.legfromroots"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legcompanion"]
+operation = "ndarray.array.legcompanion"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legroots"]
+operation = "ndarray.array.legroots"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legtrim"]
+operation = "ndarray.array.legtrim"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legline"]
+operation = "ndarray.array.legline"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legval/2"]
+operation = "ndarray.array.legval"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legval2d"]
+operation = "ndarray.array.legval2d"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legval3d"]
+operation = "ndarray.array.legval3d"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.leggrid2d"]
+operation = "ndarray.array.leggrid2d"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.leggrid3d"]
+operation = "ndarray.array.leggrid3d"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legvander"]
+operation = "ndarray.array.legvander"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legvander2d"]
+operation = "ndarray.array.legvander2d"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legvander3d"]
+operation = "ndarray.array.legvander3d"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.leggauss"]
+operation = "ndarray.array.leggauss"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legweight"]
+operation = "ndarray.array.legweight"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legder/4"]
+operation = "ndarray.array.legder_axis"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legint/6"]
+operation = "ndarray.array.legint_axis"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legval/3"]
+operation = "ndarray.array.legval_tensor"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legfit/3"]
+operation = "ndarray.array.legfit_degrees"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Legendre.legfit/4"]
+operation = "ndarray.array.legfit_weighted_degrees"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.lexsort"]
+operation = "ndarray.numpy.lexsort"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.allclose"]
+operation = "ndarray.numpy.allclose"
+arity = 5
+returns = "Bool"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.isclose"]
+operation = "ndarray.numpy.isclose"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.angle"]
+operation = "ndarray.numpy.angle"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.array_equal"]
+operation = "ndarray.numpy.array_equal"
+arity = 2
+returns = "Bool"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.array_equal_nan"]
+operation = "ndarray.numpy.array_equal_nan"
+arity = 2
+returns = "Bool"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.array_equiv"]
+operation = "ndarray.numpy.array_equiv"
+arity = 2
+returns = "Bool"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.asarray_chkfinite/1"]
+operation = "ndarray.numpy.asarray_chkfinite"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.asarray_chkfinite/3"]
+operation = "ndarray.numpy.asarray_chkfinite_as"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.asfarray"]
+operation = "ndarray.numpy.asfarray"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.difference_prepend"]
+operation = "ndarray.numpy.difference_prepend"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.difference_append"]
+operation = "ndarray.numpy.difference_append"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.difference_surround"]
+operation = "ndarray.numpy.difference_surround"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.gradient_edge"]
+operation = "ndarray.numpy.gradient_edge"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.gradient_coordinates"]
+operation = "ndarray.numpy.gradient_coordinates"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.gradient_all"]
+operation = "ndarray.numpy.gradient_all"
+arity = 3
+returns = "List[Array]"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.gradient_uniform_axes"]
+operation = "ndarray.numpy.gradient_uniform_axes"
+arity = 4
+returns = "List[Array]"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.gradient_axes"]
+operation = "ndarray.numpy.gradient_axes"
+arity = 4
+returns = "List[Array]"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.unwrap_discontinuity"]
+operation = "ndarray.numpy.unwrap_discontinuity"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.unwrap_integer_period"]
+operation = "ndarray.numpy.unwrap_integer_period"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.interpolate_default"]
+operation = "ndarray.numpy.interpolate_default"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.interpolate_boundaries"]
+operation = "ndarray.numpy.interpolate_boundaries"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.interpolate_periodic"]
+operation = "ndarray.numpy.interpolate_periodic"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.bincount"]
+operation = "ndarray.numpy.bincount"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.average"]
+operation = "ndarray.numpy.average"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.bartlett"]
+operation = "ndarray.numpy.bartlett"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.blackman"]
+operation = "ndarray.numpy.blackman"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.hamming"]
+operation = "ndarray.numpy.hamming"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.hanning"]
+operation = "ndarray.numpy.hanning"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.kaiser"]
+operation = "ndarray.numpy.kaiser"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.bitwise_not"]
+operation = "ndarray.numpy.bitwise_not"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.convolve"]
+operation = "ndarray.numpy.convolve"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.correlate"]
+operation = "ndarray.numpy.correlate"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.divmod"]
+operation = "ndarray.numpy.divmod"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.fix"]
+operation = "ndarray.numpy.fix"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.float_power"]
+operation = "ndarray.numpy.float_power"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.fmod"]
+operation = "ndarray.numpy.fmod"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.heaviside"]
+operation = "ndarray.numpy.heaviside"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.i0"]
+operation = "ndarray.numpy.i0"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.real"]
+operation = "ndarray.numpy.real"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.imag"]
+operation = "ndarray.numpy.imag"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.iscomplex"]
+operation = "ndarray.numpy.iscomplex"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.isreal"]
+operation = "ndarray.numpy.isreal"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.iscomplexobj"]
+operation = "ndarray.numpy.iscomplexobj"
+arity = 1
+returns = "Bool"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.isrealobj"]
+operation = "ndarray.numpy.isrealobj"
+arity = 1
+returns = "Bool"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.isneginf"]
+operation = "ndarray.numpy.isneginf"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.isposinf"]
+operation = "ndarray.numpy.isposinf"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.ldexp"]
+operation = "ndarray.numpy.ldexp"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nan_to_num"]
+operation = "ndarray.numpy.nan_to_num"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.real_if_close"]
+operation = "ndarray.numpy.real_if_close"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.sinc"]
+operation = "ndarray.numpy.sinc"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.spacing"]
+operation = "ndarray.numpy.spacing"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.sort_complex"]
+operation = "ndarray.numpy.sort_complex"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.trim_zeros"]
+operation = "ndarray.numpy.trim_zeros"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.unique"]
+operation = "ndarray.numpy.unique"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.invert"]
+operation = "ndarray.numpy.invert"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.trunc"]
+operation = "ndarray.numpy.trunc"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.frombuffer"]
+operation = "ndarray.numpy.frombuffer"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanargmax"]
+operation = "ndarray.numpy.nanargmax"
+arity = 1
+returns = "Int"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanargmin"]
+operation = "ndarray.numpy.nanargmin"
+arity = 1
+returns = "Int"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nancumprod"]
+operation = "ndarray.numpy.nancumprod"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nancumsum"]
+operation = "ndarray.numpy.nancumsum"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanmedian"]
+operation = "ndarray.numpy.nanmedian"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanpercentile"]
+operation = "ndarray.numpy.nanpercentile"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanquantile"]
+operation = "ndarray.numpy.nanquantile"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanquantile_axes"]
+operation = "ndarray.numpy.nanquantile_axes"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanpercentile_axes"]
+operation = "ndarray.numpy.nanpercentile_axes"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanquantiles"]
+operation = "ndarray.numpy.nanquantiles"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanpercentiles"]
+operation = "ndarray.numpy.nanpercentiles"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanmedian_axes"]
+operation = "ndarray.numpy.nanmedian_axes"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.median_into"]
+operation = "ndarray.numpy.median_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanmedian_into"]
+operation = "ndarray.numpy.nanmedian_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.quantile_into"]
+operation = "ndarray.numpy.quantile_into"
+arity = 6
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.percentile_into"]
+operation = "ndarray.numpy.percentile_into"
+arity = 6
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.quantiles_into"]
+operation = "ndarray.numpy.quantiles_into"
+arity = 6
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.percentiles_into"]
+operation = "ndarray.numpy.percentiles_into"
+arity = 6
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanquantile_into"]
+operation = "ndarray.numpy.nanquantile_into"
+arity = 6
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanpercentile_into"]
+operation = "ndarray.numpy.nanpercentile_into"
+arity = 6
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanquantiles_into"]
+operation = "ndarray.numpy.nanquantiles_into"
+arity = 6
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanpercentiles_into"]
+operation = "ndarray.numpy.nanpercentiles_into"
+arity = 6
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.packbits"]
+operation = "ndarray.numpy.packbits"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.unpackbits"]
+operation = "ndarray.numpy.unpackbits"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.unpackbits_all"]
+operation = "ndarray.numpy.unpackbits_all"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.packbits_axis"]
+operation = "ndarray.numpy.packbits_axis"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.unpackbits_axis"]
+operation = "ndarray.numpy.unpackbits_axis"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.unpackbits_axis_all"]
+operation = "ndarray.numpy.unpackbits_axis_all"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.alen"]
+operation = "ndarray.numpy.alen"
+arity = 1
+returns = "Int"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.append"]
+operation = "ndarray.numpy.append"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.block_native"]
+operation = "ndarray.numpy.block_native"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.broadcast_arrays"]
+operation = "ndarray.numpy.broadcast_arrays"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.broadcast_shapes"]
+operation = "ndarray.numpy.broadcast_shapes"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.as_strided"]
+operation = "ndarray.numpy.as_strided"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.sliding_window_view"]
+operation = "ndarray.numpy.sliding_window_view"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.column_stack"]
+operation = "ndarray.numpy.column_stack"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.copyto/2"]
+operation = "ndarray.numpy.copyto"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.copyto/3"]
+operation = "ndarray.numpy.copyto_casting"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.copyto/4"]
+operation = "ndarray.numpy.copyto_where"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.delete/2"]
+operation = "ndarray.numpy.delete"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.delete/3"]
+operation = "ndarray.numpy.delete_axis"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.delete/3"]
+operation = "ndarray.numpy.delete_mask_axis"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.diag"]
+operation = "ndarray.numpy.diag"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.diag_indices"]
+operation = "ndarray.numpy.diag_indices"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.diag_indices_from"]
+operation = "ndarray.numpy.diag_indices_from"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.dsplit"]
+operation = "ndarray.numpy.dsplit"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.dstack"]
+operation = "ndarray.numpy.dstack"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.ediff1d"]
+operation = "ndarray.numpy.ediff1d"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.fill_diagonal_native"]
+operation = "ndarray.numpy.fill_diagonal_native"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.full"]
+operation = "ndarray.numpy.full"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.full_like"]
+operation = "ndarray.numpy.full_like"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram"]
+operation = "ndarray.numpy.histogram"
+arity = 3
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram_range"]
+operation = "ndarray.numpy.histogram_range"
+arity = 5
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram_edges"]
+operation = "ndarray.numpy.histogram_edges"
+arity = 3
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram_weighted"]
+operation = "ndarray.numpy.histogram_weighted"
+arity = 4
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram_weighted_range"]
+operation = "ndarray.numpy.histogram_weighted_range"
+arity = 6
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram_weighted_edges"]
+operation = "ndarray.numpy.histogram_weighted_edges"
+arity = 4
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram_estimator"]
+operation = "ndarray.numpy.histogram_estimator"
+arity = 3
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram_estimator_range"]
+operation = "ndarray.numpy.histogram_estimator_range"
+arity = 5
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram_bin_edges"]
+operation = "ndarray.numpy.histogram_bin_edges"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram_bin_edges_estimator"]
+operation = "ndarray.numpy.histogram_bin_edges_estimator"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram2d"]
+operation = "ndarray.numpy.histogram2d"
+arity = 4
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram2d_range"]
+operation = "ndarray.numpy.histogram2d_range"
+arity = 7
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram2d_edges"]
+operation = "ndarray.numpy.histogram2d_edges"
+arity = 5
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram2d_x_edges"]
+operation = "ndarray.numpy.histogram2d_x_edges"
+arity = 7
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogram2d_y_edges"]
+operation = "ndarray.numpy.histogram2d_y_edges"
+arity = 7
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogramdd"]
+operation = "ndarray.numpy.histogramdd"
+arity = 3
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogramdd_bins_array"]
+operation = "ndarray.numpy.histogramdd_bins_array"
+arity = 3
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogramdd_range_arrays"]
+operation = "ndarray.numpy.histogramdd_range_arrays"
+arity = 5
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogramdd_edges_packed"]
+operation = "ndarray.numpy.histogramdd_edges_packed"
+arity = 5
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogramdd_weighted"]
+operation = "ndarray.numpy.histogramdd_weighted"
+arity = 4
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogramdd_weighted_bins_array"]
+operation = "ndarray.numpy.histogramdd_weighted_bins_array"
+arity = 4
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogramdd_weighted_range_arrays"]
+operation = "ndarray.numpy.histogramdd_weighted_range_arrays"
+arity = 6
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.histogramdd_weighted_edges_packed"]
+operation = "ndarray.numpy.histogramdd_weighted_edges_packed"
+arity = 6
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.hsplit"]
+operation = "ndarray.numpy.hsplit"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.hstack"]
+operation = "ndarray.numpy.hstack"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.insert/3"]
+operation = "ndarray.numpy.insert"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.insert/3"]
+operation = "ndarray.numpy.insert_indexes"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.insert/4"]
+operation = "ndarray.numpy.insert_scalar_axis"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.insert/4"]
+operation = "ndarray.numpy.insert_indexes_axis"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.ix_"]
+operation = "ndarray.numpy.ix_"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.may_share_memory"]
+operation = "ndarray.numpy.may_share_memory"
+arity = 2
+returns = "Bool"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.may_share_memory_with_work"]
+operation = "ndarray.numpy.may_share_memory_with_work"
+arity = 3
+returns = "Bool"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.internal_overlap"]
+operation = "ndarray.numpy.internal_overlap"
+arity = 1
+returns = "Bool"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.meshgrid_native"]
+operation = "ndarray.numpy.meshgrid_native"
+arity = 5
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.msort"]
+operation = "ndarray.numpy.msort"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.pad"]
+operation = "ndarray.numpy.pad"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.place"]
+operation = "ndarray.numpy.place"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.putmask"]
+operation = "ndarray.numpy.putmask"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.ravel_multi_index_native"]
+operation = "ndarray.numpy.ravel_multi_index_native"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.row_stack"]
+operation = "ndarray.numpy.row_stack"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.select"]
+operation = "ndarray.numpy.select"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.shares_memory"]
+operation = "ndarray.numpy.shares_memory"
+arity = 2
+returns = "Bool"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.shares_memory_with_work"]
+operation = "ndarray.numpy.shares_memory_with_work"
+arity = 3
+returns = "Bool"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.tril_indices"]
+operation = "ndarray.numpy.tril_indices"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.tril_indices_from"]
+operation = "ndarray.numpy.tril_indices_from"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.triu_indices"]
+operation = "ndarray.numpy.triu_indices"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.triu_indices_from"]
+operation = "ndarray.numpy.triu_indices_from"
+arity = 2
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.unravel_index_native"]
+operation = "ndarray.numpy.unravel_index_native"
+arity = 3
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.vsplit"]
+operation = "ndarray.numpy.vsplit"
+arity = 2
+returns = "List[Array]"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.vstack"]
+operation = "ndarray.numpy.vstack"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.average_weighted"]
+operation = "ndarray.numpy.average_weighted"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.average_with_sum"]
+operation = "ndarray.numpy.average_with_sum"
+arity = 3
+returns = "List[Array]"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.average_weighted_with_sum"]
+operation = "ndarray.numpy.average_weighted_with_sum"
+arity = 4
+returns = "List[Array]"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.covariance_typed"]
+operation = "ndarray.numpy.covariance_typed"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.covariance_pair"]
+operation = "ndarray.numpy.covariance_pair"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.covariance_frequency_weighted"]
+operation = "ndarray.numpy.covariance_frequency_weighted"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.covariance_analytic_weighted"]
+operation = "ndarray.numpy.covariance_analytic_weighted"
+arity = 5
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.covariance_weighted"]
+operation = "ndarray.numpy.covariance_weighted"
+arity = 6
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.covariance_pair_weighted"]
+operation = "ndarray.numpy.covariance_pair_weighted"
+arity = 7
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.correlation_typed"]
+operation = "ndarray.numpy.correlation_typed"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.correlation_pair"]
+operation = "ndarray.numpy.correlation_pair"
+arity = 4
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nansum"]
+operation = "ndarray.numpy.nansum"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanprod"]
+operation = "ndarray.numpy.nanprod"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanmean"]
+operation = "ndarray.numpy.nanmean"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanmin"]
+operation = "ndarray.numpy.nanmin"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanmax"]
+operation = "ndarray.numpy.nanmax"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanvar"]
+operation = "ndarray.numpy.nanvar"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanstd"]
+operation = "ndarray.numpy.nanstd"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nansum_as"]
+operation = "ndarray.numpy.nansum_as"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanprod_as"]
+operation = "ndarray.numpy.nanprod_as"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanmean_as"]
+operation = "ndarray.numpy.nanmean_as"
+arity = 4
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanvar_as"]
+operation = "ndarray.numpy.nanvar_as"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanstd_as"]
+operation = "ndarray.numpy.nanstd_as"
+arity = 5
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanargmin_axes"]
+operation = "ndarray.numpy.nanargmin_axes"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nanargmax_axes"]
+operation = "ndarray.numpy.nanargmax_axes"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nansum_into"]
+operation = "ndarray.numpy.nansum_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanprod_into"]
+operation = "ndarray.numpy.nanprod_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanmean_into"]
+operation = "ndarray.numpy.nanmean_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanmin_into"]
+operation = "ndarray.numpy.nanmin_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanmax_into"]
+operation = "ndarray.numpy.nanmax_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanvar_into"]
+operation = "ndarray.numpy.nanvar_into"
+arity = 5
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nanstd_into"]
+operation = "ndarray.numpy.nanstd_into"
+arity = 5
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nancumsum_flat"]
+operation = "ndarray.numpy.nancumsum_flat"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nancumprod_flat"]
+operation = "ndarray.numpy.nancumprod_flat"
+arity = 1
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nancumsum_as"]
+operation = "ndarray.numpy.nancumsum_as"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nancumprod_as"]
+operation = "ndarray.numpy.nancumprod_as"
+arity = 3
+returns = "Array"
+blocking = "fast"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nancumsum_into"]
+operation = "ndarray.numpy.nancumsum_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nancumprod_into"]
+operation = "ndarray.numpy.nancumprod_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nancumsum_flat_into"]
+operation = "ndarray.numpy.nancumsum_flat_into"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nancumprod_flat_into"]
+operation = "ndarray.numpy.nancumprod_flat_into"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.nan_to_num_default"]
+operation = "ndarray.numpy.nan_to_num_default"
+arity = 1
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.nan_to_num_into"]
+operation = "ndarray.numpy.nan_to_num_into"
+arity = 5
+returns = "Unit"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.add_into"]
+operation = "ndarray.numpy.add_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.add_where_into"]
+operation = "ndarray.numpy.add_where_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.absolute_into"]
+operation = "ndarray.numpy.absolute_into"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.logical_not_into"]
+operation = "ndarray.numpy.logical_not_into"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.logical_and_into"]
+operation = "ndarray.numpy.logical_and_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.logical_or_into"]
+operation = "ndarray.numpy.logical_or_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.logical_xor_into"]
+operation = "ndarray.numpy.logical_xor_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.invert_into"]
+operation = "ndarray.numpy.invert_into"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.invert_where_into"]
+operation = "ndarray.numpy.invert_where_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.reciprocal_into"]
+operation = "ndarray.numpy.reciprocal_into"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.reciprocal_where_into"]
+operation = "ndarray.numpy.reciprocal_where_into"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.invert_at"]
+operation = "ndarray.numpy.invert_at"
+arity = 2
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.add_at"]
+operation = "ndarray.numpy.add_at"
+arity = 3
+returns = "Unit"
+blocking = "blocking"
+resource = "value"
+
+[functions."ndarray.Numpy.logical_xor_reduce"]
+operation = "ndarray.numpy.logical_xor_reduce"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.add_reduceat"]
+operation = "ndarray.numpy.add_reduceat"
+arity = 3
+returns = "Array"
+blocking = "blocking"
+resource = "opaque_handle"
+
+[functions."ndarray.Numpy.add_reduceat_into"]
+operation = "ndarray.numpy.add_reduceat_into"
+arity = 4
+returns = "Unit"
+blocking = "blocking"
+resource = "value"

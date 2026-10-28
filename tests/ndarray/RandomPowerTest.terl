@@ -1,0 +1,29 @@
+module ndarray.RandomPowerTest.
+
+import ndarray.Array.{dispose, dtype_code, live_count, shape, to_floats_cast}.
+import ndarray.RandomStream.{new, power}.
+
+/** Returns whether every sampled value is inside NumPy's power-distribution range. */
+bounded(values: List[Float]): Bool ->
+    case values {
+        [] -> true;
+        [value | rest] -> value >= 0.0 and value <= 1.0 and bounded(rest)
+    }.
+
+@test
+pub power_distribution_preserves_shape_dtype_bounds_and_stream_lifecycle(): Bool ->
+    let first_stream = new(919);
+    let second_stream = new(919);
+    let first = power(first_stream, [2, 16], 3.5, 14);
+    let second = power(second_stream, [2, 16], 3.5, 14);
+    let first_values = to_floats_cast(first);
+    let valid =
+        shape(first) == [2, 16]
+            and dtype_code(first) == 14
+            and first_values == to_floats_cast(second)
+            and bounded(first_values);
+    dispose(second);
+    dispose(first);
+    ndarray.RandomStream.dispose(second_stream);
+    ndarray.RandomStream.dispose(first_stream);
+    valid and live_count() == 0.

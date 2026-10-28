@@ -1,0 +1,5 @@
+module ndarray.StatisticsTest.
+
+pub masked_statistics_broadcast_and_preserve_numpy_shapes(): Bool.
+
+pub statistic_dtype_out_empty_and_complex_semantics_match_numpy(): Bool.

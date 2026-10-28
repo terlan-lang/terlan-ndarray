@@ -1,0 +1,5 @@
+module ndarray.TriangleIndexTest.
+
+pub lower_triangle_indices_gather_and_assign_like_numpy(): Bool.
+
+pub upper_mask_defaults_rectangles_and_from_forms_match_numpy(): Bool.

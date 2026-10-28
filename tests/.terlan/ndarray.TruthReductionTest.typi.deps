@@ -1,0 +1,8 @@
+module=ndarray.TruthReductionTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=2122288952627448117
+interface_hash=14987886027410363599
+interface_doc_hash=12488747585997568539
+deps=0

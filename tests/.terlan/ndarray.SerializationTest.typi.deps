@@ -1,0 +1,9 @@
+module=ndarray.SerializationTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=17794891625068640036
+interface_hash=9586917736281791450
+interface_doc_hash=14722450416862203436
+deps=1
+std.io.File=10798101082129544868

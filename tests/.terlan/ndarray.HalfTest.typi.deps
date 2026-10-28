@@ -1,0 +1,8 @@
+module=ndarray.HalfTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=5562207030072337766
+interface_hash=14165052819240857874
+interface_doc_hash=7543781932870458334
+deps=0

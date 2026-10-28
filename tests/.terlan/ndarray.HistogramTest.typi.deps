@@ -1,0 +1,8 @@
+module=ndarray.HistogramTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=17940144760765380776
+interface_hash=10532121562393204394
+interface_doc_hash=5294840971775532627
+deps=0

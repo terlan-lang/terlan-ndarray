@@ -1,0 +1,46 @@
+{
+  "broker": {
+    "broker_tests": 6,
+    "flow": "producer-helper -> terlan-vm -> consumer-helper",
+    "package_neutral": true,
+    "pointer_serialization": false,
+    "status": "passed"
+  },
+  "cases": {
+    "abandoned": {
+      "diagnostic": "NDARRAY_DLPACK_ABANDONED_CLEAN",
+      "status": "passed"
+    },
+    "consumer_rejection": {
+      "diagnostic": "c_abi_status_201",
+      "status": "passed"
+    },
+    "helper_crash": {
+      "diagnostic": "native_helper_io",
+      "status": "passed"
+    },
+    "round_trip": {
+      "diagnostic": "NDARRAY_DLPACK_INTEROP_OK",
+      "status": "passed"
+    },
+    "second_claim": {
+      "diagnostic": "native_exchange.already_claimed",
+      "status": "passed"
+    },
+    "wrong_consumer": {
+      "diagnostic": "native_exchange.consumer_mismatch",
+      "status": "passed"
+    }
+  },
+  "native_audit": {
+    "deleter_cardinality": "exactly_once",
+    "malformed_metadata": "rejected_before_read",
+    "status": "passed"
+  },
+  "package_revisions": {
+    "ndarray": "8b21a3d38dee709b274e9288a447fdd1ab23b387",
+    "tensor_sink": "bcd8ed1adb368781779f88c41be530502262ba5b"
+  },
+  "schema": "terlan.ndarray.dlpack-report.v1",
+  "status": "passed"
+}

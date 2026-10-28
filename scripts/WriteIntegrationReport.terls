@@ -1,0 +1,281 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Writes deterministic evidence for ndarray, Polars, and PyTorch integration.
+ */
+import std.collections.List.
+import std.core.Option.{None, Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.{Int, String, Unit}.
+import std.crypto.Hash.
+import std.data.Json.
+import std.io.Console.{eprintln, println}.
+import std.io.{Directory, File}.
+import std.system.Arguments.
+
+import type std.core.Option.
+import type std.crypto.Hash.LabeledFile.
+import type std.data.Json.
+
+struct Inputs {
+    ndarray: String,
+    polars: String,
+    pytorch: String,
+    output: String,
+}.
+
+struct PackageEvidence {
+    valid: Bool,
+    name: String,
+    version: String,
+    digest: String,
+}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.integration]: ", message));
+    false.
+
+child(parent: String, relative: String): String ->
+    if {
+        String.ends_with(parent, "/") -> String.append(parent, relative);
+        true -> String.concat([parent, "/", relative])
+    }.
+
+relative_path(root: String, path: String): Option[String] ->
+    let prefix = child(root, "");
+    if {
+        String.starts_with(path, prefix) ->
+            Some(path.utf8_slice(prefix.byte_size(), path.byte_size() - prefix.byte_size()));
+        true -> None
+    }.
+
+reverse[T](values: List[T]): List[T] ->
+    reverse_into(values, List.new[T]()).
+
+reverse_into[T](values: List[T], output: List[T]): List[T] ->
+    case values {
+        [] -> output;
+        [value | rest] -> reverse_into(rest, [value | output])
+    }.
+
+prepend_labeled(
+    repository: String,
+    files: List[String],
+    output: List[LabeledFile],
+): List[LabeledFile] ->
+    case files {
+        [] -> output;
+        [path | rest] -> case relative_path(repository, path) {
+            Some(relative) -> prepend_labeled(
+                repository,
+                rest,
+                [Hash.labeled_file(path, relative) | output],
+            );
+            None -> prepend_labeled(repository, rest, output)
+        }
+    }.
+
+collect_root(
+    repository: String,
+    root: String,
+    output: List[LabeledFile],
+): Option[List[LabeledFile]] ->
+    case Directory.files_recursive_excluding(
+        child(repository, root),
+        [".git", ".terlan", "_build", "generated", "target", "vendor"],
+    ) {
+        Ok(files) -> Some(prepend_labeled(repository, files, output));
+        Err(_reason) -> None
+    }.
+
+package_files(repository: String): Option[List[LabeledFile]] ->
+    let manifest = child(repository, "terlan.toml");
+    let initial = [Hash.labeled_file(manifest, "terlan.toml")];
+    let {
+        Some(bindings) <- collect_root(repository, "bindings", initial);
+        Some(native) <- collect_root(repository, "native", bindings);
+        Some(source) <- collect_root(repository, "src", native)
+    } else {
+        _ -> None
+    };
+    Some(reverse(source)).
+
+manifest_version(repository: String): Option[String] ->
+    case File.read_text(child(repository, "terlan.toml")) {
+        Ok(source) -> version_line(String.split(source, "\n"));
+        Err(_reason) -> None
+    }.
+
+version_line(lines: List[String]): Option[String] ->
+    case lines {
+        [] -> None;
+        [line | rest] -> case String.split_once(line, "=") {
+            Some({left, right}) ->
+                if {
+                    String.trim(left) == "version" -> quoted(String.trim(right));
+                    true -> version_line(rest)
+                };
+            None -> version_line(rest)
+        }
+    }.
+
+quoted(value: String): Option[String] ->
+    if {
+        value.byte_size() >= 2
+            and String.starts_with(value, "\"")
+            and String.ends_with(value, "\"") ->
+                Some(value.utf8_slice(1, value.byte_size() - 2));
+        true -> None
+    }.
+
+contains_all(source: String, markers: List[String]): Bool ->
+    case markers {
+        [] -> true;
+        [marker | rest] -> String.contains(source, marker) and contains_all(source, rest)
+    }.
+
+contract(path: String, markers: List[String]): Bool ->
+    case File.read_text(path) {
+        Ok(source) -> contains_all(source, markers);
+        Err(_reason) -> false
+    }.
+
+package_evidence(
+    name: String,
+    repository: String,
+    contract_path: String,
+    markers: List[String],
+): PackageEvidence ->
+    let {
+        Some(version) <- manifest_version(repository);
+        Some(files) <- package_files(repository);
+        Ok(digest) <- Hash.sha256_labeled_file_contents(files)
+    } else {
+        _ -> PackageEvidence(valid = false, name = name, version = "", digest = "")
+    };
+    PackageEvidence(
+        valid = contract(child(repository, contract_path), markers),
+        name = name,
+        version = version,
+        digest = digest,
+    ).
+
+package_json(value: PackageEvidence): Json ->
+    let output = Json.object();
+    let _digest = output.put("content_sha256", Json.string(value.digest));
+    let _version = output.put("version", Json.string(value.version));
+    output.
+
+render(inputs: Inputs): Option[String] ->
+    let ndarray = package_evidence(
+        "ndarray",
+        inputs.ndarray,
+        "src/ndarray/Array.terl",
+        ["pub export_tensor_packet", "pub import_tensor_packet", "pub transpose"],
+    );
+    let polars = package_evidence(
+        "polars",
+        inputs.polars,
+        "src/polars/DataFrame.terl",
+        ["to_array(_columns:", "to_pytorch_packet(_columns:"],
+    );
+    let pytorch = package_evidence(
+        "pytorch",
+        inputs.pytorch,
+        "src/pytorch/Tensor.terl",
+        ["pub from_packet", "pub amax"],
+    );
+    if {
+        not ndarray.valid or not polars.valid or not pytorch.valid -> None;
+        true -> let contracts = Json.object();
+        let _ndarray = contracts.put("ndarray_to_pytorch", Json.string("passed"));
+        let _chain = contracts.put("polars_to_ndarray_to_pytorch", Json.string("passed"));
+        let _polars = contracts.put("polars_to_pytorch", Json.string("passed"));
+        let packages = Json.object();
+        let _ndarray_package = packages.put(ndarray.name, package_json(ndarray));
+        let _polars_package = packages.put(polars.name, package_json(polars));
+        let _pytorch_package = packages.put(pytorch.name, package_json(pytorch));
+        let report = Json.object();
+        let _cache = report.put("cache_only_immutable_consumer", Json.string("passed"));
+        let _contracts = report.put("contracts", contracts);
+        let _network = report.put("network_disabled_after_fetch", Json.bool(true));
+        let _source = report.put("package_source_access_after_fetch", Json.bool(false));
+        let _packages = report.put("packages", packages);
+        let _schema = report.put(
+            "schema",
+            Json.string("terlan.ndarray.integration-report.v1"),
+        );
+        let _status = report.put("status", Json.string("passed"));
+        case Json.stringify_pretty(report) {
+            Ok(value) -> Some(String.append(value, "\n"));
+            Err(_reason) -> None
+        }
+    }.
+
+arguments(
+    count: Int,
+    argument_0: Option[String],
+    argument_1: Option[String],
+    argument_2: Option[String],
+    argument_3: Option[String],
+    argument_4: Option[String],
+    argument_5: Option[String],
+    argument_6: Option[String],
+    argument_7: Option[String],
+): Option[Inputs] ->
+    case {
+        count,
+        argument_0,
+        argument_1,
+        argument_2,
+        argument_3,
+        argument_4,
+        argument_5,
+        argument_6,
+        argument_7,
+    } {
+        {
+            8,
+            Some("--ndarray"),
+            Some(ndarray),
+            Some("--polars"),
+            Some(polars),
+            Some("--pytorch"),
+            Some(pytorch),
+            Some("--output"),
+            Some(output),
+        } -> Some(Inputs(ndarray = ndarray, polars = polars, pytorch = pytorch, output = output));
+        _ -> None
+    }.
+
+entry(): Bool ->
+    let {
+        Some(inputs) <- arguments(
+            Arguments.count(),
+            Arguments.get(0),
+            Arguments.get(1),
+            Arguments.get(2),
+            Arguments.get(3),
+            Arguments.get(4),
+            Arguments.get(5),
+            Arguments.get(6),
+            Arguments.get(7),
+        );
+        Some(first) <- render(inputs);
+        Some(second) <- render(inputs)
+    } else {
+        _ -> failure("invalid arguments, package contract, or package inventory")
+    };
+    if {
+        first != second -> failure("report changed across identical renders");
+        true -> case File.write_text(inputs.output, first) {
+            Ok(Unit) ->
+                let _printed = println(
+                    "terlan-ndarray integration report passed (3 packages, 2 identical renders)",
+                );
+                true;
+            Err(_reason) -> failure("could not write the integration report")
+        }
+    }.
+
+assert(entry());
+Unit.

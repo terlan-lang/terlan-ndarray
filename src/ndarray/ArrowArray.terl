@@ -1,0 +1,30 @@
+/**
+ * Official Apache Arrow C Data exports owned by the ndarray package.
+ */
+module ndarray.ArrowArray.
+
+/**
+ * Owned Arrow C Data array and schema with release callbacks and no nullable values.
+ */
+pub opaque type ArrowArray.
+
+/**
+ * Returns the flattened Arrow element count.
+ */
+@compiler.native {ndarray.arrow_array.length}
+pub length(arrow: ArrowArray): Int ->
+    native.
+
+/**
+ * Returns zero under the ndarray no-null Arrow policy.
+ */
+@compiler.native {ndarray.arrow_array.null_count}
+pub null_count(arrow: ArrowArray): Int ->
+    native.
+
+/**
+ * Releases the Arrow C Data callbacks exactly once.
+ */
+@compiler.native {ndarray.arrow_array.dispose}
+pub dispose(arrow: ArrowArray): Unit ->
+    native.

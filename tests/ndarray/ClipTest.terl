@@ -1,0 +1,76 @@
+module ndarray.ClipTest.
+
+import ndarray.Array.{
+    clip, clip_inplace, clip_into, clip_lower, clip_upper, dispose, dtype_code,
+    from_floats, from_ints, from_ints_as, live_count, slice_axis, to_floats,
+    to_ints_cast, transpose
+}.
+
+@test
+pub clip_bounds_broadcast_promote_and_preserve_strided_inputs(): Bool ->
+    let source = from_ints([-5, 0, 5, 10, 15, 20, -4, 1, 6, 11, 16, 21], [2, 6]);
+    let strided = slice_axis(source, 1, 0, 6, 2);
+    let lower = from_floats([-1.0, 4.0, 12.0], [3]);
+    let upper = from_floats([3.0, 5.0, 15.0], [3]);
+    let bounded = clip(strided, lower, upper);
+    let lower_only = clip_lower(strided, lower);
+    let upper_only = clip_upper(strided, upper);
+    let valid = dtype_code(bounded) == 3
+        and to_floats(bounded) == [-1.0, 5.0, 15.0, -1.0, 5.0, 15.0]
+        and to_floats(lower_only) == [-1.0, 5.0, 15.0, -1.0, 6.0, 16.0]
+        and to_floats(upper_only) == [-5.0, 5.0, 15.0, -4.0, 5.0, 15.0];
+    dispose(upper_only);
+    dispose(lower_only);
+    dispose(bounded);
+    dispose(upper);
+    dispose(lower);
+    dispose(strided);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub clip_into_preserves_transposed_and_overlapping_destinations(): Bool ->
+    let source = from_ints([-5, 0, 5, 10, 15, 20, -4, 1, 6, 11, 16, 21], [2, 6]);
+    let strided = slice_axis(source, 1, 0, 6, 2);
+    let lower = from_floats([-1.0, 4.0, 12.0], [3]);
+    let upper = from_floats([3.0, 5.0, 15.0], [3]);
+    let destination_backing = from_ints_as([0, 0, 0, 0, 0, 0], [3, 2], 6);
+    let destination = transpose(destination_backing, 0, 1);
+    clip_into(destination, strided, lower, upper);
+    let overlap = from_ints([0, 1, 2, 3, 4, 5], [6]);
+    let overlap_source = slice_axis(overlap, 0, 0, 5, 1);
+    let overlap_destination = slice_axis(overlap, 0, 1, 6, 1);
+    let one = from_ints([1], []);
+    let two = from_ints([2], []);
+    let three = from_ints([3], []);
+    clip_into(overlap_destination, overlap_source, one, three);
+    let inplace = from_ints([-2, 0, 4], [3]);
+    let negative_one = from_ints([-1], []);
+    clip_inplace(inplace, negative_one, two);
+    let inverted = clip(inplace, three, one);
+    let lower_only = clip_lower(inplace, one);
+    let upper_only = clip_upper(inplace, one);
+    let valid = to_ints_cast(destination) == [-1, 5, 15, -1, 5, 15]
+        and to_ints_cast(overlap) == [0, 1, 1, 2, 3, 3]
+        and to_ints_cast(inplace) == [-1, 0, 2]
+        and to_ints_cast(inverted) == [1, 1, 1]
+        and to_ints_cast(lower_only) == [1, 1, 2]
+        and to_ints_cast(upper_only) == [-1, 0, 1];
+    dispose(upper_only);
+    dispose(lower_only);
+    dispose(inverted);
+    dispose(negative_one);
+    dispose(inplace);
+    dispose(three);
+    dispose(two);
+    dispose(one);
+    dispose(overlap_destination);
+    dispose(overlap_source);
+    dispose(overlap);
+    dispose(destination);
+    dispose(destination_backing);
+    dispose(upper);
+    dispose(lower);
+    dispose(strided);
+    dispose(source);
+    valid and live_count() == 0.

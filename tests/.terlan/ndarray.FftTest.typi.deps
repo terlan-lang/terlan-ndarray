@@ -1,0 +1,8 @@
+module=ndarray.FftTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=13736543691966159056
+interface_hash=18290282251081465106
+interface_doc_hash=16725486922768385161
+deps=0

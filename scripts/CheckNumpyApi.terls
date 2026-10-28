@@ -1,0 +1,338 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Classifies the frozen NumPy API against the generated ndarray manifest.
+ */
+import std.collections.List.
+import std.collections.Map.
+import std.core.Option.{None, Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.{Int, String, Unit}.
+import std.data.Json.
+import std.io.Console.{eprintln, println}.
+import std.io.File.
+import std.system.Arguments.
+
+import type std.core.Option.
+
+struct Classification {
+    valid: Bool,
+    missing_count: Int,
+    reason: String,
+}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.numpy_api]: ", message));
+    false.
+
+read_json(path: String): Option[Json] ->
+    let {
+        Ok(source) <- File.read_text(path);
+        Ok(document) <- Json.parse(source)
+    } else {
+        _ -> None
+    };
+    Some(document).
+
+reverse_strings(values: List[String], output: List[String]): List[String] ->
+    case values {
+        [] -> output;
+        [value | rest] -> reverse_strings(rest, [value | output])
+    }.
+
+json_strings(value: Json): Option[List[String]] ->
+    case value.length() {
+        Ok(length) -> json_strings_at(value, 0, length, List.new[String]());
+        Err(_reason) -> None
+    }.
+
+json_strings_at(
+    value: Json,
+    index: Int,
+    length: Int,
+    output: List[String],
+): Option[List[String]] ->
+    if {
+        index == length -> Some(reverse_strings(output, List.new[String]()));
+        true -> let {
+            Ok(item) <- value.at(index);
+            Ok(text) <- item.as_string()
+        } else {
+            _ -> None
+        };
+        json_strings_at(value, index + 1, length, [text | output])
+    }.
+
+collect_manifest_modules(
+    documents: Json,
+    index: Int,
+    module_count: Int,
+    available: Map[String, Bool],
+): Option[Map[String, Bool]] ->
+    if {
+        index == module_count -> Some(available);
+        true -> let {
+            Ok(module_value) <- documents.at(index);
+            Ok(function_values) <- module_value.get("functions");
+            Ok(function_count) <- function_values.length();
+            Some(updated) <- collect_manifest_functions(
+                function_values,
+                0,
+                function_count,
+                available,
+            )
+        } else {
+            _ -> None
+        };
+        collect_manifest_modules(documents, index + 1, module_count, updated)
+    }.
+
+collect_manifest_functions(
+    rows: Json,
+    index: Int,
+    function_count: Int,
+    mut available: Map[String, Bool],
+): Option[Map[String, Bool]] ->
+    if {
+        index == function_count -> Some(available);
+        true -> let {
+            Ok(function_value) <- rows.at(index);
+            Ok(name_value) <- function_value.get("name");
+            Ok(name) <- name_value.as_string()
+        } else {
+            _ -> None
+        };
+        let _put = available.put(name, true);
+        collect_manifest_functions(rows, index + 1, function_count, available)
+    }.
+
+available_functions(manifest: Json): Option[Map[String, Bool]] ->
+    let {
+        Ok(modules) <- manifest.get("modules");
+        Ok(module_count) <- modules.length()
+    } else {
+        _ -> None
+    };
+    collect_manifest_modules(modules, 0, module_count, Map.new[String, Bool]()).
+
+contains(names: List[String], expected: String): Bool ->
+    case names {
+        [] -> false;
+        [name | rest] -> name == expected or contains(rest, expected)
+    }.
+
+alias_target(aliases: Json, name: String): Option[String] ->
+    case aliases.get(name) {
+        Ok(value) -> case value.as_string() {
+            Ok(target) -> Some(target);
+            Err(_reason) -> None
+        };
+        Err(_reason) -> None
+    }.
+
+classify_reference_names(
+    names: List[String],
+    implemented: List[String],
+    aliases: Json,
+    excluded: List[String],
+    missing_names: List[String],
+    available: Map[String, Bool],
+): Bool ->
+    case names {
+        [] -> true;
+        [name | rest] -> let implemented_here = contains(implemented, name);
+        let alias = alias_target(aliases, name);
+        let alias_here = case alias { Some(_target) -> true; None -> false };
+        let excluded_here = contains(excluded, name);
+        let missing_here = contains(missing_names, name);
+        let category_count = if { implemented_here -> 1; true -> 0 }
+            + if { alias_here -> 1; true -> 0 }
+            + if { excluded_here -> 1; true -> 0 }
+            + if { missing_here -> 1; true -> 0 };
+        let implementation_valid = not implemented_here or available.contains_key(name);
+        let alias_valid = case alias {
+            Some(target) -> available.contains_key(target);
+            None -> true
+        };
+        category_count == 1
+            and implementation_valid
+            and alias_valid
+            and classify_reference_names(
+                rest,
+                implemented,
+                aliases,
+                excluded,
+                missing_names,
+                available,
+            )
+    }.
+
+classify_module(
+    policy: Json,
+    reference: Json,
+    available: Map[String, Bool],
+): {Bool, Int} ->
+    let {
+        Ok(implemented_value) <- policy.get("implemented");
+        Some(implemented) <- json_strings(implemented_value);
+        Ok(aliases) <- policy.get("equivalent");
+        Ok(alias_count) <- aliases.object_length();
+        Ok(excluded_value) <- policy.get("non_applicable");
+        Some(excluded) <- json_strings(excluded_value);
+        Ok(missing_value) <- policy.get("missing");
+        Some(missing_names) <- json_strings(missing_value);
+        Some(reference_names) <- json_strings(reference)
+    } else {
+        _ -> {false, 0}
+    };
+    let classified_count = List.length(implemented)
+        + alias_count
+        + List.length(excluded)
+        + List.length(missing_names);
+    let valid = classified_count == List.length(reference_names)
+        and classify_reference_names(
+            reference_names,
+            implemented,
+            aliases,
+            excluded,
+            missing_names,
+            available,
+        );
+    {valid, List.length(missing_names)}.
+
+classify_modules(
+    names: List[String],
+    policy_modules: Json,
+    reference_modules: Json,
+    available: Map[String, Bool],
+    accumulated_missing: Int,
+): Classification ->
+    case names {
+        [] -> Classification(valid = true, missing_count = accumulated_missing, reason = "");
+        [name | rest] -> let {
+            Ok(policy) <- policy_modules.get(name);
+            Ok(reference) <- reference_modules.get(name)
+        } else {
+            _ -> Classification(
+                valid = false,
+                missing_count = accumulated_missing,
+                reason = String.append("missing module policy or reference: ", name),
+            )
+        };
+        case classify_module(policy, reference, available) {
+            {false, _missing_count} ->
+                Classification(
+                    valid = false,
+                    missing_count = accumulated_missing,
+                    reason = String.append("invalid module classification: ", name),
+                );
+            {true, module_missing_count} -> classify_modules(
+                rest,
+                policy_modules,
+                reference_modules,
+                available,
+                accumulated_missing + module_missing_count,
+            )
+        }
+    }.
+
+classify(manifest: Json, reference: Json, policy: Json): Classification ->
+    let {
+        Ok(reference_header) <- reference.required_fields(["schema", "numpy_version"], [], []);
+        [reference_schema, reference_version] <- reference_header.strings;
+        Ok(policy_header) <- policy.required_fields(["schema", "numpy_version"], [], []);
+        [policy_schema, policy_version] <- policy_header.strings;
+        Ok(reference_modules) <- reference.get("modules");
+        Ok(policy_modules) <- policy.get("modules");
+        Ok(reference_count) <- reference_modules.object_length();
+        Ok(policy_count) <- policy_modules.object_length();
+        Some(available) <- available_functions(manifest)
+    } else {
+        _ -> Classification(
+            valid = false,
+            missing_count = 0,
+            reason = "invalid API reference or policy headers",
+        )
+    };
+    if {
+        reference_schema != "terlan.ndarray.numpy-api.v1"
+            or policy_schema != "terlan.ndarray.numpy-api-policy.v1"
+            or reference_version != "1.21.5"
+            or policy_version != reference_version
+            or reference_count != 8
+            or policy_count != reference_count ->
+                Classification(
+                    valid = false,
+                    missing_count = 0,
+                    reason = "API header, module count, or manifest traversal mismatch",
+                );
+        true -> classify_modules(
+            [
+                "numpy",
+                "numpy.fft",
+                "numpy.linalg",
+                "numpy.ndarray",
+                "numpy.polynomial.chebyshev",
+                "numpy.polynomial.legendre",
+                "numpy.polynomial.polynomial",
+                "numpy.random.Generator"
+            ],
+            policy_modules,
+            reference_modules,
+            available,
+            0,
+        )
+    }.
+
+render(policy: Json, classification: Classification): Option[String] ->
+    let _schema = policy.put("schema", Json.string("terlan.ndarray.numpy-api-report.v1"));
+    let _missing = policy.put("missing_count", Json.int(classification.missing_count));
+    let _status = policy.put(
+        "status",
+        Json.string(if { classification.missing_count == 0 -> "passed"; true -> "incomplete" }),
+    );
+    case Json.stringify_pretty(policy) {
+        Ok(value) -> Some(String.append(value, "\n"));
+        Err(_reason) -> None
+    }.
+
+entry(): Bool ->
+    let allow_missing = case {Arguments.count(), Arguments.get(0)} {
+        {0, _argument} -> Some(false);
+        {1, Some("--allow-missing")} -> Some(true);
+        _ -> None
+    };
+    let {
+        Some(allow) <- allow_missing;
+        Some(manifest) <- read_json("bindings/ndarray-c.json");
+        Some(reference) <- read_json("tests/fixtures/numpy-1.21.5-api.json");
+        Some(policy) <- read_json("tests/numpy-api-policy.json")
+    } else {
+        _ -> failure("cannot read the API manifest, reference, or policy")
+    };
+    let classification = classify(manifest, reference, policy);
+    let {
+        Some(report) <- render(policy, classification)
+    } else {
+        _ -> failure("cannot render the API report")
+    };
+    if {
+        not classification.valid -> failure(
+            String.append("classification policy is inconsistent: ", classification.reason),
+        );
+        classification.missing_count > 0 and not allow -> failure("unclassified NumPy APIs remain");
+        true -> case File.write_text("reports/ndarray-numpy-api-report.json", report) {
+            Ok(Unit) ->
+                let _printed = println(
+                    String.concat([
+                        "terlan-ndarray NumPy API inventory: ",
+                        Int.to_string(classification.missing_count),
+                        " unclassified callable(s)",
+                    ]),
+                );
+                true;
+            Err(_reason) -> failure("cannot write the API report")
+        }
+    }.
+
+assert(entry());
+Unit.

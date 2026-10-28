@@ -1,0 +1,11 @@
+module ndarray.SetOpsTest.
+
+pub membership_preserves_element_shape_and_composes_with_inversion(): Bool.
+
+pub numpy_set_variants_preserve_indexes_order_flattening_and_typed_edges(): Bool.
+
+pub set_algebra_flattens_deduplicates_sorts_and_handles_empty_inputs(): Bool.
+
+pub unique_axis_handles_lexicographic_slices_negative_axes_and_zero_widths(): Bool.
+
+pub unique_returns_values_first_indexes_inverse_and_counts(): Bool.

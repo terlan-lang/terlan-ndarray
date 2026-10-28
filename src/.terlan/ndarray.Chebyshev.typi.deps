@@ -1,0 +1,9 @@
+module=ndarray.Chebyshev
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=18405240262733691026
+interface_hash=12949579261994549036
+interface_doc_hash=18340991981555077847
+deps=1
+ndarray.Array=14540436248669504260

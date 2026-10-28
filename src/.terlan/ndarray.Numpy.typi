@@ -1,0 +1,921 @@
+//! NumPy-compatible numerical completion operations.
+
+module ndarray.Numpy.
+
+/// Represents one array or recursively nested list accepted by `block`.
+
+pub type Block =
+    Array
+  | List[Block].
+
+/// Selects a NumPy-compatible automatic histogram bin estimator.
+
+pub type HistogramEstimator: Int =
+    SQUARE_ROOT = 0
+  | STURGES = 1
+  | RICE = 2
+  | SCOTT = 3
+  | STONE = 4
+  | DOANE = 5
+  | FREEDMAN_DIACONIS = 6
+  | AUTO = 7.
+
+/// Selects Cartesian `xy` or matrix `ij` coordinate placement for `meshgrid`.
+
+pub type MeshIndexing: Int =
+    XY = 0
+  | IJ = 1.
+
+/// Selects how out-of-bounds coordinates are handled by `ravel_multi_index`.
+
+pub type RavelMode: Int =
+    RAISE = 0
+  | WRAP = 1
+  | CLIP = 2.
+
+/// Selects the triangular masking rule used by `mask_indices`.
+
+pub type TriangleMask: Int =
+    LOWER = 0
+  | UPPER = 1.
+
+/// Writes magnitudes into an exact-shape destination after staging aliased input.
+
+pub absolute_into(destination: Array, array: Array): Unit.
+
+/// Applies sequential unbuffered addition at rank-one integer indexes with broadcast values and stable aliases.
+
+pub add_at(array: Array, indexes: Array, values: Array): Unit.
+
+/// Writes a broadcast addition into an exact-shape destination after staging all aliased inputs.
+
+pub add_into(destination: Array, lhs: Array, rhs: Array): Unit.
+
+/// Returns segmented addition reductions beginning at each rank-one integer index along an axis.
+
+pub add_reduceat(array: Array, indexes: Array, axis: Int): Array.
+
+/// Writes segmented addition reductions into an exact-shape destination after staging aliased inputs.
+
+pub add_reduceat_into(destination: Array, array: Array, indexes: Array, axis: Int): Unit.
+
+/// Writes broadcast sums where a Bool mask is true while preserving masked destination elements and staging aliases.
+
+pub add_where_into(destination: Array, lhs: Array, rhs: Array, mask: Array): Unit.
+
+/// Provides NumPy-compatible alen behavior.
+
+pub alen(array: Array): Int.
+
+/// Provides NumPy-compatible allclose behavior.
+
+pub allclose(lhs: Array, rhs: Array, relative_tolerance: Float, absolute_tolerance: Float, equal_nan: Bool): Bool.
+
+/// Provides NumPy-compatible angle behavior.
+
+pub angle(array: Array, degrees: Bool): Array.
+
+/// Provides NumPy-compatible append behavior.
+
+pub append(array: Array, values: Array, axis: Int): Array.
+
+/// Provides NumPy-compatible array equal behavior.
+
+pub array_equal(lhs: Array, rhs: Array): Bool.
+
+/// Returns strict equality while treating paired NaNs as equal.
+
+pub array_equal_nan(lhs: Array, rhs: Array): Bool.
+
+/// Provides NumPy-compatible array equiv behavior.
+
+pub array_equiv(lhs: Array, rhs: Array): Bool.
+
+/// Returns a read-only shared view with an explicit shape and element strides.
+
+pub as_strided(array: Array, shape: List[Int], strides: List[Int]): Array.
+
+/// Provides NumPy-compatible asarray chkfinite behavior.
+
+pub asarray_chkfinite(array: Array): Array.
+
+/// Returns a finite-only copy in an explicit dtype and memory order.
+
+pub asarray_chkfinite(array: Array, requested_dtype: Int, order: Int): Array.
+
+/// Provides NumPy-compatible asfarray behavior.
+
+pub asfarray(array: Array): Array.
+
+/// Provides NumPy-compatible average behavior.
+
+pub average(array: Array, axes: List[Int], keep_dims: Bool): Array.
+
+/// Returns an average weighted by a same-shape array or one-dimensional axis weights.
+
+pub average_weighted(array: Array, weights: Array, axes: List[Int], keep_dims: Bool): Array.
+
+/// Returns a weighted average followed by its broadcast weight sum.
+
+pub average_weighted_with_sum(array: Array, weights: Array, axes: List[Int], keep_dims: Bool): List[Array].
+
+/// Returns an unweighted average followed by its broadcast reduction cardinality.
+
+pub average_with_sum(array: Array, axes: List[Int], keep_dims: Bool): List[Array].
+
+/// Provides NumPy-compatible bartlett behavior.
+
+pub bartlett(length: Int): Array.
+
+/// Counts occurrences of each nonnegative integer value.
+
+pub bincount(values: Array, minimum_length: Int = 0): Array.
+
+/// Provides NumPy-compatible bitwise not behavior.
+
+pub bitwise_not(array: Array): Array.
+
+/// Provides NumPy-compatible blackman behavior.
+
+pub blackman(length: Int): Array.
+
+/// Assembles an owned array from recursively nested blocks using NumPy axis and rank rules.
+
+pub block(value: Block): Array.
+
+/// Provides NumPy-compatible broadcast arrays behavior.
+
+pub broadcast_arrays(first: Array, remaining: List[Array]): List[Array].
+
+/// Provides NumPy-compatible broadcast shapes behavior.
+
+pub broadcast_shapes(lhs: List[Int], rhs: List[Int]): Array.
+
+/// Provides NumPy-compatible column stack behavior.
+
+pub column_stack(arrays: List[Array]): Array.
+
+/// Provides NumPy-compatible convolve behavior.
+
+pub convolve(lhs: Array, rhs: Array, mode: Int): Array.
+
+/// Provides NumPy-compatible copyto behavior.
+
+pub copyto(destination: Array, source: Array): Unit.
+
+/// Broadcasts and copies values under an explicit NumPy-compatible casting rule.
+
+pub copyto(destination: Array, source: Array, casting: Int): Unit.
+
+/// Broadcasts a source and truth mask before copying selected values under an explicit casting rule.
+
+pub copyto(destination: Array, source: Array, mask: Array, casting: Int): Unit.
+
+/// Broadcasts a source and truth mask before copying selected values.
+
+pub copyto_where(destination: Array, source: Array, mask: Array, casting: ndarray.Array.CastingRule): Unit.
+
+/// Broadcasts and copies values under an explicit numerical casting rule.
+
+pub copyto_with_casting(destination: Array, source: Array, casting: ndarray.Array.CastingRule): Unit.
+
+/// Provides NumPy-compatible correlate behavior.
+
+pub correlate(lhs: Array, rhs: Array, mode: Int): Array.
+
+/// Returns correlation coefficients after appending variables from a second observation array.
+
+pub correlation_pair(array: Array, other: Array, row_variables: Int, dtype: Int): Array.
+
+/// Returns correlation coefficients in the requested floating-point or complex dtype.
+
+pub correlation_typed(array: Array, row_variables: Int, dtype: Int): Array.
+
+/// Returns covariance with nonnegative relative observation weights.
+
+pub covariance_analytic_weighted(array: Array, analytic_weights: Array, row_variables: Int, correction: Int, dtype: Int): Array.
+
+/// Returns covariance with nonnegative integral observation frequencies.
+
+pub covariance_frequency_weighted(array: Array, frequency_weights: Array, row_variables: Int, correction: Int, dtype: Int): Array.
+
+/// Returns covariance after appending variables from a second observation array.
+
+pub covariance_pair(array: Array, other: Array, row_variables: Int, correction: Int, dtype: Int): Array.
+
+/// Returns paired covariance with combined observation weights.
+
+pub covariance_pair_weighted(array: Array, other: Array, frequency_weights: Array, analytic_weights: Array, row_variables: Int, correction: Int, dtype: Int): Array.
+
+/// Returns covariance in the requested floating-point or complex dtype.
+
+pub covariance_typed(array: Array, row_variables: Int, correction: Int, dtype: Int): Array.
+
+/// Returns covariance with combined frequency and analytic observation weights.
+
+pub covariance_weighted(array: Array, frequency_weights: Array, analytic_weights: Array, row_variables: Int, correction: Int, dtype: Int): Array.
+
+/// Provides NumPy-compatible delete behavior.
+
+pub delete(array: Array, indexes: List[Int]): Array.
+
+/// Deletes normalized integer indexes along one axis.
+
+pub delete(array: Array, indexes: List[Int], axis: Int): Array.
+
+/// Deletes positions selected by an exact-length Bool mask along one axis.
+
+pub delete(array: Array, mask: Array, axis: Int): Array.
+
+/// Extracts a matrix diagonal view or constructs a dtype-preserving diagonal matrix from a vector.
+
+pub diag(array: Array, offset: Int = 0): Array.
+
+/// Provides NumPy-compatible diag indices behavior.
+
+pub diag_indices(size: Int, rank: Int): Array.
+
+/// Provides NumPy-compatible diag indices from behavior.
+
+pub diag_indices_from(array: Array): Array.
+
+/// Returns repeated differences after appending compatible values along one axis.
+
+pub difference_append(array: Array, append: Array, order: Int, axis: Int): Array.
+
+/// Returns repeated differences after prepending compatible values along one axis.
+
+pub difference_prepend(array: Array, prepend: Array, order: Int, axis: Int): Array.
+
+/// Returns repeated differences with compatible values on both ends of one axis.
+
+pub difference_surround(array: Array, prepend: Array, append: Array, order: Int, axis: Int): Array.
+
+/// Provides NumPy-compatible divmod behavior.
+
+pub divmod(lhs: Array, rhs: Array): List[Array].
+
+/// Provides NumPy-compatible dsplit behavior.
+
+pub dsplit(array: Array, sections: Int): List[Array].
+
+/// Provides NumPy-compatible dstack behavior.
+
+pub dstack(arrays: List[Array]): Array.
+
+/// Provides NumPy-compatible ediff1d behavior.
+
+pub ediff1d(array: Array): Array.
+
+/// Writes a scalar across a diagonal, optionally wrapping through tall matrices.
+
+pub fill_diagonal(array: Array, value: Float, wrap: Bool = false): Unit.
+
+/// Provides NumPy-compatible fix behavior.
+
+pub fix(array: Array): Array.
+
+/// Provides NumPy-compatible float power behavior.
+
+pub float_power(lhs: Array, rhs: Array): Array.
+
+/// Provides NumPy-compatible fmod behavior.
+
+pub fmod(lhs: Array, rhs: Array): Array.
+
+/// Provides NumPy-compatible frombuffer behavior.
+
+pub frombuffer(bytes: Bytes): Array.
+
+/// Provides NumPy-compatible full behavior.
+
+pub full(shape: List[Int], value: Float): Array.
+
+/// Creates an array by broadcasting an Array-valued fill pattern.
+
+pub full_from(shape: List[Int], fill_values: Array): Array.
+
+/// Provides NumPy-compatible full like behavior.
+
+pub full_like(array: Array, value: Float): Array.
+
+/// Returns one uniform-spacing gradient for every source axis.
+
+pub gradient_all(array: Array, spacing: Float, edge_order: Int): List[Array].
+
+/// Returns gradients for selected axes using scalar or coordinate spacing arrays.
+
+pub gradient_axes(array: Array, spacings: List[Array], axes: List[Int], edge_order: Int): List[Array].
+
+/// Returns a gradient along one axis using rank-one sample coordinates.
+
+pub gradient_coordinates(array: Array, coordinates: Array, axis: Int, edge_order: Int): Array.
+
+/// Returns a uniform-spacing gradient with first- or second-order boundaries.
+
+pub gradient_edge(array: Array, spacing: Float, axis: Int, edge_order: Int): Array.
+
+/// Returns gradients for selected axes using one scalar spacing per axis.
+
+pub gradient_uniform_axes(array: Array, spacings: List[Float], axes: List[Int], edge_order: Int): List[Array].
+
+/// Provides NumPy-compatible hamming behavior.
+
+pub hamming(length: Int): Array.
+
+/// Provides NumPy-compatible hanning behavior.
+
+pub hanning(length: Int): Array.
+
+/// Provides NumPy-compatible heaviside behavior.
+
+pub heaviside(lhs: Array, zero_value: Array): Array.
+
+/// Builds a one-dimensional histogram with an inferred finite range.
+
+pub histogram(array: Array, bins: Int = 10, density: Bool = false): List[Array].
+
+/// Builds a two-dimensional histogram with equal bin counts and inferred axis ranges.
+
+pub histogram2d(x: Array, y: Array, bins: Int = 10, density: Bool = false): List[Array].
+
+/// Builds a two-dimensional histogram from explicit edge vectors.
+
+pub histogram2d_edges(x: Array, y: Array, x_edges: Array, y_edges: Array, density: Bool = false): List[Array].
+
+/// Builds a two-dimensional histogram with explicit per-axis counts and ranges.
+
+pub histogram2d_range(x: Array, y: Array, x_bins: Int, y_bins: Int, minima: Array, maxima: Array, density: Bool = false): List[Array].
+
+/// Builds a histogram with explicit x edges and uniform y bins.
+
+pub histogram2d_x_edges(x: Array, y: Array, x_edges: Array, y_bins: Int, y_lower: Float, y_upper: Float, density: Bool = false): List[Array].
+
+/// Builds a histogram with uniform x bins and explicit y edges.
+
+pub histogram2d_y_edges(x: Array, y: Array, x_bins: Int, x_lower: Float, x_upper: Float, y_edges: Array, density: Bool = false): List[Array].
+
+/// Returns inferred fixed-count histogram edges.
+
+pub histogram_bin_edges(array: Array, bins: Int = 10): Array.
+
+/// Returns estimator-selected histogram edges.
+
+pub histogram_bin_edges_estimator(array: Array, estimator: HistogramEstimator): Array.
+
+/// Builds a one-dimensional histogram from explicit increasing edges.
+
+pub histogram_edges(array: Array, edges: Array, density: Bool = false): List[Array].
+
+/// Builds a histogram using a typed automatic bin estimator.
+
+pub histogram_estimator(array: Array, estimator: HistogramEstimator, density: Bool = false): List[Array].
+
+/// Builds an estimator-selected histogram over an explicit finite range.
+
+pub histogram_estimator_range(array: Array, estimator: HistogramEstimator, lower: Float, upper: Float, density: Bool = false): List[Array].
+
+/// Builds a one-dimensional histogram over an explicit finite range.
+
+pub histogram_range(array: Array, bins: Int, lower: Float, upper: Float, density: Bool = false): List[Array].
+
+/// Builds a weighted histogram with an inferred finite range.
+
+pub histogram_weighted(array: Array, weights: Array, bins: Int = 10, density: Bool = false): List[Array].
+
+/// Builds a weighted histogram from explicit increasing edges.
+
+pub histogram_weighted_edges(array: Array, weights: Array, edges: Array, density: Bool = false): List[Array].
+
+/// Builds a weighted histogram over an explicit finite range.
+
+pub histogram_weighted_range(array: Array, weights: Array, bins: Int, lower: Float, upper: Float, density: Bool = false): List[Array].
+
+/// Builds a multidimensional histogram with one inferred-range bin count.
+
+pub histogramdd(samples: Array, bins: Int = 10, density: Bool = false): List[Array].
+
+/// Builds a multidimensional histogram from one bin count per axis.
+
+pub histogramdd_bins(samples: Array, bins: List[Int], density: Bool = false): List[Array].
+
+/// Builds a multidimensional histogram from explicit edge vectors.
+
+pub histogramdd_edges(samples: Array, edges: List[Array], density: Bool = false): List[Array].
+
+/// Builds a multidimensional histogram from per-axis counts and ranges.
+
+pub histogramdd_range(samples: Array, bins: List[Int], minima: List[Float], maxima: List[Float], density: Bool = false): List[Array].
+
+/// Builds a weighted multidimensional histogram with one inferred-range bin count.
+
+pub histogramdd_weighted(samples: Array, weights: Array, bins: Int = 10, density: Bool = false): List[Array].
+
+/// Builds a weighted multidimensional histogram from one bin count per axis.
+
+pub histogramdd_weighted_bins(samples: Array, weights: Array, bins: List[Int], density: Bool = false): List[Array].
+
+/// Builds a weighted multidimensional histogram from explicit edge vectors.
+
+pub histogramdd_weighted_edges(samples: Array, weights: Array, edges: List[Array], density: Bool = false): List[Array].
+
+/// Builds a weighted multidimensional histogram from per-axis ranges.
+
+pub histogramdd_weighted_range(samples: Array, weights: Array, bins: List[Int], minima: List[Float], maxima: List[Float], density: Bool = false): List[Array].
+
+/// Provides NumPy-compatible hsplit behavior.
+
+pub hsplit(array: Array, sections: Int): List[Array].
+
+/// Provides NumPy-compatible hstack behavior.
+
+pub hstack(arrays: List[Array]): Array.
+
+/// Provides NumPy-compatible i0 behavior.
+
+pub i0(array: Array): Array.
+
+/// Provides NumPy-compatible imag behavior.
+
+pub imag(array: Array): Array.
+
+/// Provides NumPy-compatible insert behavior.
+
+pub insert(array: Array, index: Int, values: Array): Array.
+
+/// Inserts values before stable flattened integer-index positions.
+
+pub insert(array: Array, indexes: List[Int], values: Array): Array.
+
+/// Inserts values before one scalar index along a normalized axis.
+
+pub insert(array: Array, index: Int, values: Array, axis: Int): Array.
+
+/// Inserts values before stable integer-index positions along a normalized axis.
+
+pub insert(array: Array, indexes: List[Int], values: Array, axis: Int): Array.
+
+/// Returns whether two or more logical indexes in one strided array address the same element.
+
+pub internal_overlap(array: Array): Bool.
+
+/// Interpolates with explicit real or complex scalar boundary arrays.
+
+pub interpolate_boundaries(values: Array, coordinates: Array, samples: Array, left: Array, right: Array): Array.
+
+/// Interpolates with the first and last samples as the default boundaries.
+
+pub interpolate_default(values: Array, coordinates: Array, samples: Array): Array.
+
+/// Interpolates over normalized and sorted periodic coordinates.
+
+pub interpolate_periodic(values: Array, coordinates: Array, samples: Array, period: Float): Array.
+
+/// Provides NumPy-compatible invert behavior.
+
+pub invert(array: Array): Array.
+
+/// Applies unbuffered bitwise inversion at rank-one integer indexes after stabilizing aliased indexes.
+
+pub invert_at(array: Array, indexes: Array): Unit.
+
+/// Writes bitwise inversion into an exact-shape destination after staging aliased input.
+
+pub invert_into(destination: Array, array: Array): Unit.
+
+/// Writes bitwise inversion where a Bool mask is true and stages masks that alias the destination.
+
+pub invert_where_into(destination: Array, array: Array, mask: Array): Unit.
+
+/// Returns elementwise NumPy-compatible closeness.
+
+pub isclose(lhs: Array, rhs: Array, relative_tolerance: Float, absolute_tolerance: Float, equal_nan: Bool): Array.
+
+/// Provides NumPy-compatible iscomplex behavior.
+
+pub iscomplex(array: Array): Array.
+
+/// Provides NumPy-compatible iscomplexobj behavior.
+
+pub iscomplexobj(array: Array): Bool.
+
+/// Provides NumPy-compatible isneginf behavior.
+
+pub isneginf(array: Array): Array.
+
+/// Provides NumPy-compatible isposinf behavior.
+
+pub isposinf(array: Array): Array.
+
+/// Provides NumPy-compatible isreal behavior.
+
+pub isreal(array: Array): Array.
+
+/// Provides NumPy-compatible isrealobj behavior.
+
+pub isrealobj(array: Array): Bool.
+
+/// Provides NumPy-compatible ix  behavior.
+
+pub ix_(first: Array, remaining: List[Array]): List[Array].
+
+/// Provides NumPy-compatible kaiser behavior.
+
+pub kaiser(length: Int, beta: Float): Array.
+
+/// Provides NumPy-compatible ldexp behavior.
+
+pub ldexp(values: Array, exponents: Array): Array.
+
+/// Writes broadcast truth-value conjunction into an exact-shape Bool destination.
+
+pub logical_and_into(destination: Array, lhs: Array, rhs: Array): Unit.
+
+/// Writes truth-value negation into an exact-shape Bool destination.
+
+pub logical_not_into(destination: Array, array: Array): Unit.
+
+/// Writes broadcast truth-value disjunction into an exact-shape Bool destination.
+
+pub logical_or_into(destination: Array, lhs: Array, rhs: Array): Unit.
+
+/// Writes broadcast truth-value exclusive disjunction into an exact-shape Bool destination.
+
+pub logical_xor_into(destination: Array, lhs: Array, rhs: Array): Unit.
+
+/// Returns square-matrix coordinates selected by a typed triangular mask.
+
+pub mask_indices(size: Int, mask: TriangleMask, offset: Int = 0): Array.
+
+/// Provides NumPy-compatible may share memory behavior.
+
+pub may_share_memory(lhs: Array, rhs: Array): Bool.
+
+/// Returns an exact overlap answer within a work budget and conservatively returns true when the budget is exhausted; zero selects the bounds-only query and negative one selects unlimited exact work.
+
+pub may_share_memory_with_work(lhs: Array, rhs: Array, max_work: Int): Bool.
+
+/// Atomically writes a median into an exactly shaped writable destination.
+
+pub median_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit.
+
+/// Returns an empty coordinate-grid list for an empty input sequence.
+
+@pure
+pub meshgrid(): List[Array].
+
+/// Builds coordinate grids while preserving each input dtype and explicit sparse/copy semantics.
+
+pub meshgrid(first: Array, remaining: List[Array], indexing: MeshIndexing = MeshIndexing.XY, sparse: Bool = false, copy: Bool = true): List[Array].
+
+/// Provides NumPy-compatible msort behavior.
+
+pub msort(array: Array): Array.
+
+/// Provides NumPy-compatible nan to num behavior.
+
+pub nan_to_num(array: Array, nan: Float, positive_infinity: Float, negative_infinity: Float): Array.
+
+/// Replaces NaN and infinity components with dtype-specific finite defaults.
+
+pub nan_to_num_default(array: Array): Array.
+
+/// Writes non-finite replacements into an exact-shape, exact-dtype destination.
+
+pub nan_to_num_into(destination: Array, array: Array, nan: Float, positive_infinity: Float, negative_infinity: Float): Unit.
+
+/// Provides NumPy-compatible nanargmax behavior.
+
+pub nanargmax(array: Array): Int.
+
+/// Returns maximum indexes over normalized axes while omitting NaNs.
+
+pub nanargmax_axes(array: Array, axes: List[Int], keep_dims: Bool): Array.
+
+/// Provides NumPy-compatible nanargmin behavior.
+
+pub nanargmin(array: Array): Int.
+
+/// Returns minimum indexes over normalized axes while omitting NaNs.
+
+pub nanargmin_axes(array: Array, axes: List[Int], keep_dims: Bool): Array.
+
+/// Provides NumPy-compatible nancumprod behavior.
+
+pub nancumprod(array: Array, axis: Int): Array.
+
+/// Returns a NaN-normalized cumulative product in an explicit dtype.
+
+pub nancumprod_as(array: Array, axis: Int, requested_dtype: Int): Array.
+
+/// Returns a flattened cumulative product with NaNs replaced by one.
+
+pub nancumprod_flat(array: Array): Array.
+
+/// Writes a flattened NaN-normalized cumulative product into a vector destination.
+
+pub nancumprod_flat_into(destination: Array, array: Array): Unit.
+
+/// Writes a NaN-normalized cumulative product into an exact-shape destination.
+
+pub nancumprod_into(destination: Array, array: Array, axis: Int): Unit.
+
+/// Provides NumPy-compatible nancumsum behavior.
+
+pub nancumsum(array: Array, axis: Int): Array.
+
+/// Returns a NaN-normalized cumulative sum in an explicit dtype.
+
+pub nancumsum_as(array: Array, axis: Int, requested_dtype: Int): Array.
+
+/// Returns a flattened cumulative sum with NaNs replaced by zero.
+
+pub nancumsum_flat(array: Array): Array.
+
+/// Writes a flattened NaN-normalized cumulative sum into a vector destination.
+
+pub nancumsum_flat_into(destination: Array, array: Array): Unit.
+
+/// Writes a NaN-normalized cumulative sum into an exact-shape destination.
+
+pub nancumsum_into(destination: Array, array: Array, axis: Int): Unit.
+
+/// Returns maxima while omitting NaN values.
+
+pub nanmax(array: Array, axes: List[Int], keep_dims: Bool): Array.
+
+/// Writes NaN-omitting maxima into an exact-shape destination.
+
+pub nanmax_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool): Unit.
+
+/// Returns means while omitting NaN values.
+
+pub nanmean(array: Array, axes: List[Int], keep_dims: Bool): Array.
+
+/// Returns NaN-omitting means in an explicit inexact dtype.
+
+pub nanmean_as(array: Array, axes: List[Int], keep_dims: Bool, dtype: Int): Array.
+
+/// Writes NaN-omitting means into an exact-shape inexact destination.
+
+pub nanmean_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool): Unit.
+
+/// Provides NumPy-compatible nanmedian behavior.
+
+pub nanmedian(array: Array): Array.
+
+/// Returns a NaN-skipping median across normalized axes.
+
+pub nanmedian_axes(array: Array, axes: List[Int], keep_dims: Int): Array.
+
+/// Atomically writes a NaN-skipping median into an exactly shaped writable destination.
+
+pub nanmedian_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit.
+
+/// Returns minima while omitting NaN values.
+
+pub nanmin(array: Array, axes: List[Int], keep_dims: Bool): Array.
+
+/// Writes NaN-omitting minima into an exact-shape destination.
+
+pub nanmin_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool): Unit.
+
+/// Provides NumPy-compatible nanpercentile behavior.
+
+pub nanpercentile(array: Array, percentile: Float): Array.
+
+/// Returns one NaN-skipping percentile across normalized axes.
+
+pub nanpercentile_axes(array: Array, percentile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Array.
+
+/// Atomically writes one NaN-skipping percentile into an exactly shaped writable destination.
+
+pub nanpercentile_into(destination: Array, array: Array, percentile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Unit.
+
+/// Returns multiple NaN-skipping percentiles with the percentile dimension first.
+
+pub nanpercentiles(array: Array, percentiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Array.
+
+/// Atomically writes multiple NaN-skipping percentiles into an exactly shaped writable destination.
+
+pub nanpercentiles_into(destination: Array, array: Array, percentiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Unit.
+
+/// Returns products while omitting NaN values.
+
+pub nanprod(array: Array, axes: List[Int], keep_dims: Bool): Array.
+
+/// Returns NaN-omitting products in an explicit dtype.
+
+pub nanprod_as(array: Array, axes: List[Int], keep_dims: Bool, dtype: Int): Array.
+
+/// Writes NaN-omitting products into an exact-shape destination.
+
+pub nanprod_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool): Unit.
+
+/// Provides NumPy-compatible nanquantile behavior.
+
+pub nanquantile(array: Array, quantile: Float): Array.
+
+/// Returns one NaN-skipping quantile across normalized axes.
+
+pub nanquantile_axes(array: Array, quantile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Array.
+
+/// Atomically writes one NaN-skipping quantile into an exactly shaped writable destination.
+
+pub nanquantile_into(destination: Array, array: Array, quantile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Unit.
+
+/// Returns multiple NaN-skipping quantiles with the quantile dimension first.
+
+pub nanquantiles(array: Array, quantiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Array.
+
+/// Atomically writes multiple NaN-skipping quantiles into an exactly shaped writable destination.
+
+pub nanquantiles_into(destination: Array, array: Array, quantiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Unit.
+
+/// Returns standard deviation while omitting NaN values.
+
+pub nanstd(array: Array, axes: List[Int], keep_dims: Bool, correction: Int): Array.
+
+/// Returns NaN-omitting standard deviations in an explicit inexact dtype.
+
+pub nanstd_as(array: Array, axes: List[Int], keep_dims: Bool, correction: Int, dtype: Int): Array.
+
+/// Writes NaN-omitting standard deviations into an exact-shape inexact destination.
+
+pub nanstd_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool, correction: Int): Unit.
+
+/// Returns sums while omitting NaN values.
+
+pub nansum(array: Array, axes: List[Int], keep_dims: Bool): Array.
+
+/// Returns NaN-omitting sums in an explicit dtype.
+
+pub nansum_as(array: Array, axes: List[Int], keep_dims: Bool, dtype: Int): Array.
+
+/// Writes NaN-omitting sums into an exact-shape destination.
+
+pub nansum_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool): Unit.
+
+/// Returns variance while omitting NaN values.
+
+pub nanvar(array: Array, axes: List[Int], keep_dims: Bool, correction: Int): Array.
+
+/// Returns NaN-omitting variances in an explicit inexact dtype.
+
+pub nanvar_as(array: Array, axes: List[Int], keep_dims: Bool, correction: Int, dtype: Int): Array.
+
+/// Writes NaN-omitting variances into an exact-shape inexact destination.
+
+pub nanvar_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool, correction: Int): Unit.
+
+/// Provides NumPy-compatible packbits behavior.
+
+pub packbits(array: Array, bit_order: Int): Array.
+
+/// Packs truth values into UInt8 bytes along one normalized axis.
+
+pub packbits_axis(array: Array, axis: Int, bit_order: Int): Array.
+
+/// Provides NumPy-compatible pad behavior.
+
+pub pad(array: Array, leading: List[Int], trailing: List[Int], value: Float): Array.
+
+/// Atomically writes one percentile into an exactly shaped writable destination.
+
+pub percentile_into(destination: Array, array: Array, percentile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Unit.
+
+/// Atomically writes multiple percentiles into an exactly shaped writable destination.
+
+pub percentiles_into(destination: Array, array: Array, percentiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Unit.
+
+/// Provides NumPy-compatible place behavior.
+
+pub place(array: Array, mask: Array, values: Array): Unit.
+
+/// Provides NumPy-compatible putmask behavior.
+
+pub putmask(array: Array, mask: Array, values: Array): Unit.
+
+/// Atomically writes one quantile into an exactly shaped writable destination.
+
+pub quantile_into(destination: Array, array: Array, quantile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Unit.
+
+/// Atomically writes multiple quantiles into an exactly shaped writable destination.
+
+pub quantiles_into(destination: Array, array: Array, quantiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Unit.
+
+/// Converts packed coordinates to flat indexes with explicit per-axis modes and order.
+
+pub ravel_multi_index(coordinates: Array, dimensions: List[Int], modes: List[RavelMode] = [RavelMode.RAISE], order: ndarray.Array.ArrayOrder = ArrayOrder.C): Array.
+
+/// Provides NumPy-compatible real behavior.
+
+pub real(array: Array): Array.
+
+/// Provides NumPy-compatible real if close behavior.
+
+pub real_if_close(array: Array, tolerance: Float): Array.
+
+/// Writes reciprocals into an exact-shape destination after staging aliased input.
+
+pub reciprocal_into(destination: Array, array: Array): Unit.
+
+/// Writes reciprocals where a Bool mask is true while preserving masked destination elements.
+
+pub reciprocal_where_into(destination: Array, array: Array, mask: Array): Unit.
+
+/// Provides NumPy-compatible row stack behavior.
+
+pub row_stack(arrays: List[Array]): Array.
+
+/// Provides NumPy-compatible select behavior.
+
+pub select(conditions: List[Array], choices: List[Array], default_value: Array): Array.
+
+/// Provides NumPy-compatible shares memory behavior.
+
+pub shares_memory(lhs: Array, rhs: Array): Bool.
+
+/// Returns exact memory overlap within the supplied work budget, failing when finite work is exhausted; negative one selects unlimited exact work.
+
+pub shares_memory_with_work(lhs: Array, rhs: Array, max_work: Int): Bool.
+
+/// Provides NumPy-compatible sinc behavior.
+
+pub sinc(array: Array): Array.
+
+/// Returns a read-only shared sliding-window view, using every axis when axes is empty.
+
+pub sliding_window_view(array: Array, window_shape: List[Int], axes: List[Int] = []): Array.
+
+/// Provides NumPy-compatible sort complex behavior.
+
+pub sort_complex(array: Array): Array.
+
+/// Provides NumPy-compatible spacing behavior.
+
+pub spacing(array: Array): Array.
+
+/// Provides NumPy-compatible tril indices behavior.
+
+pub tril_indices(rows: Int, offset: Int = 0, columns: Int = - 1): Array.
+
+/// Provides NumPy-compatible tril indices from behavior.
+
+pub tril_indices_from(array: Array, offset: Int = 0): Array.
+
+/// Provides NumPy-compatible trim zeros behavior.
+
+pub trim_zeros(array: Array, mode: Int): Array.
+
+/// Provides NumPy-compatible triu indices behavior.
+
+pub triu_indices(rows: Int, offset: Int = 0, columns: Int = - 1): Array.
+
+/// Provides NumPy-compatible triu indices from behavior.
+
+pub triu_indices_from(array: Array, offset: Int = 0): Array.
+
+/// Provides NumPy-compatible trunc behavior.
+
+pub trunc(array: Array): Array.
+
+/// Provides NumPy-compatible unique behavior.
+
+pub unique(array: Array): Array.
+
+/// Provides NumPy-compatible unpackbits behavior.
+
+pub unpackbits(array: Array, count: Int, bit_order: Int): Array.
+
+/// Unpacks every available flattened UInt8 bit.
+
+pub unpackbits_all(array: Array, bit_order: Int): Array.
+
+/// Unpacks a counted number of UInt8 bits along one normalized axis.
+
+pub unpackbits_axis(array: Array, axis: Int, count: Int, bit_order: Int): Array.
+
+/// Unpacks every available UInt8 bit along one normalized axis.
+
+pub unpackbits_axis_all(array: Array, axis: Int, bit_order: Int): Array.
+
+/// Converts flat indexes into coordinate arrays with explicit memory order.
+
+pub unravel_index(indexes: Array, dimensions: List[Int], order: ndarray.Array.ArrayOrder = ArrayOrder.C): List[Array].
+
+/// Unwraps a real-valued signal using an explicit discontinuity threshold.
+
+pub unwrap_discontinuity(array: Array, period: Float, discontinuity: Float, axis: Int): Array.
+
+/// Unwraps using integral period arithmetic and preserves integral semantics.
+
+pub unwrap_integer_period(array: Array, period: Int, discontinuity: Int, axis: Int): Array.
+
+/// Provides NumPy-compatible vsplit behavior.
+
+pub vsplit(array: Array, sections: Int): List[Array].
+
+/// Provides NumPy-compatible vstack behavior.
+
+pub vstack(arrays: List[Array]): Array.

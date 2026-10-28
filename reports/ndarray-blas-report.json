@@ -1,0 +1,44 @@
+{
+  "adversarial_provider_failures": [
+    "ndarray.blas.missing",
+    "ndarray.blas.integer_width",
+    "ndarray.blas.architecture",
+    "ndarray.blas.version"
+  ],
+  "host": {
+    "architecture": "x86_64",
+    "operating_system": "linux"
+  },
+  "package": "terlan-ndarray",
+  "provider": {
+    "architecture": "x86_64",
+    "build_options": [
+      "NOFORTRAN=1",
+      "NO_LAPACK=1",
+      "NO_LAPACKE=1",
+      "DYNAMIC_ARCH=1",
+      "DYNAMIC_OLDER=1",
+      "NO_SHARED=1",
+      "NUM_THREADS=64"
+    ],
+    "calling_convention": "c",
+    "cblas_integer_bits": 32,
+    "config": "OpenBLAS 0.3.33 NO_LAPACK NO_LAPACKE DYNAMIC_ARCH NO_AFFINITY Haswell MAX_THREADS=64",
+    "core": "Haswell",
+    "library_sha256": "b9eefadc45ef3331c13f091e8c411585ce458ddf0227bf9cf35394b26c3fd7c7",
+    "minimum_version": "0.3.0",
+    "parallel_mode": 1,
+    "provider": "openblas",
+    "provider_mode": "pinned_source",
+    "source_revision": "62bcfb0dc9f1cfa685fc04135c50e2780c303137",
+    "source_sha256": "91c894079dad77b2b51bee58f6f999dbd9db0419dd6a06dff93004767461ab86",
+    "version": "0.3.33"
+  },
+  "schema": "terlan.ndarray.blas-report.v1",
+  "semantics": {
+    "float64_rank2_row_major": "passed",
+    "reference_comparison": "passed",
+    "zero_dimensions_skip_provider": "passed"
+  },
+  "status": "passed"
+}

@@ -1,0 +1,230 @@
+/**
+ * Legendre polynomial algebra and numerical methods.
+ */
+module ndarray.Legendre.
+
+import ndarray.Array.
+
+/**
+ * Converts coefficients to the power basis.
+ */
+@compiler.native {ndarray.array.leg2poly}
+pub leg2poly(coefficients: Array): Array ->
+    native.
+
+/**
+ * Converts power coefficients to the leg basis.
+ */
+@compiler.native {ndarray.array.poly2leg}
+pub poly2leg(coefficients: Array): Array ->
+    native.
+
+/**
+ * Adds coefficient vectors.
+ */
+@compiler.native {ndarray.array.legadd}
+pub legadd(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Subtracts coefficient vectors.
+ */
+@compiler.native {ndarray.array.legsub}
+pub legsub(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Multiplies coefficient vectors.
+ */
+@compiler.native {ndarray.array.legmul}
+pub legmul(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns quotient and remainder.
+ */
+@compiler.native {ndarray.array.legdiv}
+pub legdiv(lhs: Array, rhs: Array): List[Array] ->
+    native.
+
+/**
+ * Multiplies coefficients by x.
+ */
+@compiler.native {ndarray.array.legmulx}
+pub legmulx(coefficients: Array): Array ->
+    native.
+
+/**
+ * Raises coefficients to a nonnegative power.
+ */
+@compiler.native {ndarray.array.legpow}
+pub legpow(coefficients: Array, exponent: Int): Array ->
+    native.
+
+/**
+ * Differentiates coefficients.
+ */
+@compiler.native {ndarray.array.legder}
+pub legder(coefficients: Array, order: Int): Array ->
+    native.
+
+/**
+ * Integrates coefficients.
+ */
+@compiler.native {ndarray.array.legint}
+pub legint(coefficients: Array, order: Int, constant: Float): Array ->
+    native.
+
+/**
+ * Fits coefficients to samples.
+ */
+@compiler.native {ndarray.array.legfit}
+pub legfit(coordinates: Array, values: Array, degree: Int): Array ->
+    native.
+
+/**
+ * Builds coefficients from roots.
+ */
+@compiler.native {ndarray.array.legfromroots}
+pub legfromroots(roots: Array): Array ->
+    native.
+
+/**
+ * Builds a companion matrix.
+ */
+@compiler.native {ndarray.array.legcompanion}
+pub legcompanion(coefficients: Array): Array ->
+    native.
+
+/**
+ * Returns polynomial roots.
+ */
+@compiler.native {ndarray.array.legroots}
+pub legroots(coefficients: Array): Array ->
+    native.
+
+/**
+ * Removes insignificant high-order coefficients.
+ */
+@compiler.native {ndarray.array.legtrim}
+pub legtrim(coefficients: Array, tolerance: Float): Array ->
+    native.
+
+/**
+ * Builds coefficients for offset plus scale times x.
+ */
+@compiler.native {ndarray.array.legline}
+pub legline(offset: Float, scale: Float): Array ->
+    native.
+
+/**
+ * Evaluates coefficients.
+ */
+@compiler.native {ndarray.array.legval}
+pub legval(coordinates: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Evaluates a two-dimensional coefficient tensor.
+ */
+@compiler.native {ndarray.array.legval2d}
+pub legval2d(x: Array, y: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Evaluates a three-dimensional coefficient tensor.
+ */
+@compiler.native {ndarray.array.legval3d}
+pub legval3d(x: Array, y: Array, z: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Evaluates over a two-dimensional Cartesian grid.
+ */
+@compiler.native {ndarray.array.leggrid2d}
+pub leggrid2d(x: Array, y: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Evaluates over a three-dimensional Cartesian grid.
+ */
+@compiler.native {ndarray.array.leggrid3d}
+pub leggrid3d(x: Array, y: Array, z: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Builds a Vandermonde matrix.
+ */
+@compiler.native {ndarray.array.legvander}
+pub legvander(coordinates: Array, degree: Int): Array ->
+    native.
+
+/**
+ * Builds a two-dimensional Vandermonde matrix.
+ */
+@compiler.native {ndarray.array.legvander2d}
+pub legvander2d(x: Array, y: Array, x_degree: Int, y_degree: Int): Array ->
+    native.
+
+/**
+ * Builds a three-dimensional Vandermonde matrix.
+ */
+@compiler.native {ndarray.array.legvander3d}
+pub legvander3d(x: Array, y: Array, z: Array, x_degree: Int, y_degree: Int, z_degree: Int): Array ->
+    native.
+
+/**
+ * Returns Gaussian quadrature nodes and weights.
+ */
+@compiler.native {ndarray.array.leggauss}
+pub leggauss(degree: Int): Array ->
+    native.
+
+/**
+ * Evaluates the orthogonality weight function.
+ */
+@compiler.native {ndarray.array.legweight}
+pub legweight(coordinates: Array): Array ->
+    native.
+
+/**
+ * Differentiates Legendre coefficient lanes along an axis with derivative scaling.
+ */
+@compiler.native {ndarray.array.legder_axis}
+pub legder(coefficients: Array, order: Int, scale: Float, axis: Int): Array ->
+    native.
+
+/**
+ * Integrates Legendre coefficient lanes along an axis with constants, a lower bound, and scaling.
+ */
+@compiler.native {ndarray.array.legint_axis}
+pub legint(
+    coefficients: Array,
+    order: Int,
+    constants: Array,
+    lower_bound: Float,
+    scale: Float,
+    axis: Int,
+): Array ->
+    native.
+
+/**
+ * Evaluates Legendre coefficient tensors with Cartesian or broadcast semantics.
+ */
+@compiler.native {ndarray.array.legval_tensor}
+pub legval(coordinates: Array, coefficients: Array, tensor: Bool): Array ->
+    native.
+
+/**
+ * Fits selected Legendre degrees to scalar or matrix-valued samples.
+ */
+@compiler.native {ndarray.array.legfit_degrees}
+pub legfit(coordinates: Array, values: Array, degrees: Array): Array ->
+    native.
+
+/**
+ * Fits selected Legendre degrees using sample weights.
+ */
+@compiler.native {ndarray.array.legfit_weighted_degrees}
+pub legfit(coordinates: Array, values: Array, degrees: Array, weights: Array): Array ->
+    native.

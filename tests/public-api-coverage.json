@@ -1,0 +1,3794 @@
+{
+  "evidence": {
+    "helper.lifecycle": {
+      "marker": "check_helper_lifecycle(",
+      "path": "scripts/CheckPackage.terls"
+    },
+    "native.abi-boundaries": {
+      "marker": "test_scalar_empty_and_high_rank_shapes",
+      "path": "tests/abi_test.c"
+    },
+    "native.abi-rejections": {
+      "marker": "test_rejections_leave_no_live_array",
+      "path": "tests/abi_test.c"
+    },
+    "native.advanced-indexing": {
+      "marker": "test_advanced_indexing_rejects_bad_shapes_and_indexes",
+      "path": "tests/advanced_indexing_test.c"
+    },
+    "native.coordinate-indexing": {
+      "marker": "test_coordinate_assignment_is_atomic_and_alias_safe",
+      "path": "tests/advanced_indexing_test.c"
+    },
+    "native.coordinate-add-at": {
+      "marker": "test_coordinate_add_at_matches_numpy_map_iterator",
+      "path": "tests/advanced_indexing_test.c"
+    },
+    "native.allocation-failures": {
+      "marker": "test_allocation_failures_release_partial_state",
+      "path": "tests/abi_test.c"
+    },
+    "native.broadcast": {
+      "marker": "test_incompatible_and_zero_division_fail_cleanly",
+      "path": "tests/broadcast_test.c"
+    },
+    "native.clip": {
+      "marker": "test_clip_bounds_promotion_strides_and_mutation",
+      "path": "tests/broadcast_test.c"
+    },
+    "native.completion": {
+      "marker": "test_completion_rejections_leave_no_partial_output",
+      "path": "tests/completion_test.c"
+    },
+    "native.completion-output": {
+      "marker": "test_choose_into_stages_overlap_and_rejects_invalid_outputs",
+      "path": "tests/completion_test.c"
+    },
+    "native.numpy-resize": {
+      "marker": "test_numpy_resize_repeats_zero_shapes_and_dtype",
+      "path": "tests/completion_test.c"
+    },
+    "native.numpy-resize-in-place": {
+      "marker": "test_numpy_resize_alias_empty_and_atomic_rejections",
+      "path": "tests/resize_conformance_test.c"
+    },
+    "native.creation": {
+      "marker": "test_creation_rejections_are_typed",
+      "path": "tests/creation_test.c"
+    },
+    "native.creation-extra": {
+      "marker": "test_creation_extra_rejections_release_everything",
+      "path": "tests/creation_extra_test.c"
+    },
+    "native.dlpack-boundaries": {
+      "marker": "test_zero_dimension_round_trip_uses_canonical_strides",
+      "path": "tests/dlpack_test.c"
+    },
+    "native.dlpack-rejections": {
+      "marker": "test_rejection_paths_invoke_deleter_once",
+      "path": "tests/dlpack_test.c"
+    },
+    "native.dtype": {
+      "marker": "test_invalid_and_overflowing_casts_fail_without_outputs",
+      "path": "tests/dtype_test.c"
+    },
+    "native.histogram-numerical": {
+      "marker": "test_trapezoids_and_rejections",
+      "path": "tests/histogram_numerical_test.c"
+    },
+    "native.numpy-difference": {
+      "marker": "test_difference_numpy_orders_axes_boolean_and_boundaries",
+      "path": "tests/histogram_numerical_test.c"
+    },
+    "terlan.numpy-difference": {
+      "marker": "pub differences_orders_axes_and_boundaries_match_numpy",
+      "path": "tests/ndarray/NumericalTest.terl"
+    },
+    "native.numpy-gradient": {
+      "marker": "test_gradient_coordinate_spacing_and_edge_orders",
+      "path": "tests/gradient_test.c"
+    },
+    "native.numpy-gradient-adversarial": {
+      "marker": "test_gradient_rejections_and_allocation_cleanup",
+      "path": "tests/gradient_test.c"
+    },
+    "terlan.numpy-gradient": {
+      "marker": "pub gradients_cover_axes_coordinates_edge_orders_and_mixed_spacing",
+      "path": "tests/ndarray/NumericalTest.terl"
+    },
+    "native.numpy-calculus": {
+      "marker": "test_complex_and_periodic_interpolation",
+      "path": "tests/calculus_test.c"
+    },
+    "native.numpy-calculus-adversarial": {
+      "marker": "test_calculus_rejections_and_allocation_cleanup",
+      "path": "tests/calculus_test.c"
+    },
+    "terlan.numpy-calculus": {
+      "marker": "pub calculus_handles_periods_complex_interpolation_and_coordinate_grids",
+      "path": "tests/ndarray/NumericalTest.terl"
+    },
+    "native.numpy-counting": {
+      "marker": "test_digitize_increasing_decreasing_repeated_and_right_edges",
+      "path": "tests/bincount_digitize_test.c"
+    },
+    "native.numpy-counting-adversarial": {
+      "marker": "test_counting_rejections_and_allocation_cleanup",
+      "path": "tests/bincount_digitize_test.c"
+    },
+    "terlan.numpy-counting": {
+      "marker": "pub counts_and_bins_match_numpy_for_repeated_and_decreasing_edges",
+      "path": "tests/ndarray/NumericalTest.terl"
+    },
+    "native.indexing": {
+      "marker": "test_take_uses_normalized_integer_indices",
+      "path": "tests/indexing_view_test.c"
+    },
+    "native.numpy-take-shaped-output": {
+      "marker": "test_numpy_take_preserves_index_shape_and_stages_outputs",
+      "path": "tests/indexing_view_test.c"
+    },
+    "native.numpy-take-dtypes": {
+      "marker": "test_numpy_take_all_admitted_numeric_dtypes",
+      "path": "tests/indexing_view_test.c"
+    },
+    "native.scalar-conversion": {
+      "marker": "test_numpy_scalar_conversion_contract",
+      "path": "tests/multiarray_reduction_conformance_test.c"
+    },
+    "native.boolean-reduction": {
+      "marker": "test_numpy_logical_xor_reduction_contract",
+      "path": "tests/multiarray_reduction_conformance_test.c"
+    },
+    "terlan.scalar-conversion": {
+      "marker": "one_element_arrays_convert_to_language_scalars",
+      "path": "tests/ndarray/ConversionTest.terl"
+    },
+    "terlan.boolean-reduction": {
+      "marker": "logical_xor_reductions_preserve_parity_axes_and_empty_identity",
+      "path": "tests/ndarray/TruthReductionTest.terl"
+    },
+    "native.linear-algebra-boundaries": {
+      "marker": "test_vector_and_matrix_matmul",
+      "path": "tests/linear_algebra_test.c"
+    },
+    "native.linear-algebra-positive": {
+      "marker": "test_batched_broadcast_and_non_contiguous_matmul",
+      "path": "tests/linear_algebra_test.c"
+    },
+    "native.numpy-inner-vdot": {
+      "marker": "test_numpy_inner_three_dimensional_dtype_and_shape_contract",
+      "path": "tests/inner_vdot_conformance_test.c"
+    },
+    "native.numpy-inner-vdot-rejections": {
+      "marker": "test_numpy_inner_vdot_rejections_are_atomic",
+      "path": "tests/inner_vdot_conformance_test.c"
+    },
+    "native.linear-algebra-rejections": {
+      "marker": "test_linear_algebra_rejections",
+      "path": "tests/linear_algebra_test.c"
+    },
+    "native.linear-algebra-output": {
+      "marker": "test_output_destinations_are_atomic_and_operation_specific",
+      "path": "tests/linear_algebra_test.c"
+    },
+    "native.matmul-boundaries": {
+      "marker": "test_identity_zero_and_non_finite_matmul",
+      "path": "tests/blas_test.c"
+    },
+    "native.matmul-rejections": {
+      "marker": "test_matmul_rejections_and_allocation_cleanup",
+      "path": "tests/blas_test.c"
+    },
+    "native.nonzero": {
+      "marker": "test_nonzero_coordinate_family",
+      "path": "tests/indexing_view_test.c"
+    },
+    "native.numeric-ufunc": {
+      "marker": "test_numeric_ufunc_rejections",
+      "path": "tests/numeric_ufunc_test.c"
+    },
+    "native.operation-boundaries": {
+      "marker": "test_sum_axes_empty_identity_and_non_finite_values",
+      "path": "tests/operations_test.c"
+    },
+    "native.operation-rejections": {
+      "marker": "test_operation_failures_leave_sources_usable",
+      "path": "tests/operations_test.c"
+    },
+    "native.reduction-where": {
+      "marker": "test_masked_truth_reductions_match_numpy_identities",
+      "path": "tests/reduction_test.c"
+    },
+    "native.ordering": {
+      "marker": "test_ordering_rejects_invalid_inputs",
+      "path": "tests/ordering_test.c"
+    },
+    "native.numpy-lexsort": {
+      "marker": "test_numpy_lexsort_all_admitted_numeric_dtypes",
+      "path": "tests/ordering_test.c"
+    },
+    "native.numpy-lexsort-axis": {
+      "marker": "test_numpy_lexsort_normalizes_axes_and_rejects_invalid_axes",
+      "path": "tests/ordering_test.c"
+    },
+    "native.partition-sequences": {
+      "marker": "test_partition_empty_axes_and_invalid_kths",
+      "path": "tests/ordering_test.c"
+    },
+    "native.partition-fuzz": {
+      "marker": "test_partition_fuzz_and_axis_contracts",
+      "path": "tests/ordering_test.c"
+    },
+    "native.sorting": {
+      "marker": "test_complex_nan_order_matches_numpy",
+      "path": "tests/ordering_test.c"
+    },
+    "native.unary-output": {
+      "marker": "test_round_decimals_and_output_contracts",
+      "path": "tests/unary_test.c"
+    },
+    "native.complex-umath": {
+      "marker": "test_special_complex_strided_square_and_conjugate",
+      "path": "tests/complex_umath_test.c"
+    },
+    "terlan.complex-umath": {
+      "marker": "complex_power_absolute_square_and_conjugate_support_strided_dtypes",
+      "path": "tests/ndarray/ComplexUfuncTest.terl"
+    },
+    "native.half": {
+      "marker": "test_every_encoding_converts_exactly",
+      "path": "tests/half_test.c"
+    },
+    "rust.half-spacing": {
+      "marker": "float16_spacing_covers_every_finite_encoding",
+      "path": "bindings/ndarray_float_spacing_tests.rs"
+    },
+    "terlan.half": {
+      "marker": "float16_spacing_preserves_binary16_precision",
+      "path": "tests/ndarray/HalfSpacingTest.terl"
+    },
+    "terlan.half-nextafter": {
+      "marker": "float16_spacing_and_nextafter_follow_binary16_encodings",
+      "path": "tests/ndarray/HalfNextafterTest.terl"
+    },
+    "native.padding": {
+      "marker": "test_padding_rejections_leave_no_outputs",
+      "path": "tests/padding_test.c"
+    },
+    "native.reduction": {
+      "marker": "test_axis_and_correction_rejections",
+      "path": "tests/reduction_test.c"
+    },
+    "native.argument-reduction": {
+      "marker": "test_numpy_argument_reduction_destinations_are_exact_and_atomic",
+      "path": "tests/argument_reduction_test.c"
+    },
+    "terlan.statistic-options": {
+      "marker": "statistic_dtype_out_empty_and_complex_semantics_match_numpy",
+      "path": "tests/ndarray/StatisticsTest.terl"
+    },
+    "native.searchsorted": {
+      "marker": "test_searchsorted_left_right_and_nan_order",
+      "path": "tests/ordering_test.c"
+    },
+    "native.searchsorted-dtypes": {
+      "marker": "test_searchsorted_all_admitted_scalar_dtypes",
+      "path": "tests/ordering_test.c"
+    },
+    "native.searchsorter": {
+      "marker": "test_searchsorted_strided_sorters_and_bad_permutations",
+      "path": "tests/ordering_test.c"
+    },
+    "native.set": {
+      "marker": "test_set_rejections_and_partial_allocation_cleanup",
+      "path": "tests/set_test.c"
+    },
+    "terlan.set": {
+      "marker": "numpy_set_variants_preserve_indexes_order_flattening_and_typed_edges",
+      "path": "tests/ndarray/SetOpsTest.terl"
+    },
+    "native.shape": {
+      "marker": "test_shape_rejections_leave_no_results",
+      "path": "tests/shape_test.c"
+    },
+    "native.numpy-compress-output": {
+      "marker": "test_compress_outputs_are_exact_atomic_and_overlap_safe",
+      "path": "tests/shape_test.c"
+    },
+    "terlan.numpy-compress-output": {
+      "marker": "take_modes_and_compress_truncation_match_numpy",
+      "path": "tests/ndarray/ShapeTest.terl"
+    },
+    "native.shape-extra": {
+      "marker": "test_flips_rotations_and_rejections",
+      "path": "tests/shape_extra_test.c"
+    },
+    "native.numpy-methods-order": {
+      "marker": "test_numpy_ordered_reshape_flatten_and_ravel",
+      "path": "tests/methods_conformance_test.c"
+    },
+    "native.numpy-attributes-fill": {
+      "marker": "test_numpy_fill_mutates_all_admitted_dtypes_and_views",
+      "path": "tests/methods_conformance_test.c"
+    },
+    "terlan.numpy-attributes-fill": {
+      "marker": "fill_mutates_the_receiver_with_scalar_dtype_conversion",
+      "path": "tests/ndarray/MethodOutputTest.terl"
+    },
+    "native.split": {
+      "marker": "test_split_families_return_shared_views",
+      "path": "tests/shape_test.c"
+    },
+    "native.statistics": {
+      "marker": "test_statistics_rejections_and_allocation_cleanup",
+      "path": "tests/statistics_test.c"
+    },
+    "native.average": {
+      "marker": "test_average_weights_returned_dtype_and_axes",
+      "path": "tests/statistics_test.c"
+    },
+    "native.covariance": {
+      "marker": "test_covariance_numpy_pair_weight_dtype_and_empty_semantics",
+      "path": "tests/statistics_test.c"
+    },
+    "native.covariance-adversarial": {
+      "marker": "test_covariance_rejects_invalid_weights_and_shapes",
+      "path": "tests/statistics_test.c"
+    },
+    "terlan.covariance": {
+      "marker": "pub covariance_pair_weights_and_dtype_match_numpy",
+      "path": "tests/ndarray/StatisticsTest.terl"
+    },
+    "rust.average": {
+      "marker": "returned_average_rejects_null_outputs_without_leaking_arrays",
+      "path": "bindings/ndarray_numpy_average_tests.rs"
+    },
+    "terlan.average": {
+      "marker": "average_weights_returned_sums_and_dtypes_match_numpy",
+      "path": "tests/ndarray/StatisticsTest.terl"
+    },
+    "native.unary": {
+      "marker": "test_extended_transcendental_family",
+      "path": "tests/unary_test.c"
+    },
+    "rust.arrow": {
+      "marker": "external_arrow_import_validates_shape_nulls_and_argument_ownership",
+      "path": "bindings/ndarray_arrow_tests.rs"
+    },
+    "rust.decomposition-core": {
+      "marker": "decomposition_core_solves_and_rejects_singular_or_non_finite_inputs",
+      "path": "bindings/ndarray_linear_algebra_tests.rs"
+    },
+    "rust.fft": {
+      "marker": "fft_rejects_empty_axes_bad_normalization_duplicate_axes_and_shapes",
+      "path": "bindings/ndarray_fft_tests.rs"
+    },
+    "rust.linalg-completion": {
+      "marker": "linalg_completion_matches_reference_decompositions_and_tensor_shapes",
+      "path": "bindings/ndarray_linear_algebra_completion_tests.rs"
+    },
+    "rust.linalg-system": {
+      "marker": "determinant_and_inverse_cover_stacks_dtypes_empty_and_singular_inputs",
+      "path": "bindings/ndarray_linalg_system_tests.rs"
+    },
+    "rust.linalg-analysis": {
+      "marker": "matrix_rank_covers_scalars_vectors_stacks_hermitian_tolerance_and_reduced_rank",
+      "path": "bindings/ndarray_linalg_analysis_tests.rs"
+    },
+    "rust.linalg-regressions": {
+      "marker": "singular_values_cover_no_uv_large_and_full_nullspace_regressions",
+      "path": "bindings/ndarray_linalg_decomposition_tests.rs"
+    },
+    "rust.numpy-data-completion": {
+      "marker": "data_completion_handles_all_nan_quantiles_and_rejects_bad_bit_requests",
+      "path": "bindings/ndarray_numpy_data_tests.rs"
+    },
+    "rust.numpy-bit-packing": {
+      "marker": "bit_packing_matches_numpy_axes_orders_empty_shapes_and_negative_counts",
+      "path": "bindings/ndarray_numpy_data_tests.rs"
+    },
+    "rust.numpy-numeric-completion": {
+      "marker": "numerical_completion_rejects_bad_shapes_modes_domains_and_outputs",
+      "path": "bindings/ndarray_numpy_numeric_tests.rs"
+    },
+    "rust.numpy-allclose-parameter-factories": {
+      "marker": "numpy_allclose_parameter_factories_match_tolerance_and_nonfinite_rules",
+      "path": "bindings/ndarray_numpy_numeric_tests.rs"
+    },
+    "rust.numpy-shape-completion": {
+      "marker": "shape_completion_rejects_bad_ranks_shapes_indexes_and_nulls",
+      "path": "bindings/ndarray_numpy_shape_tests.rs"
+    },
+    "rust.numpy-block": {
+      "marker": "block_promotes_rank_and_dtype_and_rejects_shape_depth_and_encoding_errors",
+      "path": "bindings/ndarray_numpy_block_tests.rs"
+    },
+    "rust.numpy-meshgrid": {
+      "marker": "meshgrid_matches_xy_ij_sparse_copy_dtype_and_rank_semantics",
+      "path": "bindings/ndarray_numpy_shape_tests.rs"
+    },
+    "rust.numpy-atleast-dimensions": {
+      "marker": "atleast_dimensions_match_numpy_scalar_vector_matrix_and_cube",
+      "path": "bindings/ndarray_numpy_shape_tests.rs"
+    },
+    "rust.numpy-rank-stack-split": {
+      "marker": "stacking_and_designated_splits_match_numpy_rank_rules",
+      "path": "bindings/ndarray_numpy_shape_tests.rs"
+    },
+    "rust.numpy-triangle-indices": {
+      "marker": "triangle_indices_match_numpy_square_rectangular_offsets_and_empty_shapes",
+      "path": "bindings/ndarray_triangle_index_tests.rs"
+    },
+    "rust.numpy-histogram2d": {
+      "marker": "histogram2d_rejects_bad_counts_edges_ranges_shapes_and_outputs_without_leaks",
+      "path": "bindings/ndarray_histogram2d_tests.rs"
+    },
+    "rust.numpy-histogram": {
+      "marker": "histogram_rejects_bad_edges_ranges_weights_estimators_and_outputs",
+      "path": "bindings/ndarray_histogram_tests.rs"
+    },
+    "terlan.numpy-histogram": {
+      "marker": "histogram_counts_edges_density_and_weights_match_numpy",
+      "path": "tests/ndarray/HistogramTest.terl"
+    },
+    "rust.numpy-histogramdd": {
+      "marker": "histogramdd_rejects_invalid_shapes_bins_ranges_edges_weights_and_outputs",
+      "path": "bindings/ndarray_histogramdd_tests.rs"
+    },
+    "terlan.numpy-histogramdd": {
+      "marker": "histogramdd_lists_ranges_edges_weights_and_density_match_numpy",
+      "path": "tests/ndarray/HistogramTest.terl"
+    },
+    "terlan.linalg-system": {
+      "marker": "stacked_system_operations_preserve_shapes_dtypes_and_broadcast_rhs",
+      "path": "tests/ndarray/LinearAlgebraTest.terl"
+    },
+    "terlan.linalg-analysis": {
+      "marker": "rank_least_squares_and_qr_modes_match_numpy_result_contracts",
+      "path": "tests/ndarray/LinearAlgebraTest.terl"
+    },
+    "terlan.numpy-creation-conversion": {
+      "marker": "array_valued_full_broadcasts_the_fill_pattern",
+      "path": "tests/ndarray/CreationTest.terl"
+    },
+    "rust.numpy-array-conversion": {
+      "marker": "astype_preserves_requested_order_copy_policy_and_casting_rules",
+      "path": "bindings/ndarray_numpy_misc_tests.rs"
+    },
+    "terlan.numpy-array-conversion": {
+      "marker": "astype_and_copy_preserve_numpy_order_and_ownership_semantics",
+      "path": "tests/ndarray/ConversionTest.terl"
+    },
+    "terlan.numpy-methods-order": {
+      "marker": "pub ordered_shape_methods_match_numpy",
+      "path": "tests/ndarray/OrderedShapeTest.terl"
+    },
+    "terlan.numpy-atleast-dimensions": {
+      "marker": "rank_adaptation_preserves_values_and_numpy_axis_placement",
+      "path": "tests/ndarray/ShapeTest.terl"
+    },
+    "terlan.numpy-rank-stack-split": {
+      "marker": "stacking_and_designated_splits_follow_numpy_rank_rules",
+      "path": "tests/ndarray/ShapeTest.terl"
+    },
+    "terlan.numpy-concatenate": {
+      "marker": "concatenate_supports_flatten_dtype_and_exact_output_paths",
+      "path": "tests/ndarray/ShapeTest.terl"
+    },
+    "terlan.numpy-block": {
+      "marker": "nested_lists_follow_numpy_row_column_rank_and_copy_rules",
+      "path": "tests/ndarray/BlockTest.terl"
+    },
+    "terlan.numpy-meshgrid": {
+      "marker": "meshgrid_preserves_numpy_indexing_sparse_copy_and_empty_semantics",
+      "path": "tests/ndarray/ShapeTest.terl"
+    },
+    "rust.polynomial": {
+      "marker": "polynomial_operations_reject_degenerate_and_rank_deficient_inputs",
+      "path": "bindings/ndarray_polynomial_tests.rs"
+    },
+    "rust.polynomial-numpy-completion": {
+      "marker": "numpy_polynomial_completion_rejects_invalid_controls",
+      "path": "bindings/ndarray_polynomial_numpy_completion_tests.rs"
+    },
+    "rust.polynomial-basis-numpy-completion": {
+      "marker": "numpy_orthogonal_completion_rejects_invalid_axes_modes_and_degrees",
+      "path": "bindings/ndarray_polynomial_basis_numpy_completion_tests.rs"
+    },
+    "terlan.polynomial-chebyshev-numpy-completion": {
+      "marker": "tensor_evaluation_and_selected_weighted_fitting_match_numpy",
+      "path": "tests/ndarray/ChebyshevTest.terl"
+    },
+    "terlan.polynomial-legendre-numpy-completion": {
+      "marker": "tensor_evaluation_and_selected_weighted_fitting_match_numpy",
+      "path": "tests/ndarray/LegendreTest.terl"
+    },
+    "rust.polynomial-chebyshev": {
+      "marker": "chebyshev_rejects_invalid_degrees",
+      "path": "bindings/ndarray_polynomial_chebyshev_tests.rs"
+    },
+    "rust.polynomial-legendre": {
+      "marker": "legendre_rejects_invalid_degrees",
+      "path": "bindings/ndarray_polynomial_legendre_tests.rs"
+    },
+    "rust.polynomial-power": {
+      "marker": "power_completion_rejects_invalid_degrees_shapes_and_tolerances",
+      "path": "bindings/ndarray_polynomial_power_tests.rs"
+    },
+    "rust.random": {
+      "marker": "normal_and_invalid_inputs_have_stable_results",
+      "path": "bindings/ndarray_random_tests.rs"
+    },
+    "rust.random-boundaries": {
+      "marker": "random_boundaries_fail_without_partial_outputs",
+      "path": "bindings/ndarray_random_tests.rs"
+    },
+    "rust.random-distributions": {
+      "marker": "integer_bernoulli_and_permutation_are_reproducible",
+      "path": "bindings/ndarray_random_tests.rs"
+    },
+    "rust.random-shuffle": {
+      "marker": "functional_shuffle_preserves_values_and_rejects_bad_domains",
+      "path": "bindings/ndarray_random_tests.rs"
+    },
+    "rust.random-stream": {
+      "marker": "owned_stream_advances_reproducibly_across_all_operations",
+      "path": "bindings/ndarray_random_tests.rs"
+    },
+    "rust.random-output": {
+      "marker": "destination_fills_match_direct_sampling_and_preserve_streams_on_failure",
+      "path": "bindings/ndarray_random_regression_tests.rs"
+    },
+    "rust.ordered-zero-construction": {
+      "marker": "ordered_views_reshape_squeeze_and_empty_dot_match_numpy",
+      "path": "bindings/ndarray_regression_tests.rs"
+    },
+    "rust.noncommutative-reduce-accumulate": {
+      "marker": "noncommutative_reduce_and_accumulate_preserve_numpy_order",
+      "path": "bindings/ndarray_regression_tests.rs"
+    },
+    "rust.random-stream-distributions": {
+      "marker": "gamma_normal_and_count_distributions_respect_domains",
+      "path": "bindings/ndarray_random_distribution_tests.rs"
+    },
+    "rust.random-broadcast-positive": {
+      "marker": "one_and_two_parameter_families_broadcast_shapes_domains_and_dtypes",
+      "path": "bindings/ndarray_random_broadcast_tests.rs"
+    },
+    "rust.random-broadcast-boundaries": {
+      "marker": "non_contiguous_scalar_and_zero_extent_parameters_preserve_logical_shapes",
+      "path": "bindings/ndarray_random_broadcast_tests.rs"
+    },
+    "rust.random-broadcast-adversarial": {
+      "marker": "rejected_broadcast_calls_clear_outputs_and_preserve_stream_state",
+      "path": "bindings/ndarray_random_broadcast_tests.rs"
+    },
+    "rust.random-broadcast-continuous": {
+      "marker": "remaining_continuous_families_broadcast_through_the_shared_sampler",
+      "path": "bindings/ndarray_random_broadcast_tests.rs"
+    },
+    "rust.random-broadcast-integer": {
+      "marker": "integer_families_broadcast_shape_dtype_and_count_domains",
+      "path": "bindings/ndarray_random_broadcast_tests.rs"
+    },
+    "rust.random-broadcast-remaining-adversarial": {
+      "marker": "remaining_broadcast_domains_fail_atomically_without_advancing_the_stream",
+      "path": "bindings/ndarray_random_broadcast_tests.rs"
+    },
+    "rust.random-power-positive": {
+      "marker": "power_distribution_is_reproducible_bounded_shaped_and_typed",
+      "path": "bindings/ndarray_random_power_tests.rs"
+    },
+    "rust.random-power-boundaries": {
+      "marker": "power_distribution_handles_scalar_and_zero_extent_shapes",
+      "path": "bindings/ndarray_random_power_tests.rs"
+    },
+    "rust.random-power-adversarial": {
+      "marker": "power_distribution_rejects_invalid_domains_without_advancing_stream",
+      "path": "bindings/ndarray_random_power_tests.rs"
+    },
+    "rust.random-stream-structured": {
+      "marker": "structured_distributions_reject_invalid_probability_and_covariance_domains",
+      "path": "bindings/ndarray_random_structured_tests.rs"
+    },
+    "terlan.random-broadcast": {
+      "marker": "random_parameters_broadcast_across_one_two_and_three_parameter_families",
+      "path": "tests/ndarray/RandomBroadcastTest.terl"
+    },
+    "terlan.random-broadcast-continuous": {
+      "marker": "remaining_continuous_array_parameters_dispatch_through_the_shared_sampler",
+      "path": "tests/ndarray/RandomBroadcastTest.terl"
+    },
+    "terlan.random-broadcast-integer": {
+      "marker": "integer_array_parameters_preserve_broadcast_shapes_and_integer_dtypes",
+      "path": "tests/ndarray/RandomBroadcastTest.terl"
+    },
+    "rust.random-integer-bounds": {
+      "marker": "exact_integer_bounds_broadcast_endpoints_shapes_and_dtypes",
+      "path": "bindings/ndarray_random_broadcast_tests.rs"
+    },
+    "rust.random-integer-bounds-adversarial": {
+      "marker": "exact_integer_bound_failures_are_atomic_and_dtype_checked",
+      "path": "bindings/ndarray_random_broadcast_tests.rs"
+    },
+    "rust.random-choice-axis": {
+      "marker": "choice_replaces_arbitrary_source_axes_with_sample_dimensions",
+      "path": "bindings/ndarray_random_structured_tests.rs"
+    },
+    "rust.random-choice-axis-adversarial": {
+      "marker": "choice_axis_rejections_preserve_stream_state_and_clear_outputs",
+      "path": "bindings/ndarray_random_structured_tests.rs"
+    },
+    "terlan.random-core-generator": {
+      "marker": "bounded_integer_arrays_preserve_endpoint_shape_and_dtype_semantics",
+      "path": "tests/ndarray/RandomBroadcastTest.terl"
+    },
+    "terlan.random-choice-axis": {
+      "marker": "choice_replaces_multidimensional_axes_with_the_requested_sample_shape",
+      "path": "tests/ndarray/RandomBroadcastTest.terl"
+    },
+    "rust.serialization": {
+      "marker": "npy_round_trip_preserves_every_admitted_scalar_dtype",
+      "path": "bindings/ndarray_serialization_tests.rs"
+    },
+    "terlan.serialization": {
+      "marker": "numpy_bytes_files_and_mmaps_preserve_values_and_fortran_order",
+      "path": "tests/ndarray/SerializationTest.terl"
+    },
+    "rust.shape-composition": {
+      "marker": "shape_composition_rejects_empty_handles_and_malformed_specs",
+      "path": "bindings/ndarray_shape_tests.rs"
+    },
+    "rust.shape-concatenate-stack": {
+      "marker": "concatenate_and_stack_match_numpy_copy_axis_shape_and_empty_rules",
+      "path": "bindings/ndarray_shape_tests.rs"
+    },
+    "rust.numpy-index-errors": {
+      "marker": "indexing_failures_leave_sources_unchanged_and_outputs_null",
+      "path": "bindings/ndarray_index_error_tests.rs"
+    },
+    "rust.numpy-index-casting": {
+      "marker": "boolean_index_assignment_uses_explicit_casting_and_is_atomic",
+      "path": "bindings/ndarray_index_error_tests.rs"
+    },
+    "rust.numpy-broadcasted-index-assignment": {
+      "marker": "Broadcasted assignment tests based on upstream indexing behavior",
+      "path": "bindings/ndarray_broadcast_assignment_tests.rs"
+    },
+    "rust.numpy-boolean-prefix-indexing": {
+      "marker": "Boolean prefix-index selection and assignment tests",
+      "path": "bindings/ndarray_boolean_index_tests.rs"
+    },
+    "terlan.numpy-boolean-prefix-indexing": {
+      "marker": "boolean_prefix_indexes_preserve_suffix_shape_and_assign_values",
+      "path": "tests/ndarray/BooleanIndexTest.terl"
+    },
+    "rust.numpy-integer-index-dtypes": {
+      "marker": "Signed and unsigned integer indexing tests",
+      "path": "bindings/ndarray_integer_index_tests.rs"
+    },
+    "terlan.numpy-integer-index-dtypes": {
+      "marker": "signed_and_unsigned_index_dtypes_select_and_assign",
+      "path": "tests/ndarray/IntegerIndexTest.terl"
+    },
+    "terlan.numpy-take-shaped-output": {
+      "marker": "shaped_take_preserves_index_rank_and_stages_overlapping_outputs",
+      "path": "tests/ndarray/IntegerIndexTest.terl"
+    },
+    "rust.numpy-basic-index-views": {
+      "marker": "basic_slice_composes_reverse_ellipsis_squeeze_and_new_axis",
+      "path": "bindings/ndarray_shape_tests.rs"
+    },
+    "rust.numpy-strided-advanced-indexing": {
+      "marker": "Strided advanced-index selection and assignment regressions",
+      "path": "bindings/ndarray_strided_index_tests.rs"
+    },
+    "terlan.numpy-index-casting": {
+      "marker": "masked_complex_assignment_requires_an_explicit_unsafe_cast",
+      "path": "tests/ndarray/ConversionTest.terl"
+    },
+    "rust.numpy-concatenate-flat": {
+      "marker": "concatenate_flat_matches_numpy_axis_none_and_large_input_rules",
+      "path": "bindings/ndarray_shape_tests.rs"
+    },
+    "rust.numpy-concatenate-output": {
+      "marker": "concatenate_dtype_and_destination_paths_are_exact_atomic_and_alias_safe",
+      "path": "bindings/ndarray_shape_tests.rs"
+    },
+    "rust.shape-expand-squeeze": {
+      "marker": "expand_dims_accepts_numpy_final_position_axis_lists",
+      "path": "bindings/ndarray_shape_tests.rs"
+    },
+    "rust.shape-split": {
+      "marker": "integer_split_families_match_numpy_uneven_and_boundary_rules",
+      "path": "bindings/ndarray_shape_tests.rs"
+    },
+    "rust.shape-tile": {
+      "marker": "tile_matches_numpy_rank_promotion_empty_and_copy_rules",
+      "path": "bindings/ndarray_shape_tests.rs"
+    },
+    "rust.shape-along-axis": {
+      "marker": "along_axis_operations_broadcast_alias_and_fail_atomically",
+      "path": "bindings/ndarray_shape_tests.rs"
+    },
+    "rust.tensor-algebra": {
+      "marker": "tensor_algebra_rejects_bad_axes_shapes_and_equations_without_outputs",
+      "path": "bindings/ndarray_tensor_algebra_tests.rs"
+    },
+    "terlan.arithmetic": {
+      "marker": "pub exact_shape_arithmetic_and_reductions_are_exact",
+      "path": "tests/ndarray/AbiTest.terl"
+    },
+    "terlan.dlpack": {
+      "marker": "pub dlpack_exchange_round_trip_is_owned",
+      "path": "tests/ndarray/AbiTest.terl"
+    },
+    "terlan.matmul": {
+      "marker": "pub cblas_matrix_multiplication_is_exact",
+      "path": "tests/ndarray/AbiTest.terl"
+    },
+    "terlan.metadata": {
+      "marker": "pub owned_cpu_metadata_is_observable",
+      "path": "tests/ndarray/AbiTest.terl"
+    },
+    "terlan.padding": {
+      "marker": "pub standard_padding_modes_match_numpy",
+      "path": "tests/ndarray/PaddingTest.terl"
+    },
+    "terlan.clip": {
+      "marker": "pub clip_into_preserves_transposed_and_overlapping_destinations",
+      "path": "tests/ndarray/ClipTest.terl"
+    },
+    "terlan.shape-boundaries": {
+      "marker": "pub scalar_and_zero_dimension_layouts_are_exact",
+      "path": "tests/ndarray/AbiTest.terl"
+    },
+    "terlan.shape-operations": {
+      "marker": "pub shared_shape_views_and_owned_materialization_are_exact",
+      "path": "tests/ndarray/AbiTest.terl"
+    },
+    "terlan.numpy-flip-rot90": {
+      "marker": "pub flips_and_rotations_cover_numpy_axis_semantics",
+      "path": "tests/ndarray/ShapeTest.terl"
+    },
+    "terlan.multiarray-selection": {
+      "marker": "pub repeat_counts_preserve_numpy_axis_and_flatten_order",
+      "path": "tests/ndarray/ShapeTest.terl"
+    },
+    "terlan.numpy-resize": {
+      "marker": "pub resize_repeats_values_and_fills_empty_sources",
+      "path": "tests/ndarray/ShapeTest.terl"
+    },
+    "terlan.numpy-resize-in-place": {
+      "marker": "pub mutating_resize_preserves_prefix_and_zero_initializes_growth",
+      "path": "tests/ndarray/ShapeTest.terl"
+    },
+    "terlan.numpy-lexsort-axis": {
+      "marker": "pub lexsort_normalizes_axes_for_stacked_multidimensional_keys",
+      "path": "tests/ndarray/SortingTest.terl"
+    },
+    "terlan.method-output-selection": {
+      "marker": "pub masked_truth_and_choose_outputs_match_numpy",
+      "path": "tests/ndarray/MethodOutputTest.terl"
+    },
+    "terlan.method-output-numeric": {
+      "marker": "pub rounded_complex_and_linear_algebra_outputs_match_numpy",
+      "path": "tests/ndarray/MethodOutputTest.terl"
+    },
+    "terlan.numpy-inner-vdot": {
+      "marker": "pub inner_and_vdot_preserve_rank_and_complex_conjugation",
+      "path": "tests/ndarray/MethodOutputTest.terl"
+    },
+    "terlan.sorting": {
+      "marker": "pub sorting_defaults_axes_flattening_and_inplace_match_numpy",
+      "path": "tests/ndarray/SortingTest.terl"
+    },
+    "terlan.partition-sequences": {
+      "marker": "pub partition_scalar_sequence_flattening_and_mutation_match_numpy",
+      "path": "tests/ndarray/SortingTest.terl"
+    },
+    "terlan.searchsorter": {
+      "marker": "pub searchsorted_supports_strided_integer_sorters_and_empty_inputs",
+      "path": "tests/ndarray/SortingTest.terl"
+    },
+    "rust.numpy-nan-reductions": {
+      "marker": "nan_reductions_match_axes_keepdims_all_nan_empty_and_mutation_contracts",
+      "path": "bindings/ndarray_nan_reduction_tests.rs"
+    },
+    "rust.numpy-nan-cumulative": {
+      "marker": "nan_cumulative_operations_cover_axes_flattening_dtypes_outputs_and_empty_shapes",
+      "path": "bindings/ndarray_nan_reduction_tests.rs"
+    },
+    "terlan.numpy-nan-reductions": {
+      "marker": "pub nan_reductions_cover_axes_dtypes_outputs_and_all_nan_values",
+      "path": "tests/ndarray/NanReductionTest.terl"
+    },
+    "terlan.numpy-nan-cumulative": {
+      "marker": "pub nan_cumulative_operations_cover_axes_flattening_integer_dtypes_and_outputs",
+      "path": "tests/ndarray/NanReductionTest.terl"
+    },
+    "rust.numpy-type-check-completion": {
+      "marker": "asfarray_and_nan_to_num_cover_defaults_complex_components_and_atomic_destinations",
+      "path": "bindings/ndarray_type_check_tests.rs"
+    },
+    "terlan.numpy-type-check-completion": {
+      "marker": "pub nan_replacement_supports_dtype_defaults_and_explicit_destinations",
+      "path": "tests/ndarray/TypeCheckTest.terl"
+    },
+    "rust.numpy-stride-tricks": {
+      "marker": "sliding_windows_cover_one_two_selected_and_repeated_axes",
+      "path": "bindings/ndarray_stride_tricks_tests.rs"
+    },
+    "rust.numpy-stride-tricks-adversarial": {
+      "marker": "stride_tricks_reject_invalid_shapes_axes_and_storage_escape",
+      "path": "bindings/ndarray_stride_tricks_tests.rs"
+    },
+    "terlan.numpy-stride-tricks": {
+      "marker": "pub sliding_windows_cover_default_selected_and_repeated_axes",
+      "path": "tests/ndarray/StrideTricksTest.terl"
+    },
+    "rust.numpy-index-tricks": {
+      "marker": "ravel_supports_c_fortran_scalar_and_per_axis_modes",
+      "path": "bindings/ndarray_index_tricks_tests.rs"
+    },
+    "rust.numpy-index-tricks-adversarial": {
+      "marker": "index_tricks_reject_invalid_modes_dtypes_bounds_and_overflow",
+      "path": "bindings/ndarray_index_tricks_tests.rs"
+    },
+    "terlan.numpy-index-tricks": {
+      "marker": "pub multidimensional_indexes_preserve_modes_order_and_result_shape",
+      "path": "tests/ndarray/IndexTricksTest.terl"
+    },
+    "rust.numpy-memory-overlap": {
+      "marker": "bounded_queries_distinguish_bounds_exactness_and_exhaustion",
+      "path": "bindings/ndarray_memory_overlap_tests.rs"
+    },
+    "rust.numpy-memory-overlap-adversarial": {
+      "marker": "overlap_queries_reject_invalid_arguments_and_work_policies",
+      "path": "bindings/ndarray_memory_overlap_tests.rs"
+    },
+    "terlan.numpy-memory-overlap": {
+      "marker": "pub overlap_queries_distinguish_bounds_exactness_and_internal_aliases",
+      "path": "tests/ndarray/MemoryOverlapTest.terl"
+    },
+    "rust.numpy-ufunc-output-overlap": {
+      "marker": "unary_binary_and_masked_destinations_stage_every_alias",
+      "path": "bindings/ndarray_memory_overlap_tests.rs"
+    },
+    "rust.numpy-ufunc-output-adversarial": {
+      "marker": "ufunc_output_operations_reject_bad_shapes_indexes_axes_and_mutability_atomically",
+      "path": "bindings/ndarray_memory_overlap_tests.rs"
+    },
+    "terlan.numpy-ufunc-output-overlap": {
+      "marker": "pub ufunc_destinations_and_indexed_updates_stage_overlapping_inputs",
+      "path": "tests/ndarray/MemoryOverlapTest.terl"
+    },
+    "rust.numpy-function-base": {
+      "marker": "function_base_insert_supports_scalar_list_axis_and_stable_index_semantics",
+      "path": "bindings/ndarray_function_base_tests.rs"
+    },
+    "rust.numpy-function-base-adversarial": {
+      "marker": "function_base_delete_supports_axes_masks_duplicates_and_order_preservation",
+      "path": "bindings/ndarray_function_base_tests.rs"
+    },
+    "rust.numpy-scalarmath": {
+      "marker": "scalar_math_floor_divide_and_remainder_match_numpy_sign_and_zero_rules",
+      "path": "bindings/ndarray_scalar_math_tests.rs"
+    },
+    "rust.numpy-scalarmath-adversarial": {
+      "marker": "scalar_math_negation_subtraction_and_negative_power_match_numpy_errors",
+      "path": "bindings/ndarray_scalar_math_tests.rs"
+    },
+    "rust.numpy-numeric-roll": {
+      "marker": "numeric_roll_matches_flattened_multi_axis_repeated_and_empty_numpy_rules",
+      "path": "bindings/ndarray_numeric_core_tests.rs"
+    },
+    "rust.numpy-numeric-roll-adversarial": {
+      "marker": "numeric_roll_rejects_malformed_axis_shift_contracts_atomically",
+      "path": "bindings/ndarray_numeric_core_tests.rs"
+    },
+    "rust.numpy-numeric-indices": {
+      "marker": "numeric_indices_match_dense_sparse_scalar_empty_and_dtype_numpy_rules",
+      "path": "bindings/ndarray_numeric_core_tests.rs"
+    },
+    "rust.numpy-numeric-indices-adversarial": {
+      "marker": "numeric_indices_reject_invalid_contracts_without_partial_outputs",
+      "path": "bindings/ndarray_numeric_core_tests.rs"
+    },
+    "rust.numpy-numeric-axis-movement": {
+      "marker": "numeric_rollaxis_exhaustively_matches_numpy_shapes_values_and_negative_axes",
+      "path": "bindings/ndarray_numeric_core_tests.rs"
+    },
+    "rust.numpy-numeric-axis-movement-adversarial": {
+      "marker": "numeric_axis_movement_rejects_invalid_axes_counts_and_pointers_atomically",
+      "path": "bindings/ndarray_numeric_core_tests.rs"
+    },
+    "rust.numpy-numeric-bool-array": {
+      "marker": "bool_logical_absolute_and_destination_operations_match_numpy",
+      "path": "bindings/ndarray_bool_numeric_tests.rs"
+    },
+    "rust.numpy-numeric-bool-comparison": {
+      "marker": "float32_and_float64_boolean_comparisons_match_numpy_offset_fixtures",
+      "path": "bindings/ndarray_bool_numeric_tests.rs"
+    },
+    "rust.numpy-numeric-bool-adversarial": {
+      "marker": "bool_destinations_reject_wrong_shapes_atomically",
+      "path": "bindings/ndarray_bool_numeric_tests.rs"
+    },
+    "native.numpy-numeric-std-var": {
+      "marker": "test_statistic_correction_and_complex_semantics",
+      "path": "tests/reduction_test.c"
+    },
+    "rust.numpy-numeric-nonzero-scalar": {
+      "marker": "nonzero_trivial_and_scalar_results_match_numpy_1_21",
+      "path": "bindings/ndarray_nonzero_tests.rs"
+    },
+    "rust.numpy-numeric-nonzero-coordinates": {
+      "marker": "nonzero_coordinates_match_one_two_dimensional_and_sparse_numpy_results",
+      "path": "bindings/ndarray_nonzero_tests.rs"
+    },
+    "rust.numpy-numeric-count-nonzero-axes": {
+      "marker": "count_nonzero_axis_order_empty_dimensions_and_keepdims_match_numpy",
+      "path": "bindings/ndarray_nonzero_tests.rs"
+    },
+    "rust.numpy-numeric-argwhere": {
+      "marker": "argwhere_matches_rank_zero_one_two_and_exact_coordinate_order",
+      "path": "bindings/ndarray_nonzero_tests.rs"
+    },
+    "rust.numpy-numeric-nonzero-adversarial": {
+      "marker": "nonzero_family_rejects_malformed_calls_without_partial_outputs",
+      "path": "bindings/ndarray_nonzero_tests.rs"
+    },
+    "rust.numpy-reduction-options": {
+      "marker": "sum_where_and_initial_cover_broadcast_axes_and_empty_inputs",
+      "path": "bindings/ndarray_reduction_option_tests.rs"
+    },
+    "rust.numpy-reduction-outputs": {
+      "marker": "reduction_destinations_require_exact_shapes_and_preserve_strided_storage",
+      "path": "bindings/ndarray_reduction_option_tests.rs"
+    },
+    "rust.numpy-ufunc-output-broadcast": {
+      "marker": "ufunc_destinations_expand_broadcasts_and_masks_preserve_unselected_values",
+      "path": "bindings/ndarray_memory_overlap_tests.rs"
+    }
+  },
+  "families": {
+    "advanced-indexing": {
+      "adversarial": [
+        "native.advanced-indexing",
+        "native.coordinate-indexing",
+        "native.coordinate-add-at",
+        "native.numpy-compress-output",
+        "rust.numpy-broadcasted-index-assignment",
+        "rust.numpy-boolean-prefix-indexing",
+        "rust.numpy-integer-index-dtypes",
+        "rust.numpy-index-errors",
+        "rust.numpy-index-casting",
+        "rust.numpy-strided-advanced-indexing",
+        "rust.shape-along-axis",
+        "terlan.multiarray-selection"
+      ],
+      "boundary": [
+        "native.advanced-indexing",
+        "native.coordinate-indexing",
+        "native.coordinate-add-at",
+        "native.numpy-compress-output",
+        "rust.numpy-broadcasted-index-assignment",
+        "rust.numpy-boolean-prefix-indexing",
+        "rust.numpy-integer-index-dtypes",
+        "rust.numpy-index-errors",
+        "rust.numpy-index-casting",
+        "rust.numpy-strided-advanced-indexing",
+        "rust.shape-along-axis",
+        "terlan.multiarray-selection"
+      ],
+      "members": [
+        "take_along_axis",
+        "put",
+        "put_along_axis",
+        "compress",
+        "compress_flat",
+        "compress_into",
+        "compress_flat_into",
+        "mask_select",
+        "mask_assign",
+        "gather_coordinates",
+        "put_coordinates",
+        "add_at_coordinates"
+      ],
+      "positive": [
+        "native.advanced-indexing",
+        "native.coordinate-indexing",
+        "native.coordinate-add-at",
+        "native.numpy-compress-output",
+        "rust.numpy-broadcasted-index-assignment",
+        "rust.numpy-boolean-prefix-indexing",
+        "rust.numpy-integer-index-dtypes",
+        "rust.numpy-index-casting",
+        "rust.numpy-strided-advanced-indexing",
+        "rust.shape-along-axis",
+        "terlan.multiarray-selection",
+        "terlan.numpy-index-casting",
+        "terlan.numpy-boolean-prefix-indexing",
+        "terlan.numpy-integer-index-dtypes",
+        "terlan.numpy-compress-output"
+      ]
+    },
+    "array-completion": {
+      "adversarial": [
+        "native.completion",
+        "native.completion-output",
+        "native.numpy-attributes-fill",
+        "terlan.numpy-attributes-fill",
+        "native.numpy-resize",
+        "native.numpy-resize-in-place"
+      ],
+      "boundary": [
+        "native.completion",
+        "native.completion-output",
+        "native.numpy-attributes-fill",
+        "terlan.numpy-attributes-fill",
+        "native.numpy-resize",
+        "terlan.numpy-resize",
+        "native.numpy-resize-in-place",
+        "terlan.numpy-resize-in-place"
+      ],
+      "members": [
+        "choose",
+        "choose_into",
+        "fill",
+        "resize",
+        "resize_in_place"
+      ],
+      "positive": [
+        "native.completion",
+        "native.numpy-attributes-fill",
+        "terlan.numpy-attributes-fill",
+        "terlan.method-output-selection",
+        "native.numpy-resize",
+        "terlan.numpy-resize",
+        "native.numpy-resize-in-place",
+        "terlan.numpy-resize-in-place"
+      ]
+    },
+    "arrow": {
+      "adversarial": [
+        "rust.arrow"
+      ],
+      "boundary": [
+        "rust.arrow"
+      ],
+      "members": [
+        "to_arrow",
+        "from_arrow",
+        "length",
+        "null_count"
+      ],
+      "positive": [
+        "rust.arrow"
+      ]
+    },
+    "broadcast": {
+      "adversarial": [
+        "native.broadcast",
+        "native.clip",
+        "native.complex-umath",
+        "native.half",
+        "rust.numpy-stride-tricks-adversarial",
+        "rust.numpy-scalarmath-adversarial"
+      ],
+      "boundary": [
+        "native.broadcast",
+        "native.clip",
+        "native.complex-umath",
+        "native.half",
+        "rust.numpy-stride-tricks",
+        "rust.numpy-stride-tricks-adversarial",
+        "rust.numpy-scalarmath",
+        "rust.numpy-numeric-bool-comparison"
+      ],
+      "members": [
+        "broadcast_to",
+        "as_strided",
+        "sliding_window_view",
+        "true_divide",
+        "floor_divide",
+        "remainder",
+        "ndarray.array.power",
+        "elementwise_minimum",
+        "elementwise_maximum",
+        "fmin",
+        "fmax",
+        "equal",
+        "not_equal",
+        "less",
+        "less_equal",
+        "greater",
+        "greater_equal",
+        "logical_and",
+        "logical_or",
+        "logical_xor",
+        "select_where",
+        "clip",
+        "clip_lower",
+        "clip_upper",
+        "clip_into",
+        "clip_lower_into",
+        "clip_upper_into",
+        "clip_inplace",
+        "clip_lower_inplace",
+        "clip_upper_inplace"
+      ],
+      "positive": [
+        "native.broadcast",
+        "native.clip",
+        "native.complex-umath",
+        "native.half",
+        "terlan.complex-umath",
+        "terlan.half",
+        "terlan.clip",
+        "rust.numpy-stride-tricks",
+        "terlan.numpy-stride-tricks",
+        "rust.numpy-scalarmath",
+        "rust.numpy-numeric-bool-array",
+        "rust.numpy-numeric-bool-comparison"
+      ]
+    },
+    "contractions": {
+      "adversarial": [
+        "native.linear-algebra-rejections",
+        "native.linear-algebra-output",
+        "native.numpy-inner-vdot-rejections"
+      ],
+      "boundary": [
+        "native.linear-algebra-boundaries",
+        "native.linear-algebra-output",
+        "native.numpy-inner-vdot",
+        "terlan.numpy-inner-vdot"
+      ],
+      "members": [
+        "inner",
+        "outer",
+        "vdot",
+        "trace",
+        "trace_into"
+      ],
+      "positive": [
+        "native.linear-algebra-positive",
+        "native.numpy-inner-vdot",
+        "terlan.numpy-inner-vdot",
+        "terlan.method-output-numeric"
+      ]
+    },
+    "creation": {
+      "adversarial": [
+        "native.creation",
+        "native.creation-extra",
+        "rust.numpy-numeric-indices-adversarial"
+      ],
+      "boundary": [
+        "native.creation",
+        "native.creation-extra",
+        "rust.numpy-numeric-indices"
+      ],
+      "members": [
+        "empty",
+        "zeros",
+        "ones",
+        "full_int",
+        "full_float",
+        "ndarray.array.arange",
+        "ndarray.array.arange_float_step",
+        "ndarray.array.arange_int_interval",
+        "ndarray.array.arange_int_stop",
+        "ndarray.array.arange_float_interval",
+        "ndarray.array.arange_float_stop",
+        "arange_int",
+        "linspace",
+        "linspace_arrays",
+        "linspace_steps",
+        "identity",
+        "eye_ordered",
+        "diagonal",
+        "empty_like",
+        "zeros_like",
+        "ones_like",
+        "full_like_int",
+        "full_like_float",
+        "logspace",
+        "geomspace",
+        "logspace_arrays",
+        "geomspace_arrays",
+        "tri",
+        "tril",
+        "triu",
+        "diagflat",
+        "indices",
+        "indices_sparse",
+        "vander"
+      ],
+      "positive": [
+        "native.creation",
+        "native.creation-extra",
+        "rust.numpy-numeric-indices"
+      ]
+    },
+    "decomposition-core": {
+      "adversarial": [
+        "rust.decomposition-core",
+        "rust.linalg-analysis",
+        "rust.linalg-regressions"
+      ],
+      "boundary": [
+        "rust.decomposition-core",
+        "rust.linalg-analysis",
+        "rust.linalg-regressions"
+      ],
+      "members": [
+        "determinant",
+        "solve",
+        "inverse",
+        "norm_l1",
+        "norm_l2",
+        "norm_max",
+        "frobenius_norm",
+        "nuclear_norm",
+        "matrix_rank",
+        "least_squares",
+        "cholesky",
+        "svd",
+        "singular_values",
+        "symmetric_eigen"
+      ],
+      "positive": [
+        "rust.decomposition-core",
+        "terlan.linalg-analysis"
+      ]
+    },
+    "dtype": {
+      "adversarial": [
+        "native.dtype",
+        "native.half"
+      ],
+      "boundary": [
+        "native.dtype",
+        "native.half"
+      ],
+      "members": [
+        "from_ints_as",
+        "from_floats_as",
+        "from_complex",
+        "ndarray.array.astype",
+        "ndarray.array.astype_ordered",
+        "to_ints_cast",
+        "to_floats_cast",
+        "complex_reals",
+        "complex_imags"
+      ],
+      "positive": [
+        "native.dtype",
+        "native.half",
+        "terlan.half"
+      ]
+    },
+    "fft": {
+      "adversarial": [
+        "rust.fft"
+      ],
+      "boundary": [
+        "rust.fft"
+      ],
+      "members": [
+        "ndarray.array.fft",
+        "ndarray.array.fft_sized",
+        "ndarray.array.ifft",
+        "ndarray.array.ifft_sized",
+        "fftn",
+        "ifftn",
+        "ndarray.array.rfft",
+        "ndarray.array.rfft_sized",
+        "irfft",
+        "rfftn",
+        "irfftn",
+        "hfft",
+        "ndarray.array.ihfft",
+        "ndarray.array.ihfft_sized",
+        "fftfreq",
+        "rfftfreq",
+        "fftshift",
+        "ifftshift"
+      ],
+      "positive": [
+        "rust.fft"
+      ]
+    },
+    "histogram-numerical": {
+      "adversarial": [
+        "native.histogram-numerical",
+        "native.numpy-difference",
+        "native.numpy-gradient-adversarial",
+        "native.numpy-calculus-adversarial",
+        "native.numpy-counting-adversarial"
+      ],
+      "boundary": [
+        "native.histogram-numerical",
+        "native.numpy-difference",
+        "native.numpy-gradient",
+        "native.numpy-calculus",
+        "native.numpy-counting"
+      ],
+      "members": [
+        "ndarray.array.histogram",
+        "ndarray.numpy.histogram",
+        "ndarray.array.histogram_bin_edges",
+        "ndarray.numpy.histogram_bin_edges",
+        "ndarray.array.histogramdd",
+        "ndarray.numpy.histogramdd",
+        "ndarray.array.bincount",
+        "ndarray.numpy.bincount",
+        "digitize",
+        "difference",
+        "difference_prepend",
+        "difference_append",
+        "difference_surround",
+        "gradient",
+        "gradient_edge",
+        "gradient_coordinates",
+        "gradient_all",
+        "gradient_uniform_axes",
+        "gradient_axes",
+        "unwrap",
+        "unwrap_discontinuity",
+        "unwrap_integer_period",
+        "interpolate",
+        "interpolate_default",
+        "interpolate_boundaries",
+        "interpolate_periodic",
+        "trapezoidal_integral",
+        "trapezoidal_integral_uniform"
+      ],
+      "positive": [
+        "native.histogram-numerical",
+        "native.numpy-difference",
+        "terlan.numpy-difference",
+        "native.numpy-gradient",
+        "terlan.numpy-gradient",
+        "native.numpy-calculus",
+        "terlan.numpy-calculus",
+        "native.numpy-counting",
+        "terlan.numpy-counting"
+      ]
+    },
+    "indexing": {
+      "adversarial": [
+        "native.indexing",
+        "native.numpy-take-dtypes",
+        "native.numpy-take-shaped-output",
+        "native.scalar-conversion",
+        "rust.numpy-index-errors",
+        "terlan.multiarray-selection"
+      ],
+      "boundary": [
+        "native.indexing",
+        "native.numpy-take-dtypes",
+        "native.numpy-take-shaped-output",
+        "native.scalar-conversion",
+        "rust.numpy-index-errors",
+        "terlan.multiarray-selection"
+      ],
+      "members": [
+        "ndarray.array.copy",
+        "ndarray.array.copy_ordered",
+        "contiguous",
+        "index_axis",
+        "slice_axis",
+        "permute",
+        "take",
+        "take_mode",
+        "take_indices",
+        "take_indices_mode",
+        "take_indices_into",
+        "item_bool",
+        "item_int",
+        "get_bool",
+        "get_int",
+        "get_float",
+        "set_bool",
+        "set_int",
+        "set_float"
+      ],
+      "positive": [
+        "native.indexing",
+        "native.numpy-take-dtypes",
+        "native.numpy-take-shaped-output",
+        "native.scalar-conversion",
+        "rust.numpy-basic-index-views",
+        "terlan.scalar-conversion",
+        "terlan.multiarray-selection",
+        "terlan.numpy-take-shaped-output"
+      ]
+    },
+    "linalg-completion": {
+      "adversarial": [
+        "rust.linalg-completion"
+      ],
+      "boundary": [
+        "rust.linalg-completion"
+      ],
+      "members": [
+        "cond",
+        "eig",
+        "eigvals",
+        "eigvalsh",
+        "matrix_power",
+        "multi_dot",
+        "multi_dot_into",
+        "norm",
+        "pinv",
+        "slogdet",
+        "tensorinv",
+        "tensorsolve"
+      ],
+      "positive": [
+        "rust.linalg-completion"
+      ]
+    },
+    "linalg-system": {
+      "adversarial": [
+        "rust.linalg-system"
+      ],
+      "boundary": [
+        "rust.linalg-system"
+      ],
+      "members": [
+        "det",
+        "condition"
+      ],
+      "positive": [
+        "terlan.linalg-system"
+      ]
+    },
+    "nonzero": {
+      "adversarial": [
+        "native.nonzero",
+        "rust.numpy-numeric-nonzero-adversarial"
+      ],
+      "boundary": [
+        "native.nonzero",
+        "rust.numpy-numeric-nonzero-scalar",
+        "rust.numpy-numeric-count-nonzero-axes",
+        "rust.numpy-numeric-argwhere"
+      ],
+      "members": [
+        "count_nonzero",
+        "count_nonzero_axes",
+        "flatnonzero",
+        "argwhere",
+        "nonzero"
+      ],
+      "positive": [
+        "native.nonzero",
+        "rust.numpy-numeric-nonzero-scalar",
+        "rust.numpy-numeric-nonzero-coordinates",
+        "rust.numpy-numeric-count-nonzero-axes",
+        "rust.numpy-numeric-argwhere"
+      ]
+    },
+    "numeric-ufunc": {
+      "adversarial": [
+        "native.numeric-ufunc",
+        "native.half",
+        "rust.numpy-scalarmath-adversarial"
+      ],
+      "boundary": [
+        "native.numeric-ufunc",
+        "native.half",
+        "rust.numpy-scalarmath"
+      ],
+      "members": [
+        "bitwise_and",
+        "bitwise_or",
+        "bitwise_xor",
+        "left_shift",
+        "right_shift",
+        "gcd",
+        "lcm",
+        "hypot",
+        "arctan2",
+        "logaddexp",
+        "logaddexp2",
+        "copysign",
+        "nextafter",
+        "is_close",
+        "exp2",
+        "cbrt",
+        "degrees",
+        "radians",
+        "sign_bit",
+        "frexp_all",
+        "modf_all"
+      ],
+      "positive": [
+        "native.numeric-ufunc",
+        "native.half",
+        "terlan.half",
+        "terlan.half-nextafter",
+        "rust.numpy-scalarmath"
+      ]
+    },
+    "numpy-data-completion": {
+      "adversarial": [
+        "rust.numpy-data-completion",
+        "rust.numpy-bit-packing",
+        "rust.numpy-nan-cumulative"
+      ],
+      "boundary": [
+        "rust.numpy-data-completion",
+        "rust.numpy-bit-packing",
+        "rust.numpy-nan-cumulative",
+        "terlan.numpy-nan-cumulative"
+      ],
+      "members": [
+        "frombuffer",
+        "nanargmax",
+        "nanargmin",
+        "nancumprod",
+        "nancumsum",
+        "nanmedian",
+        "nanpercentile",
+        "nanquantile",
+        "packbits",
+        "unpackbits",
+        "unpackbits_all",
+        "packbits_axis",
+        "unpackbits_axis",
+        "unpackbits_axis_all"
+      ],
+      "positive": [
+        "rust.numpy-data-completion",
+        "rust.numpy-bit-packing",
+        "rust.numpy-nan-cumulative",
+        "terlan.numpy-nan-cumulative"
+      ]
+    },
+    "numpy-numeric-completion": {
+      "adversarial": [
+        "rust.numpy-numeric-completion",
+        "rust.half-spacing",
+        "rust.average",
+        "rust.numpy-type-check-completion",
+        "rust.numpy-function-base-adversarial"
+      ],
+      "boundary": [
+        "rust.numpy-numeric-completion",
+        "rust.numpy-allclose-parameter-factories",
+        "rust.half-spacing",
+        "native.average",
+        "rust.average",
+        "rust.numpy-type-check-completion",
+        "terlan.numpy-type-check-completion",
+        "rust.numpy-function-base"
+      ],
+      "members": [
+        "allclose",
+        "isclose",
+        "angle",
+        "array_equal",
+        "array_equal_nan",
+        "array_equiv",
+        "ndarray.numpy.asarray_chkfinite",
+        "ndarray.numpy.asarray_chkfinite_as",
+        "asfarray",
+        "average",
+        "average_weighted",
+        "average_with_sum",
+        "average_weighted_with_sum",
+        "bartlett",
+        "blackman",
+        "hamming",
+        "hanning",
+        "kaiser",
+        "bitwise_not",
+        "convolve",
+        "correlate",
+        "divmod",
+        "fix",
+        "float_power",
+        "fmod",
+        "heaviside",
+        "i0",
+        "real",
+        "imag",
+        "iscomplex",
+        "isreal",
+        "iscomplexobj",
+        "isrealobj",
+        "isneginf",
+        "isposinf",
+        "ldexp",
+        "nan_to_num",
+        "real_if_close",
+        "sinc",
+        "spacing",
+        "sort_complex",
+        "trim_zeros",
+        "unique",
+        "invert",
+        "trunc",
+        "nan_to_num_default",
+        "nan_to_num_into"
+      ],
+      "positive": [
+        "rust.numpy-numeric-completion",
+        "rust.numpy-allclose-parameter-factories",
+        "rust.half-spacing",
+        "terlan.half",
+        "native.average",
+        "rust.average",
+        "terlan.average",
+        "rust.numpy-type-check-completion",
+        "terlan.numpy-type-check-completion",
+        "rust.numpy-function-base"
+      ]
+    },
+    "numpy-shape-completion": {
+      "adversarial": [
+        "rust.numpy-shape-completion",
+        "rust.numpy-block",
+        "rust.numpy-meshgrid",
+        "rust.numpy-triangle-indices",
+        "rust.numpy-rank-stack-split",
+        "rust.numpy-index-tricks-adversarial",
+        "rust.numpy-memory-overlap-adversarial",
+        "rust.numpy-function-base-adversarial"
+      ],
+      "boundary": [
+        "rust.numpy-shape-completion",
+        "rust.numpy-block",
+        "rust.numpy-meshgrid",
+        "rust.numpy-triangle-indices",
+        "rust.numpy-rank-stack-split",
+        "terlan.numpy-rank-stack-split",
+        "rust.numpy-index-tricks",
+        "terlan.numpy-index-tricks",
+        "rust.numpy-memory-overlap",
+        "terlan.numpy-memory-overlap",
+        "rust.numpy-function-base"
+      ],
+      "members": [
+        "alen",
+        "append",
+        "broadcast_arrays",
+        "broadcast_shapes",
+        "column_stack",
+        "ndarray.numpy.copyto",
+        "ndarray.numpy.copyto_casting",
+        "ndarray.numpy.copyto_where",
+        "ndarray.numpy.delete",
+        "ndarray.numpy.delete_axis",
+        "ndarray.numpy.delete_mask_axis",
+        "diag",
+        "diag_indices",
+        "diag_indices_from",
+        "dsplit",
+        "dstack",
+        "ediff1d",
+        "full",
+        "full_like",
+        "hsplit",
+        "hstack",
+        "ndarray.numpy.insert",
+        "ndarray.numpy.insert_indexes",
+        "ndarray.numpy.insert_scalar_axis",
+        "ndarray.numpy.insert_indexes_axis",
+        "internal_overlap",
+        "ix_",
+        "may_share_memory",
+        "may_share_memory_with_work",
+        "msort",
+        "pad",
+        "place",
+        "putmask",
+        "row_stack",
+        "select",
+        "shares_memory",
+        "shares_memory_with_work",
+        "tril_indices",
+        "tril_indices_from",
+        "triu_indices",
+        "triu_indices_from",
+        "vsplit",
+        "vstack"
+      ],
+      "positive": [
+        "rust.numpy-shape-completion",
+        "rust.numpy-block",
+        "terlan.numpy-block",
+        "rust.numpy-meshgrid",
+        "rust.numpy-triangle-indices",
+        "rust.numpy-rank-stack-split",
+        "terlan.numpy-rank-stack-split",
+        "terlan.numpy-meshgrid",
+        "rust.numpy-index-tricks",
+        "terlan.numpy-index-tricks",
+        "rust.numpy-memory-overlap",
+        "terlan.numpy-memory-overlap",
+        "rust.numpy-function-base"
+      ]
+    },
+    "numpy-ufunc-output": {
+      "adversarial": [
+        "rust.numpy-ufunc-output-adversarial",
+        "rust.numpy-numeric-bool-adversarial"
+      ],
+      "boundary": [
+        "rust.numpy-ufunc-output-overlap",
+        "terlan.numpy-ufunc-output-overlap",
+        "rust.numpy-numeric-bool-array"
+      ],
+      "members": [
+        "add_at",
+        "add_into",
+        "add_reduceat",
+        "add_reduceat_into",
+        "add_where_into",
+        "absolute_into",
+        "logical_not_into",
+        "logical_and_into",
+        "logical_or_into",
+        "logical_xor_into",
+        "invert_at",
+        "invert_into",
+        "invert_where_into",
+        "reciprocal_into",
+        "reciprocal_where_into"
+      ],
+      "positive": [
+        "rust.numpy-ufunc-output-overlap",
+        "terlan.numpy-ufunc-output-overlap",
+        "rust.numpy-numeric-bool-array"
+      ]
+    },
+    "numpy-histogram2d": {
+      "adversarial": [
+        "rust.numpy-histogram2d"
+      ],
+      "boundary": [
+        "rust.numpy-histogram2d"
+      ],
+      "members": [
+        "histogram2d",
+        "histogram2d_range",
+        "histogram2d_edges",
+        "histogram2d_x_edges",
+        "histogram2d_y_edges"
+      ],
+      "positive": [
+        "rust.numpy-histogram2d"
+      ]
+    },
+    "numpy-histogram": {
+      "adversarial": [
+        "rust.numpy-histogram"
+      ],
+      "boundary": [
+        "rust.numpy-histogram",
+        "terlan.numpy-histogram"
+      ],
+      "members": [
+        "histogram_range",
+        "histogram_edges",
+        "histogram_weighted",
+        "histogram_weighted_range",
+        "histogram_weighted_edges",
+        "histogram_estimator",
+        "histogram_estimator_range",
+        "histogram_bin_edges_estimator"
+      ],
+      "positive": [
+        "rust.numpy-histogram",
+        "terlan.numpy-histogram"
+      ]
+    },
+    "numpy-histogramdd": {
+      "adversarial": [
+        "rust.numpy-histogramdd"
+      ],
+      "boundary": [
+        "rust.numpy-histogramdd",
+        "terlan.numpy-histogramdd"
+      ],
+      "members": [
+        "histogramdd_weighted"
+      ],
+      "positive": [
+        "rust.numpy-histogramdd",
+        "terlan.numpy-histogramdd"
+      ]
+    },
+    "ordering": {
+      "adversarial": [
+        "native.ordering",
+        "native.numpy-lexsort-axis",
+        "native.partition-sequences"
+      ],
+      "boundary": [
+        "native.ordering",
+        "native.numpy-lexsort",
+        "native.numpy-lexsort-axis",
+        "native.partition-fuzz",
+        "native.partition-sequences",
+        "native.sorting"
+      ],
+      "members": [
+        "sort",
+        "argsort",
+        "sort_unstable",
+        "argsort_unstable",
+        "sort_flat",
+        "argsort_flat",
+        "sort_inplace",
+        "ndarray.array.partition",
+        "ndarray.array.partition_kths",
+        "ndarray.array.argpartition",
+        "ndarray.array.argpartition_kths",
+        "ndarray.array.partition_flat",
+        "ndarray.array.partition_kths_flat",
+        "ndarray.array.argpartition_flat",
+        "ndarray.array.argpartition_kths_flat",
+        "ndarray.array.partition_inplace",
+        "ndarray.array.partition_kths_inplace",
+        "lexsort_keys",
+        "lexsort"
+      ],
+      "positive": [
+        "native.ordering",
+        "native.numpy-lexsort",
+        "native.numpy-lexsort-axis",
+        "native.partition-fuzz",
+        "native.partition-sequences",
+        "native.sorting",
+        "terlan.partition-sequences",
+        "terlan.sorting",
+        "terlan.numpy-lexsort-axis"
+      ]
+    },
+    "polynomial": {
+      "adversarial": [
+        "rust.polynomial"
+      ],
+      "boundary": [
+        "rust.polynomial"
+      ],
+      "members": [
+        "polyval",
+        "polyroots",
+        "polyfit",
+        "polyadd",
+        "polysub",
+        "polymul",
+        "polydiv_all",
+        "polyder",
+        "polyint",
+        "polycompanion",
+        "polyconvert"
+      ],
+      "positive": [
+        "rust.polynomial"
+      ]
+    },
+    "polynomial-chebyshev": {
+      "adversarial": [
+        "rust.polynomial-chebyshev",
+        "rust.polynomial-basis-numpy-completion"
+      ],
+      "boundary": [
+        "rust.polynomial-chebyshev",
+        "rust.polynomial-basis-numpy-completion"
+      ],
+      "members": [
+        "cheb2poly",
+        "poly2cheb",
+        "chebadd",
+        "chebsub",
+        "chebmul",
+        "chebdiv",
+        "chebmulx",
+        "chebpow",
+        "ndarray.array.chebder",
+        "ndarray.array.chebder_axis",
+        "ndarray.array.chebint",
+        "ndarray.array.chebint_axis",
+        "ndarray.array.chebfit",
+        "ndarray.array.chebfit_degrees",
+        "ndarray.array.chebfit_weighted_degrees",
+        "chebfromroots",
+        "chebcompanion",
+        "chebroots",
+        "chebtrim",
+        "chebline",
+        "ndarray.array.chebval",
+        "ndarray.array.chebval_tensor",
+        "chebval2d",
+        "chebval3d",
+        "chebgrid2d",
+        "chebgrid3d",
+        "chebvander",
+        "chebvander2d",
+        "chebvander3d",
+        "chebgauss",
+        "chebweight",
+        "chebpts1",
+        "chebpts2",
+        "chebinterpolate"
+      ],
+      "positive": [
+        "rust.polynomial-chebyshev",
+        "rust.polynomial-basis-numpy-completion",
+        "terlan.polynomial-chebyshev-numpy-completion"
+      ]
+    },
+    "polynomial-legendre": {
+      "adversarial": [
+        "rust.polynomial-legendre",
+        "rust.polynomial-basis-numpy-completion"
+      ],
+      "boundary": [
+        "rust.polynomial-legendre",
+        "rust.polynomial-basis-numpy-completion"
+      ],
+      "members": [
+        "leg2poly",
+        "poly2leg",
+        "legadd",
+        "legsub",
+        "legmul",
+        "legdiv",
+        "legmulx",
+        "legpow",
+        "ndarray.array.legder",
+        "ndarray.array.legder_axis",
+        "ndarray.array.legint",
+        "ndarray.array.legint_axis",
+        "ndarray.array.legfit",
+        "ndarray.array.legfit_degrees",
+        "ndarray.array.legfit_weighted_degrees",
+        "legfromroots",
+        "legcompanion",
+        "legroots",
+        "legtrim",
+        "legline",
+        "ndarray.array.legval",
+        "ndarray.array.legval_tensor",
+        "legval2d",
+        "legval3d",
+        "leggrid2d",
+        "leggrid3d",
+        "legvander",
+        "legvander2d",
+        "legvander3d",
+        "leggauss",
+        "legweight"
+      ],
+      "positive": [
+        "rust.polynomial-legendre",
+        "rust.polynomial-basis-numpy-completion",
+        "terlan.polynomial-legendre-numpy-completion"
+      ]
+    },
+    "polynomial-power": {
+      "adversarial": [
+        "rust.polynomial-power"
+      ],
+      "boundary": [
+        "rust.polynomial-power"
+      ],
+      "members": [
+        "polyfromroots",
+        "polyline",
+        "polymulx",
+        "polypow",
+        "polytrim",
+        "polyvalfromroots",
+        "polyvander",
+        "polyval2d",
+        "polyval3d",
+        "polygrid2d",
+        "polygrid3d",
+        "polyvander2d",
+        "polyvander3d"
+      ],
+      "positive": [
+        "rust.polynomial-power"
+      ]
+    },
+    "polynomial-numpy-completion": {
+      "adversarial": [
+        "rust.polynomial-numpy-completion"
+      ],
+      "boundary": [
+        "rust.polynomial-numpy-completion"
+      ],
+      "members": [
+        "polyder_axis",
+        "polyint_axis",
+        "polyvalfromroots_tensor",
+        "polyfit_degrees",
+        "polyfit_weighted_degrees",
+        "polyfit_covariance",
+        "polyfit_weighted_covariance"
+      ],
+      "positive": [
+        "rust.polynomial-numpy-completion"
+      ]
+    },
+    "random": {
+      "adversarial": [
+        "rust.random",
+        "rust.random-distributions",
+        "rust.random-shuffle",
+        "rust.random-boundaries"
+      ],
+      "boundary": [
+        "rust.random",
+        "rust.random-distributions",
+        "rust.random-shuffle",
+        "rust.random-boundaries"
+      ],
+      "members": [
+        "random_uniform",
+        "random_normal",
+        "random_integers",
+        "random_bernoulli",
+        "random_permutation",
+        "random_shuffle"
+      ],
+      "positive": [
+        "rust.random",
+        "rust.random-distributions",
+        "rust.random-shuffle"
+      ]
+    },
+    "random-stream": {
+      "adversarial": [
+        "rust.random-stream",
+        "rust.random-stream-distributions",
+        "rust.random-stream-structured",
+        "rust.random-output",
+        "rust.random-power-adversarial"
+      ],
+      "boundary": [
+        "rust.random-stream",
+        "rust.random-stream-distributions",
+        "rust.random-stream-structured",
+        "rust.random-output",
+        "rust.random-power-boundaries"
+      ],
+      "members": [
+        "new",
+        "uniform",
+        "uniform_into",
+        "normal",
+        "integers",
+        "bernoulli",
+        "permutation",
+        "shuffle",
+        "beta",
+        "gamma",
+        "binomial",
+        "poisson",
+        "standard_normal",
+        "standard_normal_into",
+        "chisquare",
+        "f",
+        "gumbel",
+        "lognormal",
+        "pareto",
+        "ndarray.random_stream.power",
+        "exponential",
+        "standard_exponential",
+        "standard_exponential_into",
+        "standard_gamma",
+        "standard_gamma_into",
+        "standard_t",
+        "triangular",
+        "weibull",
+        "geometric",
+        "hypergeometric",
+        "zipf",
+        "standard_cauchy",
+        "laplace",
+        "logistic",
+        "negative_binomial",
+        "noncentral_chisquare",
+        "noncentral_f",
+        "rayleigh",
+        "wald",
+        "logseries",
+        "vonmises",
+        "choice",
+        "dirichlet",
+        "multinomial",
+        "multivariate_hypergeometric",
+        "multivariate_normal"
+      ],
+      "positive": [
+        "rust.random-stream",
+        "rust.random-stream-distributions",
+        "rust.random-stream-structured",
+        "rust.random-output",
+        "rust.random-power-positive"
+      ]
+    },
+    "reduction": {
+      "adversarial": [
+        "native.argument-reduction",
+        "native.boolean-reduction",
+        "native.reduction",
+        "native.reduction-where"
+      ],
+      "boundary": [
+        "native.argument-reduction",
+        "native.boolean-reduction",
+        "native.reduction",
+        "native.reduction-where",
+        "native.numpy-numeric-std-var"
+      ],
+      "members": [
+        "product",
+        "mean",
+        "mean_where",
+        "mean_as",
+        "mean_into",
+        "minimum",
+        "maximum",
+        "any",
+        "all",
+        "logical_xor_reduce",
+        "any_where",
+        "all_where",
+        "argmin",
+        "argmin_into",
+        "argmax",
+        "argmax_into",
+        "variance",
+        "variance_where",
+        "variance_as",
+        "variance_into",
+        "standard_deviation",
+        "standard_deviation_where",
+        "standard_deviation_as",
+        "standard_deviation_into",
+        "cumulative_sum",
+        "cumulative_product"
+      ],
+      "positive": [
+        "native.argument-reduction",
+        "native.boolean-reduction",
+        "native.reduction",
+        "terlan.boolean-reduction",
+        "native.numpy-numeric-std-var",
+        "terlan.statistic-options",
+        "terlan.method-output-selection"
+      ]
+    },
+    "searchsorted": {
+      "adversarial": [
+        "native.searchsorted",
+        "native.searchsorter"
+      ],
+      "boundary": [
+        "native.searchsorted",
+        "native.searchsorted-dtypes",
+        "native.searchsorter"
+      ],
+      "members": [
+        "searchsorted",
+        "searchsorted_with_sorter"
+      ],
+      "positive": [
+        "native.searchsorted",
+        "native.searchsorted-dtypes",
+        "native.searchsorter",
+        "terlan.searchsorter"
+      ]
+    },
+    "serialization": {
+      "adversarial": [
+        "rust.serialization"
+      ],
+      "boundary": [
+        "rust.serialization"
+      ],
+      "members": [
+        "to_npy",
+        "from_npy",
+        "save_npy",
+        "load_npy",
+        "serialize",
+        "deserialize",
+        "mmap_npy",
+        "flush"
+      ],
+      "positive": [
+        "rust.serialization",
+        "terlan.serialization"
+      ]
+    },
+    "set": {
+      "adversarial": [
+        "native.set",
+        "terlan.set"
+      ],
+      "boundary": [
+        "native.set",
+        "terlan.set"
+      ],
+      "members": [
+        "unique_all",
+        "union",
+        "intersect",
+        "set_difference",
+        "set_xor",
+        "is_in",
+        "in1d",
+        "set_difference_unique",
+        "intersect_all",
+        "unique_axis_all",
+        "ediff1d_edges"
+      ],
+      "positive": [
+        "native.set",
+        "terlan.set"
+      ]
+    },
+    "shape": {
+      "adversarial": [
+        "native.numpy-methods-order",
+        "native.shape",
+        "native.shape-extra",
+        "native.padding",
+        "terlan.padding",
+        "rust.shape-composition",
+        "rust.shape-concatenate-stack",
+        "rust.numpy-concatenate-flat",
+        "rust.numpy-concatenate-output",
+        "rust.shape-expand-squeeze",
+        "rust.numpy-basic-index-views",
+        "rust.shape-tile",
+        "rust.numpy-atleast-dimensions",
+        "rust.numpy-numeric-roll-adversarial",
+        "rust.numpy-numeric-axis-movement-adversarial"
+      ],
+      "boundary": [
+        "native.numpy-methods-order",
+        "native.shape",
+        "native.shape-extra",
+        "native.padding",
+        "terlan.padding",
+        "rust.shape-composition",
+        "rust.shape-concatenate-stack",
+        "rust.numpy-concatenate-flat",
+        "rust.numpy-concatenate-output",
+        "rust.shape-expand-squeeze",
+        "rust.numpy-basic-index-views",
+        "rust.shape-tile",
+        "rust.numpy-atleast-dimensions",
+        "terlan.numpy-atleast-dimensions",
+        "terlan.numpy-concatenate",
+        "terlan.multiarray-selection",
+        "terlan.numpy-flip-rot90",
+        "rust.numpy-numeric-roll",
+        "rust.numpy-numeric-axis-movement"
+      ],
+      "members": [
+        "ndarray.array.expand_dims",
+        "ndarray.array.expand_dims_axes",
+        "squeeze",
+        "flip",
+        "flip_all",
+        "ndarray.array.roll",
+        "ndarray.array.roll_flat",
+        "ndarray.array.roll_axes_by",
+        "ndarray.array.roll_axes",
+        "repeat",
+        "repeat_counts",
+        "repeat_flat",
+        "tile",
+        "concatenate",
+        "concatenate_flat",
+        "concatenate_with_dtype",
+        "concatenate_flat_with_dtype",
+        "concatenate_into",
+        "concatenate_flat_into",
+        "stack",
+        "basic_slice",
+        "pad_constant",
+        "pad_constant_values",
+        "pad_edge",
+        "pad_reflect",
+        "pad_symmetric",
+        "pad_wrap",
+        "pad_reflect_odd",
+        "pad_symmetric_odd",
+        "pad_linear_ramp",
+        "pad_linear_ramp_values",
+        "pad_empty",
+        "pad_minimum",
+        "pad_maximum",
+        "pad_mean",
+        "pad_median",
+        "pad_statistical",
+        "atleast_1d",
+        "atleast_2d",
+        "atleast_3d",
+        "ndarray.shape.ravel",
+        "ndarray.shape.ravel_ordered",
+        "ndarray.shape.flatten",
+        "ndarray.shape.flatten_ordered",
+        "ndarray.array.reshape_ordered",
+        "moveaxis",
+        "rollaxis",
+        "flipud",
+        "fliplr",
+        "rot90"
+      ],
+      "positive": [
+        "native.numpy-methods-order",
+        "terlan.numpy-methods-order",
+        "native.shape",
+        "native.shape-extra",
+        "native.padding",
+        "terlan.padding",
+        "rust.shape-composition",
+        "rust.shape-concatenate-stack",
+        "rust.numpy-concatenate-flat",
+        "rust.numpy-concatenate-output",
+        "rust.shape-expand-squeeze",
+        "rust.numpy-basic-index-views",
+        "rust.shape-tile",
+        "rust.numpy-atleast-dimensions",
+        "terlan.numpy-atleast-dimensions",
+        "terlan.numpy-concatenate",
+        "terlan.multiarray-selection",
+        "terlan.numpy-flip-rot90",
+        "rust.numpy-numeric-roll",
+        "rust.numpy-numeric-axis-movement"
+      ]
+    },
+    "split": {
+      "adversarial": [
+        "native.shape",
+        "rust.shape-split"
+      ],
+      "boundary": [
+        "native.split",
+        "rust.shape-split"
+      ],
+      "members": [
+        "split",
+        "array_split",
+        "split_at"
+      ],
+      "positive": [
+        "native.split",
+        "rust.shape-split"
+      ]
+    },
+    "statistics": {
+      "adversarial": [
+        "native.statistics",
+        "native.covariance-adversarial"
+      ],
+      "boundary": [
+        "native.statistics",
+        "native.covariance"
+      ],
+      "members": [
+        "median",
+        "quantile",
+        "percentile",
+        "quantiles",
+        "percentiles",
+        "nanquantile_axes",
+        "nanpercentile_axes",
+        "nanquantiles",
+        "nanpercentiles",
+        "nanmedian_axes",
+        "median_into",
+        "nanmedian_into",
+        "quantile_into",
+        "percentile_into",
+        "quantiles_into",
+        "percentiles_into",
+        "nanquantile_into",
+        "nanpercentile_into",
+        "nanquantiles_into",
+        "nanpercentiles_into",
+        "peak_to_peak",
+        "weighted_average",
+        "covariance",
+        "covariance_typed",
+        "covariance_pair",
+        "covariance_frequency_weighted",
+        "covariance_analytic_weighted",
+        "covariance_weighted",
+        "covariance_pair_weighted",
+        "correlation",
+        "correlation_typed",
+        "correlation_pair",
+        "nan_sum",
+        "nan_product",
+        "nan_mean",
+        "nan_minimum",
+        "nan_maximum",
+        "nan_variance",
+        "nan_standard_deviation"
+      ],
+      "positive": [
+        "native.statistics",
+        "native.covariance",
+        "terlan.covariance"
+      ]
+    },
+    "tensor-algebra": {
+      "adversarial": [
+        "rust.tensor-algebra"
+      ],
+      "boundary": [
+        "rust.tensor-algebra"
+      ],
+      "members": [
+        "tensordot",
+        "kron",
+        "cross",
+        "einsum",
+        "einsum_into",
+        "einsum_ordered"
+      ],
+      "positive": [
+        "rust.tensor-algebra"
+      ]
+    },
+    "unary": {
+      "adversarial": [
+        "native.unary",
+        "native.unary-output",
+        "native.complex-umath",
+        "native.half",
+        "rust.numpy-scalarmath-adversarial"
+      ],
+      "boundary": [
+        "native.unary",
+        "native.unary-output",
+        "native.complex-umath",
+        "native.half",
+        "rust.numpy-scalarmath",
+        "rust.numpy-numeric-bool-array",
+        "rust.numpy-numeric-bool-comparison"
+      ],
+      "members": [
+        "negative",
+        "positive",
+        "absolute",
+        "sign",
+        "square",
+        "sqrt",
+        "reciprocal",
+        "exp",
+        "expm1",
+        "log",
+        "log1p",
+        "log2",
+        "log10",
+        "sin",
+        "cos",
+        "tan",
+        "sinh",
+        "cosh",
+        "tanh",
+        "arcsin",
+        "arccos",
+        "arctan",
+        "arcsinh",
+        "arccosh",
+        "arctanh",
+        "floor",
+        "ceil",
+        "round",
+        "round_decimals",
+        "round_into",
+        "logical_not",
+        "is_nan",
+        "is_infinite",
+        "is_finite",
+        "conjugate",
+        "conjugate_into"
+      ],
+      "positive": [
+        "native.unary",
+        "native.complex-umath",
+        "native.half",
+        "terlan.complex-umath",
+        "terlan.half",
+        "terlan.method-output-numeric",
+        "terlan.scalar-conversion",
+        "rust.numpy-scalarmath",
+        "rust.numpy-numeric-bool-array",
+        "rust.numpy-numeric-bool-comparison"
+      ]
+    },
+    "numpy-nan-reductions": {
+      "adversarial": [
+        "rust.numpy-nan-reductions"
+      ],
+      "boundary": [
+        "rust.numpy-nan-reductions",
+        "terlan.numpy-nan-reductions"
+      ],
+      "members": [
+        "nansum",
+        "nanprod",
+        "nanmean",
+        "nanmin",
+        "nanmax",
+        "nanvar",
+        "nanstd",
+        "nansum_as",
+        "nanprod_as",
+        "nanmean_as",
+        "nanvar_as",
+        "nanstd_as",
+        "nanargmin_axes",
+        "nanargmax_axes",
+        "nansum_into",
+        "nanprod_into",
+        "nanmean_into",
+        "nanmin_into",
+        "nanmax_into",
+        "nanvar_into",
+        "nanstd_into"
+      ],
+      "positive": [
+        "rust.numpy-nan-reductions",
+        "terlan.numpy-nan-reductions"
+      ]
+    },
+    "numpy-nan-cumulative-output": {
+      "adversarial": [
+        "rust.numpy-nan-cumulative"
+      ],
+      "boundary": [
+        "rust.numpy-nan-cumulative",
+        "terlan.numpy-nan-cumulative"
+      ],
+      "members": [
+        "nancumsum_flat",
+        "nancumprod_flat",
+        "nancumsum_as",
+        "nancumprod_as",
+        "nancumsum_into",
+        "nancumprod_into",
+        "nancumsum_flat_into",
+        "nancumprod_flat_into"
+      ],
+      "positive": [
+        "rust.numpy-nan-cumulative",
+        "terlan.numpy-nan-cumulative"
+      ]
+    }
+  },
+  "functions": {
+    "add": {
+      "adversarial": [
+        "native.operation-rejections"
+      ],
+      "boundary": [
+        "native.operation-boundaries"
+      ],
+      "positive": [
+        "terlan.arithmetic"
+      ]
+    },
+    "byte_count": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "contiguous_code": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "fortran_contiguous_code": {
+      "adversarial": [
+        "rust.numpy-array-conversion"
+      ],
+      "boundary": [
+        "rust.numpy-array-conversion"
+      ],
+      "positive": [
+        "terlan.numpy-array-conversion"
+      ]
+    },
+    "device_type_code": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "ndarray.array.dispose": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "terlan.shape-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "ndarray.arrow_array.dispose": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "terlan.shape-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "ndarray.random_stream.dispose": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "terlan.shape-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "dot": {
+      "adversarial": [
+        "native.linear-algebra-rejections"
+      ],
+      "boundary": [
+        "native.linear-algebra-boundaries"
+      ],
+      "positive": [
+        "native.linear-algebra-positive"
+      ]
+    },
+    "dot_into": {
+      "adversarial": [
+        "native.linear-algebra-output"
+      ],
+      "boundary": [
+        "native.linear-algebra-output"
+      ],
+      "positive": [
+        "terlan.method-output-numeric"
+      ]
+    },
+    "dtype_code": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "export_tensor_packet": {
+      "adversarial": [
+        "native.dlpack-rejections"
+      ],
+      "boundary": [
+        "native.dlpack-boundaries"
+      ],
+      "positive": [
+        "terlan.dlpack"
+      ]
+    },
+    "from_bools": {
+      "adversarial": [
+        "native.abi-rejections",
+        "native.allocation-failures"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "from_floats": {
+      "adversarial": [
+        "native.abi-rejections",
+        "native.allocation-failures"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "from_ints": {
+      "adversarial": [
+        "native.abi-rejections",
+        "native.allocation-failures"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "import_tensor_packet": {
+      "adversarial": [
+        "native.dlpack-rejections"
+      ],
+      "boundary": [
+        "native.dlpack-boundaries"
+      ],
+      "positive": [
+        "terlan.dlpack"
+      ]
+    },
+    "live_count": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "terlan.shape-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "matmul": {
+      "adversarial": [
+        "native.matmul-rejections",
+        "native.linear-algebra-rejections"
+      ],
+      "boundary": [
+        "native.matmul-boundaries",
+        "native.linear-algebra-boundaries"
+      ],
+      "positive": [
+        "terlan.matmul",
+        "native.linear-algebra-positive"
+      ]
+    },
+    "matmul_into": {
+      "adversarial": [
+        "native.linear-algebra-output"
+      ],
+      "boundary": [
+        "native.linear-algebra-output"
+      ],
+      "positive": [
+        "terlan.method-output-numeric"
+      ]
+    },
+    "multiply": {
+      "adversarial": [
+        "native.operation-rejections"
+      ],
+      "boundary": [
+        "native.operation-boundaries"
+      ],
+      "positive": [
+        "terlan.arithmetic"
+      ]
+    },
+    "numel": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "rank": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "ndarray.array.reshape": {
+      "adversarial": [
+        "native.operation-rejections"
+      ],
+      "boundary": [
+        "terlan.shape-boundaries"
+      ],
+      "positive": [
+        "terlan.shape-operations"
+      ]
+    },
+    "shape": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "strides": {
+      "adversarial": [
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "subtract": {
+      "adversarial": [
+        "native.operation-rejections"
+      ],
+      "boundary": [
+        "native.operation-boundaries"
+      ],
+      "positive": [
+        "terlan.arithmetic"
+      ]
+    },
+    "subtract_reduce": {
+      "adversarial": [
+        "rust.noncommutative-reduce-accumulate"
+      ],
+      "boundary": [
+        "rust.noncommutative-reduce-accumulate"
+      ],
+      "positive": [
+        "rust.noncommutative-reduce-accumulate"
+      ]
+    },
+    "subtract_accumulate": {
+      "adversarial": [
+        "rust.noncommutative-reduce-accumulate"
+      ],
+      "boundary": [
+        "rust.noncommutative-reduce-accumulate"
+      ],
+      "positive": [
+        "rust.noncommutative-reduce-accumulate"
+      ]
+    },
+    "divide_reduce": {
+      "adversarial": [
+        "rust.noncommutative-reduce-accumulate"
+      ],
+      "boundary": [
+        "rust.noncommutative-reduce-accumulate"
+      ],
+      "positive": [
+        "rust.noncommutative-reduce-accumulate"
+      ]
+    },
+    "divide_accumulate": {
+      "adversarial": [
+        "rust.noncommutative-reduce-accumulate"
+      ],
+      "boundary": [
+        "rust.noncommutative-reduce-accumulate"
+      ],
+      "positive": [
+        "rust.noncommutative-reduce-accumulate"
+      ]
+    },
+    "sum": {
+      "adversarial": [
+        "native.operation-rejections"
+      ],
+      "boundary": [
+        "native.operation-boundaries"
+      ],
+      "positive": [
+        "terlan.arithmetic"
+      ]
+    },
+    "to_bools": {
+      "adversarial": [
+        "native.abi-rejections",
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "to_floats": {
+      "adversarial": [
+        "native.abi-rejections",
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "to_ints": {
+      "adversarial": [
+        "native.abi-rejections",
+        "helper.lifecycle"
+      ],
+      "boundary": [
+        "native.abi-boundaries"
+      ],
+      "positive": [
+        "terlan.metadata"
+      ]
+    },
+    "transpose": {
+      "adversarial": [
+        "native.operation-rejections"
+      ],
+      "boundary": [
+        "terlan.shape-boundaries"
+      ],
+      "positive": [
+        "terlan.shape-operations"
+      ]
+    },
+    "zeros_ordered": {
+      "adversarial": [
+        "rust.ordered-zero-construction"
+      ],
+      "boundary": [
+        "rust.ordered-zero-construction"
+      ],
+      "positive": [
+        "rust.ordered-zero-construction"
+      ]
+    },
+    "outer_into": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "sum_into": {
+      "adversarial": ["rust.numpy-reduction-outputs"],
+      "boundary": ["rust.numpy-reduction-outputs"],
+      "positive": ["rust.numpy-reduction-outputs"]
+    },
+    "product_into": {
+      "adversarial": ["rust.numpy-reduction-outputs"],
+      "boundary": ["rust.numpy-reduction-outputs"],
+      "positive": ["rust.numpy-reduction-outputs"]
+    },
+    "minimum_into": {
+      "adversarial": ["rust.numpy-reduction-outputs"],
+      "boundary": ["rust.numpy-reduction-outputs"],
+      "positive": ["rust.numpy-reduction-outputs"]
+    },
+    "maximum_into": {
+      "adversarial": ["rust.numpy-reduction-outputs"],
+      "boundary": ["rust.numpy-reduction-outputs"],
+      "positive": ["rust.numpy-reduction-outputs"]
+    },
+    "sum_where": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "sum_initial": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "sum_where_initial": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "minimum_initial": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "maximum_initial": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "minimum_where": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "maximum_where": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "minimum_where_initial": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "maximum_where_initial": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "fmin_reduce": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "fmax_reduce": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "bitwise_and_reduce": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "bitwise_or_reduce": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    },
+    "bitwise_xor_reduce": {
+      "adversarial": ["rust.numpy-reduction-options"],
+      "boundary": ["rust.numpy-reduction-options"],
+      "positive": ["rust.numpy-reduction-options"]
+    }
+  },
+  "extension_functions": {
+    "fill_diagonal": {
+      "adversarial": [
+        "rust.numpy-index-tricks-adversarial"
+      ],
+      "boundary": [
+        "rust.numpy-index-tricks",
+        "terlan.numpy-index-tricks"
+      ],
+      "positive": [
+        "rust.numpy-index-tricks",
+        "terlan.numpy-index-tricks"
+      ]
+    },
+    "ravel_multi_index": {
+      "adversarial": [
+        "rust.numpy-index-tricks-adversarial"
+      ],
+      "boundary": [
+        "rust.numpy-index-tricks",
+        "terlan.numpy-index-tricks"
+      ],
+      "positive": [
+        "rust.numpy-index-tricks",
+        "terlan.numpy-index-tricks"
+      ]
+    },
+    "unravel_index": {
+      "adversarial": [
+        "rust.numpy-index-tricks-adversarial"
+      ],
+      "boundary": [
+        "rust.numpy-index-tricks",
+        "terlan.numpy-index-tricks"
+      ],
+      "positive": [
+        "rust.numpy-index-tricks",
+        "terlan.numpy-index-tricks"
+      ]
+    },
+    "block": {
+      "adversarial": [
+        "rust.numpy-block"
+      ],
+      "boundary": [
+        "rust.numpy-block",
+        "terlan.numpy-block"
+      ],
+      "positive": [
+        "rust.numpy-block",
+        "terlan.numpy-block"
+      ]
+    },
+    "meshgrid": {
+      "adversarial": [
+        "rust.numpy-meshgrid"
+      ],
+      "boundary": [
+        "rust.numpy-meshgrid"
+      ],
+      "positive": [
+        "terlan.numpy-meshgrid"
+      ]
+    },
+    "take": {
+      "adversarial": [
+        "native.numpy-take-shaped-output"
+      ],
+      "boundary": [
+        "native.numpy-take-shaped-output",
+        "terlan.numpy-take-shaped-output"
+      ],
+      "positive": [
+        "native.numpy-take-shaped-output",
+        "terlan.numpy-take-shaped-output"
+      ]
+    },
+    "take_into": {
+      "adversarial": [
+        "native.numpy-take-shaped-output"
+      ],
+      "boundary": [
+        "native.numpy-take-shaped-output",
+        "terlan.numpy-take-shaped-output"
+      ],
+      "positive": [
+        "native.numpy-take-shaped-output",
+        "terlan.numpy-take-shaped-output"
+      ]
+    },
+    "astype_with": {
+      "adversarial": [
+        "rust.numpy-array-conversion"
+      ],
+      "boundary": [
+        "rust.numpy-array-conversion"
+      ],
+      "positive": [
+        "terlan.numpy-array-conversion"
+      ]
+    },
+    "copy_with_order": {
+      "adversarial": [
+        "rust.numpy-array-conversion"
+      ],
+      "boundary": [
+        "rust.numpy-array-conversion"
+      ],
+      "positive": [
+        "terlan.numpy-array-conversion"
+      ]
+    },
+    "reshape_with_order": {
+      "adversarial": [
+        "native.numpy-methods-order"
+      ],
+      "boundary": [
+        "native.numpy-methods-order"
+      ],
+      "positive": [
+        "terlan.numpy-methods-order"
+      ]
+    },
+    "ravel_with_order": {
+      "adversarial": [
+        "native.numpy-methods-order"
+      ],
+      "boundary": [
+        "native.numpy-methods-order"
+      ],
+      "positive": [
+        "terlan.numpy-methods-order"
+      ]
+    },
+    "flatten_with_order": {
+      "adversarial": [
+        "native.numpy-methods-order"
+      ],
+      "boundary": [
+        "native.numpy-methods-order"
+      ],
+      "positive": [
+        "terlan.numpy-methods-order"
+      ]
+    },
+    "copyto_where": {
+      "adversarial": [
+        "rust.numpy-array-conversion"
+      ],
+      "boundary": [
+        "rust.numpy-array-conversion"
+      ],
+      "positive": [
+        "terlan.numpy-array-conversion"
+      ]
+    },
+    "copyto_with_casting": {
+      "adversarial": [
+        "rust.numpy-array-conversion"
+      ],
+      "boundary": [
+        "rust.numpy-array-conversion"
+      ],
+      "positive": [
+        "terlan.numpy-array-conversion"
+      ]
+    },
+    "full_from": {
+      "adversarial": [
+        "terlan.numpy-creation-conversion"
+      ],
+      "boundary": [
+        "terlan.numpy-creation-conversion"
+      ],
+      "positive": [
+        "terlan.numpy-creation-conversion"
+      ]
+    },
+    "is_c_contiguous": {
+      "adversarial": [
+        "rust.numpy-array-conversion"
+      ],
+      "boundary": [
+        "rust.numpy-array-conversion"
+      ],
+      "positive": [
+        "terlan.numpy-array-conversion"
+      ]
+    },
+    "is_fortran_contiguous": {
+      "adversarial": [
+        "rust.numpy-array-conversion"
+      ],
+      "boundary": [
+        "rust.numpy-array-conversion"
+      ],
+      "positive": [
+        "terlan.numpy-array-conversion"
+      ]
+    },
+    "histogramdd_bins": {
+      "adversarial": [
+        "rust.numpy-histogramdd"
+      ],
+      "boundary": [
+        "terlan.numpy-histogramdd"
+      ],
+      "positive": [
+        "terlan.numpy-histogramdd"
+      ]
+    },
+    "histogramdd_edges": {
+      "adversarial": [
+        "rust.numpy-histogramdd"
+      ],
+      "boundary": [
+        "terlan.numpy-histogramdd"
+      ],
+      "positive": [
+        "terlan.numpy-histogramdd"
+      ]
+    },
+    "histogramdd_range": {
+      "adversarial": [
+        "rust.numpy-histogramdd"
+      ],
+      "boundary": [
+        "terlan.numpy-histogramdd"
+      ],
+      "positive": [
+        "terlan.numpy-histogramdd"
+      ]
+    },
+    "histogramdd_weighted_bins": {
+      "adversarial": [
+        "rust.numpy-histogramdd"
+      ],
+      "boundary": [
+        "terlan.numpy-histogramdd"
+      ],
+      "positive": [
+        "terlan.numpy-histogramdd"
+      ]
+    },
+    "histogramdd_weighted_edges": {
+      "adversarial": [
+        "rust.numpy-histogramdd"
+      ],
+      "boundary": [
+        "terlan.numpy-histogramdd"
+      ],
+      "positive": [
+        "terlan.numpy-histogramdd"
+      ]
+    },
+    "histogramdd_weighted_range": {
+      "adversarial": [
+        "rust.numpy-histogramdd"
+      ],
+      "boundary": [
+        "terlan.numpy-histogramdd"
+      ],
+      "positive": [
+        "terlan.numpy-histogramdd"
+      ]
+    },
+    "lstsq": {
+      "adversarial": [
+        "rust.linalg-analysis"
+      ],
+      "boundary": [
+        "rust.linalg-analysis"
+      ],
+      "positive": [
+        "terlan.linalg-analysis"
+      ]
+    },
+    "qr": {
+      "adversarial": [
+        "rust.linalg-analysis"
+      ],
+      "boundary": [
+        "rust.linalg-analysis"
+      ],
+      "positive": [
+        "terlan.linalg-analysis"
+      ]
+    },
+    "random_stream.uniform.array_parameters": {
+      "declaration": "uniform",
+      "adversarial": [
+        "rust.random-broadcast-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-boundaries"
+      ],
+      "positive": [
+        "terlan.random-broadcast"
+      ]
+    },
+    "random_stream.normal.array_parameters": {
+      "declaration": "normal",
+      "adversarial": [
+        "rust.random-broadcast-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-boundaries"
+      ],
+      "positive": [
+        "terlan.random-broadcast"
+      ]
+    },
+    "random_stream.beta.array_parameters": {
+      "declaration": "beta",
+      "adversarial": [
+        "rust.random-broadcast-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-boundaries"
+      ],
+      "positive": [
+        "terlan.random-broadcast"
+      ]
+    },
+    "random_stream.gamma.array_parameters": {
+      "declaration": "gamma",
+      "adversarial": [
+        "rust.random-broadcast-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-boundaries"
+      ],
+      "positive": [
+        "terlan.random-broadcast"
+      ]
+    },
+    "random_stream.power.array_parameters": {
+      "declaration": "power",
+      "adversarial": [
+        "rust.random-broadcast-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-boundaries"
+      ],
+      "positive": [
+        "terlan.random-broadcast"
+      ]
+    },
+    "random_stream.triangular.array_parameters": {
+      "declaration": "triangular",
+      "adversarial": [
+        "rust.random-broadcast-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-boundaries"
+      ],
+      "positive": [
+        "terlan.random-broadcast"
+      ]
+    },
+    "random_stream.chisquare.array_parameters": {
+      "declaration": "chisquare",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.f.array_parameters": {
+      "declaration": "f",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.gumbel.array_parameters": {
+      "declaration": "gumbel",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.lognormal.array_parameters": {
+      "declaration": "lognormal",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.pareto.array_parameters": {
+      "declaration": "pareto",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.exponential.array_parameters": {
+      "declaration": "exponential",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.standard_gamma.array_parameters": {
+      "declaration": "standard_gamma",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.standard_t.array_parameters": {
+      "declaration": "standard_t",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.weibull.array_parameters": {
+      "declaration": "weibull",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.laplace.array_parameters": {
+      "declaration": "laplace",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.logistic.array_parameters": {
+      "declaration": "logistic",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.noncentral_chisquare.array_parameters": {
+      "declaration": "noncentral_chisquare",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.noncentral_f.array_parameters": {
+      "declaration": "noncentral_f",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.rayleigh.array_parameters": {
+      "declaration": "rayleigh",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.wald.array_parameters": {
+      "declaration": "wald",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.vonmises.array_parameters": {
+      "declaration": "vonmises",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-continuous"
+      ],
+      "positive": [
+        "terlan.random-broadcast-continuous"
+      ]
+    },
+    "random_stream.binomial.array_parameters": {
+      "declaration": "binomial",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-integer"
+      ],
+      "positive": [
+        "terlan.random-broadcast-integer"
+      ]
+    },
+    "random_stream.geometric.array_parameters": {
+      "declaration": "geometric",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-integer"
+      ],
+      "positive": [
+        "terlan.random-broadcast-integer"
+      ]
+    },
+    "random_stream.hypergeometric.array_parameters": {
+      "declaration": "hypergeometric",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-integer"
+      ],
+      "positive": [
+        "terlan.random-broadcast-integer"
+      ]
+    },
+    "random_stream.poisson.array_parameters": {
+      "declaration": "poisson",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-integer"
+      ],
+      "positive": [
+        "terlan.random-broadcast-integer"
+      ]
+    },
+    "random_stream.zipf.array_parameters": {
+      "declaration": "zipf",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-integer"
+      ],
+      "positive": [
+        "terlan.random-broadcast-integer"
+      ]
+    },
+    "random_stream.negative_binomial.array_parameters": {
+      "declaration": "negative_binomial",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-integer"
+      ],
+      "positive": [
+        "terlan.random-broadcast-integer"
+      ]
+    },
+    "random_stream.logseries.array_parameters": {
+      "declaration": "logseries",
+      "adversarial": [
+        "rust.random-broadcast-remaining-adversarial"
+      ],
+      "boundary": [
+        "rust.random-broadcast-integer"
+      ],
+      "positive": [
+        "terlan.random-broadcast-integer"
+      ]
+    },
+    "random_stream.random": {
+      "declaration": "random",
+      "adversarial": [
+        "rust.random-boundaries"
+      ],
+      "boundary": [
+        "rust.random-integer-bounds"
+      ],
+      "positive": [
+        "terlan.random-core-generator"
+      ]
+    },
+    "random_stream.integers.array_parameters": {
+      "declaration": "integers",
+      "adversarial": [
+        "rust.random-integer-bounds-adversarial"
+      ],
+      "boundary": [
+        "rust.random-integer-bounds"
+      ],
+      "positive": [
+        "terlan.random-core-generator"
+      ]
+    },
+    "random_stream.integers.shaped_endpoint": {
+      "declaration": "integers",
+      "adversarial": [
+        "rust.random-integer-bounds-adversarial"
+      ],
+      "boundary": [
+        "rust.random-integer-bounds"
+      ],
+      "positive": [
+        "terlan.random-core-generator"
+      ]
+    },
+    "random_stream.choice.axis_weighted": {
+      "declaration": "choice",
+      "adversarial": [
+        "rust.random-choice-axis-adversarial"
+      ],
+      "boundary": [
+        "rust.random-choice-axis"
+      ],
+      "positive": [
+        "terlan.random-choice-axis"
+      ]
+    },
+    "random_stream.choice.axis_uniform": {
+      "declaration": "choice",
+      "adversarial": [
+        "rust.random-choice-axis-adversarial"
+      ],
+      "boundary": [
+        "rust.random-choice-axis"
+      ],
+      "positive": [
+        "terlan.random-choice-axis"
+      ]
+    },
+    "random_stream.choice.integer_population": {
+      "declaration": "choice",
+      "adversarial": [
+        "rust.random-choice-axis-adversarial"
+      ],
+      "boundary": [
+        "rust.random-choice-axis"
+      ],
+      "positive": [
+        "terlan.random-choice-axis"
+      ]
+    }
+  },
+  "schema": "terlan.ndarray.public-api-coverage.v1"
+}

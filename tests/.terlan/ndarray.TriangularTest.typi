@@ -1,0 +1,5 @@
+module ndarray.TriangularTest.
+
+pub triangular_defaults_and_numeric_dtypes_match_numpy(): Bool.
+
+pub triangular_rank_three_offsets_and_immutability_match_numpy(): Bool.

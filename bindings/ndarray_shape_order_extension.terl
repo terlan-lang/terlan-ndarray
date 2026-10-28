@@ -1,0 +1,16 @@
+/** Returns the ABI code for an ordered shape traversal. */
+shape_order_code(order: ArrayOrder): Int ->
+    case order {
+        ArrayOrder.C -> 0;
+        ArrayOrder.FORTRAN -> 1;
+        ArrayOrder.KEEP -> 2;
+        ArrayOrder.ANY -> 3
+    }.
+
+/** Ravels with explicit C, Fortran, input-compatible, or physical traversal order. */
+pub ravel_with_order(array: Array, order: ArrayOrder): Array ->
+    ravel(array, shape_order_code(order)).
+
+/** Flattens with explicit C, Fortran, input-compatible, or physical traversal order. */
+pub flatten_with_order(array: Array, order: ArrayOrder): Array ->
+    flatten(array, shape_order_code(order)).

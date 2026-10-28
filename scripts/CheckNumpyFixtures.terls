@@ -1,0 +1,161 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Validates pinned NumPy fixtures and executes their maintained package tests.
+ */
+import std.collections.List.
+import std.core.Option.{None, Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.{String, Unit}.
+import std.crypto.Hash.
+import std.data.Json.
+import std.io.Console.{eprintln, println}.
+import std.io.{Directory, File}.
+import std.system.{Arguments, Environment, Process}.
+
+import type std.core.Option.
+import type std.system.Process.{Command, Output}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.numpy_fixture]: ", message));
+    false.
+
+fixture_valid(path: String, digest: String): Bool ->
+    let {
+        Ok(actual_digest) <- Hash.sha256_file(path);
+        Ok(source) <- File.read_text(path);
+        Ok(document) <- Json.parse(source);
+        Ok(header) <- document.required_fields(["schema", "numpy_version"], [], []);
+        [schema, version] <- header.strings;
+        Ok(cases) <- document.get("cases");
+        Ok(case_count) <- cases.object_length()
+    } else {
+        _ -> false
+    };
+    actual_digest == digest
+        and schema == "terlan.ndarray.numpy-fixtures.v1"
+        and version == "1.21.5"
+        and case_count > 0.
+
+command(program: String, arguments: List[String]): Command ->
+    Process.with_output_limit_bytes(
+        Process.with_timeout_ms(
+            Process.with_working_directory(
+                Process.with_arguments(Process.command(program), arguments),
+                Environment.current_directory(),
+            ),
+            120000,
+        ),
+        8388608,
+    ).
+
+run(program: String, arguments: List[String]): Option[Output] ->
+    case Process.run(command(program, arguments)) {
+        Ok(output) -> Some(output);
+        Err(reason) ->
+            let _reported = failure(reason.message);
+            None
+    }.
+
+successful(program: String, arguments: List[String]): Bool ->
+    case run(program, arguments) {
+        Some(output) ->
+            if {
+                output.status == 0 -> true;
+                true -> failure(
+                    String.concat([
+                        program,
+                        " failed: ",
+                        output.stderr,
+                        output.stdout,
+                    ]),
+                )
+            };
+        None -> false
+    }.
+
+compiler(): String ->
+    case Environment.get("CC") {
+        Some(value) -> value;
+        None -> "cc"
+    }.
+
+nd15(): Bool ->
+    if {
+        not fixture_valid(
+            "tests/fixtures/numpy-1.21.5-nd15.json",
+            "738232c467528f9553547138f50f4eb7e35a67848c45669e5fedb8c175b46e7e",
+        ) -> failure("ND15 fixture provenance drifted");
+        true -> case Directory.create_temporary("terlan_nd15_numpy") {
+            Err(_reason) -> failure("cannot create ND15 temporary directory");
+            Ok(root) ->
+                let binary = String.concat([root, "/fixture"]);
+                let built = successful(
+                    compiler(),
+                    [
+                        "-std=c11",
+                        "-Wall",
+                        "-Wextra",
+                        "-Wpedantic",
+                        "-Werror",
+                        "-I",
+                        "bindings",
+                        "bindings/terlan_ndarray.c",
+                        "bindings/terlan_ndarray_dtype.c",
+                        "bindings/terlan_ndarray_ordering.c",
+                        "bindings/terlan_ndarray_set.c",
+                        "bindings/terlan_ndarray_shape.c",
+                        "bindings/terlan_ndarray_indexing.c",
+                        "tests/nd15_numpy_fixture_test.c",
+                        "-lm",
+                        "-o",
+                        binary,
+                    ],
+                );
+                let executed = built and successful(binary, List.new[String]());
+                let _removed = Directory.remove_all(root);
+                if {
+                    executed ->
+                        let _printed = println(
+                            "terlan-ndarray NumPy 1.21.5 ND15 fixtures passed",
+                        );
+                        true;
+                    true -> false
+                }
+        }
+    }.
+
+nd18_markers(): Bool ->
+    let {
+        Ok(polynomial) <- File.read_text("bindings/ndarray_polynomial_numpy_tests.rs");
+        Ok(polynomial_fit) <- File.read_text("bindings/ndarray_polynomial_tests.rs");
+        Ok(algebra) <- File.read_text("bindings/ndarray_tensor_algebra_tests.rs")
+    } else {
+        _ -> false
+    };
+    String.contains(polynomial, "numpy_power_polynomial_arithmetic_matches_degree_first_loops")
+        and String.contains(polynomial_fit, "polyfit")
+        and String.contains(polynomial, "polyroots")
+        and String.contains(algebra, "tensordot")
+        and String.contains(algebra, "einsum").
+
+nd18(): Bool ->
+    if {
+        not fixture_valid(
+            "tests/fixtures/numpy-1.21.5-nd18.json",
+            "ce50e5ff287c151a81c74a9baaffd301280d18a4b5e516da8b52d6a5749d4bb8",
+        ) -> failure("ND18 fixture provenance drifted");
+        not nd18_markers() -> failure("ND18 executable Rust evidence is incomplete");
+        true ->
+            let _printed = println("terlan-ndarray NumPy 1.21.5 ND18 fixtures passed");
+            true
+    }.
+
+entry(): Bool ->
+    case {Arguments.count(), Arguments.get(0)} {
+        {1, Some("--nd15")} -> nd15();
+        {1, Some("--nd18")} -> nd18();
+        _ -> failure("expected --nd15 or --nd18")
+    }.
+
+assert(entry());
+Unit.

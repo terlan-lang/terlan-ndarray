@@ -1,0 +1,9 @@
+module ndarray.SortingTest.
+
+pub partition_scalar_sequence_flattening_and_mutation_match_numpy(): Bool.
+
+pub searchsorted_supports_strided_integer_sorters_and_empty_inputs(): Bool.
+
+pub sorting_defaults_axes_flattening_and_inplace_match_numpy(): Bool.
+
+pub sorting_preserves_empty_shapes_and_orders_complex_values(): Bool.

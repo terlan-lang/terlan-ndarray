@@ -1,0 +1,5 @@
+module ndarray.MethodOutputTest.
+
+pub masked_truth_and_choose_outputs_match_numpy(): Bool.
+
+pub rounded_complex_and_linear_algebra_outputs_match_numpy(): Bool.

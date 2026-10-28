@@ -1,0 +1,127 @@
+//! Legendre polynomial algebra and numerical methods.
+
+module ndarray.Legendre.
+
+/// Converts coefficients to the power basis.
+
+pub leg2poly(coefficients: Array): Array.
+
+/// Adds coefficient vectors.
+
+pub legadd(lhs: Array, rhs: Array): Array.
+
+/// Builds a companion matrix.
+
+pub legcompanion(coefficients: Array): Array.
+
+/// Differentiates coefficients.
+
+pub legder(coefficients: Array, order: Int): Array.
+
+/// Differentiates Legendre coefficient lanes along an axis with derivative scaling.
+
+pub legder(coefficients: Array, order: Int, scale: Float, axis: Int): Array.
+
+/// Returns quotient and remainder.
+
+pub legdiv(lhs: Array, rhs: Array): List[Array].
+
+/// Fits coefficients to samples.
+
+pub legfit(coordinates: Array, values: Array, degree: Int): Array.
+
+/// Fits selected Legendre degrees to scalar or matrix-valued samples.
+
+pub legfit(coordinates: Array, values: Array, degrees: Array): Array.
+
+/// Fits selected Legendre degrees using sample weights.
+
+pub legfit(coordinates: Array, values: Array, degrees: Array, weights: Array): Array.
+
+/// Builds coefficients from roots.
+
+pub legfromroots(roots: Array): Array.
+
+/// Returns Gaussian quadrature nodes and weights.
+
+pub leggauss(degree: Int): Array.
+
+/// Evaluates over a two-dimensional Cartesian grid.
+
+pub leggrid2d(x: Array, y: Array, coefficients: Array): Array.
+
+/// Evaluates over a three-dimensional Cartesian grid.
+
+pub leggrid3d(x: Array, y: Array, z: Array, coefficients: Array): Array.
+
+/// Integrates coefficients.
+
+pub legint(coefficients: Array, order: Int, constant: Float): Array.
+
+/// Integrates Legendre coefficient lanes along an axis with constants, a lower bound, and scaling.
+
+pub legint(coefficients: Array, order: Int, constants: Array, lower_bound: Float, scale: Float, axis: Int): Array.
+
+/// Builds coefficients for offset plus scale times x.
+
+pub legline(offset: Float, scale: Float): Array.
+
+/// Multiplies coefficient vectors.
+
+pub legmul(lhs: Array, rhs: Array): Array.
+
+/// Multiplies coefficients by x.
+
+pub legmulx(coefficients: Array): Array.
+
+/// Raises coefficients to a nonnegative power.
+
+pub legpow(coefficients: Array, exponent: Int): Array.
+
+/// Returns polynomial roots.
+
+pub legroots(coefficients: Array): Array.
+
+/// Subtracts coefficient vectors.
+
+pub legsub(lhs: Array, rhs: Array): Array.
+
+/// Removes insignificant high-order coefficients.
+
+pub legtrim(coefficients: Array, tolerance: Float): Array.
+
+/// Evaluates coefficients.
+
+pub legval(coordinates: Array, coefficients: Array): Array.
+
+/// Evaluates Legendre coefficient tensors with Cartesian or broadcast semantics.
+
+pub legval(coordinates: Array, coefficients: Array, tensor: Bool): Array.
+
+/// Evaluates a two-dimensional coefficient tensor.
+
+pub legval2d(x: Array, y: Array, coefficients: Array): Array.
+
+/// Evaluates a three-dimensional coefficient tensor.
+
+pub legval3d(x: Array, y: Array, z: Array, coefficients: Array): Array.
+
+/// Builds a Vandermonde matrix.
+
+pub legvander(coordinates: Array, degree: Int): Array.
+
+/// Builds a two-dimensional Vandermonde matrix.
+
+pub legvander2d(x: Array, y: Array, x_degree: Int, y_degree: Int): Array.
+
+/// Builds a three-dimensional Vandermonde matrix.
+
+pub legvander3d(x: Array, y: Array, z: Array, x_degree: Int, y_degree: Int, z_degree: Int): Array.
+
+/// Evaluates the orthogonality weight function.
+
+pub legweight(coordinates: Array): Array.
+
+/// Converts power coefficients to the leg basis.
+
+pub poly2leg(coefficients: Array): Array.

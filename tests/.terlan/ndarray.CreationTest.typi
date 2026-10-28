@@ -1,0 +1,11 @@
+module ndarray.CreationTest.
+
+pub array_valued_full_broadcasts_the_fill_pattern(): Bool.
+
+pub diag_constructs_and_extracts_offsets_bounds_dtypes_and_fortran_views(): Bool.
+
+pub eye_defaults_rectangles_diagonals_dtypes_and_orders_match_numpy(): Bool.
+
+pub linspace_spacing_wrapper_owns_samples_and_step(): Bool.
+
+pub logarithmic_spaces_broadcast_axis_and_complex_values(): Bool.

@@ -1,0 +1,11 @@
+module ndarray.PaddingTest.
+
+pub empty_axis_padding_preserves_shape(): Bool.
+
+pub ramp_and_odd_reflections_match_numpy(): Bool.
+
+pub shared_widths_and_exact_constants_match_numpy(): Bool.
+
+pub standard_padding_modes_match_numpy(): Bool.
+
+pub statistical_padding_defaults_and_clips_match_numpy(): Bool.

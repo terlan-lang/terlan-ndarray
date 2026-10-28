@@ -1,0 +1,59 @@
+module ndarray.TensorAlgebraTest.
+
+import ndarray.Array.{ArrayOrder, copy_with_order, dispose, from_floats, is_c_contiguous, is_fortran_contiguous, live_count, ones, reshape, shape, to_floats_cast}.
+import ndarray.TensorAlgebra.{einsum, einsum_into}.
+
+@test
+pub einsum_supports_ellipsis_singleton_broadcasting_and_scalar_terms(): Bool ->
+    let matrix = from_floats([1.0, 2.0, 3.0, 4.0], [2, 2]);
+    let singleton = from_floats([10.0, 20.0], [1, 2]);
+    let broadcast = einsum([matrix, singleton], "...j,...j->...j");
+    let scalar = from_floats([3.0], []);
+    let reduced = einsum([scalar, matrix], ", ij ->");
+    let valid = shape(broadcast) == [2, 2]
+        and to_floats_cast(broadcast) == [10.0, 40.0, 30.0, 80.0]
+        and shape(reduced) == []
+        and to_floats_cast(reduced) == [30.0];
+    dispose(reduced);
+    dispose(scalar);
+    dispose(broadcast);
+    dispose(singleton);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub einsum_into_stages_results_before_overlapping_destination_writes(): Bool ->
+    let lhs = from_floats([0.0, 1.0, 2.0, 3.0], [2, 2]);
+    let rhs = from_floats([0.0, 1.0, 2.0, 3.0], [2, 2]);
+    let rhs_view = reshape(rhs, [2, 2]);
+    einsum_into(rhs, [lhs, rhs_view], "ij,jk->ik");
+    let valid = to_floats_cast(rhs) == [2.0, 3.0, 6.0, 11.0];
+    dispose(rhs_view);
+    dispose(rhs);
+    dispose(lhs);
+    valid and live_count() == 0.
+
+@test
+pub einsum_exposes_typed_c_and_fortran_output_order(): Bool ->
+    let lhs = ones([2, 3, 5], 3);
+    let rhs = ones([4, 3], 3);
+    let lhs_f = copy_with_order(lhs, ArrayOrder.FORTRAN);
+    let rhs_f = copy_with_order(rhs, ArrayOrder.FORTRAN);
+    let c_order = einsum([lhs, rhs], "...ft,mf->...mt", ArrayOrder.C);
+    let f_order = einsum([lhs, rhs], "...ft,mf->...mt", ArrayOrder.FORTRAN);
+    let keep_order = einsum([lhs_f, rhs_f], "...ft,mf->...mt", ArrayOrder.KEEP);
+    let valid = is_c_contiguous(c_order)
+        and is_fortran_contiguous(f_order)
+        and not is_c_contiguous(keep_order)
+        and not is_fortran_contiguous(keep_order)
+        and shape(keep_order) == [2, 4, 5]
+        and to_floats_cast(c_order) == to_floats_cast(f_order)
+        and to_floats_cast(c_order) == to_floats_cast(keep_order);
+    dispose(keep_order);
+    dispose(f_order);
+    dispose(c_order);
+    dispose(rhs_f);
+    dispose(lhs_f);
+    dispose(rhs);
+    dispose(lhs);
+    valid and live_count() == 0.

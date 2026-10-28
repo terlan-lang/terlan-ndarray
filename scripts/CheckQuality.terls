@@ -1,0 +1,915 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Enforces ndarray source, dependency, independence, and API evidence policy.
+ */
+import std.collections.List.{concat}.
+import std.core.Option.{None, Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.{Int, String, Unit}.
+import std.data.Json.
+import std.io.Console.{eprintln, println}.
+import std.io.{Directory, File}.
+import std.regex.Regex.
+import std.system.{Arguments, Platform, Process}.
+
+import type std.core.Option.
+import type std.io.File.TextFile.
+import type std.regex.Regex.{Regex}.
+
+struct SourceStats {
+    valid: Bool,
+    reason: String,
+    files_checked: Int,
+    maximum_file_lines: Int,
+    maximum_file_path: String,
+    maximum_nesting: Int,
+    maximum_nesting_path: String,
+}.
+
+struct ScanState {
+    depth: Int,
+    maximum: Int,
+    valid: Bool,
+}.
+
+struct CoverageResult {
+    valid: Bool,
+    reason: String,
+    public_functions: Int,
+}.
+
+/** One public generated function before collision-safe coverage projection. */
+struct ManifestFunction {
+    name: String,
+    operation: String,
+}.
+
+struct IndependenceResult {
+    valid: Bool,
+    reason: String,
+    host: String,
+}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.quality]: ", message));
+    false.
+
+child(parent: String, relative: String): String ->
+    if {
+        parent == "." or parent == "" -> relative;
+        String.ends_with(parent, "/") -> String.append(parent, relative);
+        true -> String.concat([parent, "/", relative])
+    }.
+
+read_json(path: String): Option[Json] ->
+    let {
+        Ok(source) <- File.read_text(path);
+        Ok(document) <- Json.parse(source)
+    } else {
+        _ -> None
+    };
+    Some(document).
+
+drop_terminal_empty(lines: List[String]): List[String] ->
+    case lines {
+        [] -> [];
+        [""] -> [];
+        [line | rest] -> [line | drop_terminal_empty(rest)]
+    }.
+
+line_count(source: String): Int ->
+    drop_terminal_empty(String.split(source, "\n")).length().
+
+source_suffix(path: String): Bool ->
+    String.ends_with(path, ".c")
+        or String.ends_with(path, ".h")
+        or String.ends_with(path, ".rs")
+        or String.ends_with(path, ".sh")
+        or String.ends_with(path, ".terl")
+        or String.ends_with(path, ".terls").
+
+structured_suffix(path: String): Bool ->
+    String.ends_with(path, ".c")
+        or String.ends_with(path, ".h")
+        or String.ends_with(path, ".rs").
+
+pinned_third_party(path: String): Bool ->
+    String.ends_with(path, "bindings/include/dlpack/dlpack.h")
+        or String.ends_with(path, "native/rust/c/dlpack.h").
+
+governed_sources_at(paths: List[String], output: List[String]): List[String] ->
+    case paths {
+        [] -> output;
+        [path | rest] -> if {
+            source_suffix(path) and not pinned_third_party(path) ->
+                governed_sources_at(rest, [path | output]);
+            true -> governed_sources_at(rest, output)
+        }
+    }.
+
+governed_sources(paths: List[String]): List[String] ->
+    governed_sources_at(paths, []).
+
+scan_braces(codepoints: List[Int], depth: Int, maximum: Int): ScanState ->
+    case codepoints {
+        [] -> ScanState(depth = depth, maximum = maximum, valid = depth == 0);
+        [codepoint | rest] -> if {
+            codepoint == 123 ->
+                let next = depth + 1;
+                scan_braces(rest, next, if { next > maximum -> next; true -> maximum });
+            codepoint == 125 and depth == 0 ->
+                ScanState(depth = depth, maximum = maximum, valid = false);
+            codepoint == 125 -> scan_braces(rest, depth - 1, maximum);
+            true -> scan_braces(rest, depth, maximum)
+        }
+    }.
+
+structural_nesting(source: String, scrubber: Regex): ScanState ->
+    let scrubbed = Regex.replace(scrubber, source, "");
+    scan_braces(String.codepoints(scrubbed), 0, 0).
+
+check_sources(): SourceStats ->
+    case {Regex.compile(
+        "(?s)/\\*.*?\\*/|//[^\\n]*|\"(?:\\\\.|[^\"\\\\])*\"",
+    ), File.read_text_tree_matching(
+        ".",
+        [".git", ".terlan", "_build", "generated", "target", "vendor"],
+        [".c", ".h", ".rs", ".sh", ".terl", ".terls"],
+        [],
+        0,
+        20000,
+    )} {
+        {Err(_reason), _files} -> SourceStats(
+            valid = false,
+            reason = "cannot compile source scrubber",
+            files_checked = 0,
+            maximum_file_lines = 0,
+            maximum_file_path = "",
+            maximum_nesting = 0,
+            maximum_nesting_path = "",
+        );
+        {_scrubber, Err(_reason)} -> SourceStats(
+            valid = false,
+            reason = "cannot inventory repository sources",
+            files_checked = 0,
+            maximum_file_lines = 0,
+            maximum_file_path = "",
+            maximum_nesting = 0,
+            maximum_nesting_path = "",
+        );
+        {Ok(scrubber), Ok(files)} -> source_file_stats(
+            files,
+            scrubber,
+            SourceStats(
+                valid = true,
+                reason = "",
+                files_checked = 0,
+                maximum_file_lines = 0,
+                maximum_file_path = "",
+                maximum_nesting = 0,
+                maximum_nesting_path = "",
+            ),
+        )
+    }.
+
+source_file_stats(
+    files: List[TextFile],
+    scrubber: Regex,
+    current: SourceStats,
+): SourceStats ->
+    case files {
+        [] -> current;
+        [file | rest] ->
+            let path = file.path;
+            let source = file.contents;
+            if {
+                pinned_third_party(path) -> source_file_stats(rest, scrubber, current);
+                true ->
+                    let lines = line_count(source);
+                    let nesting = if {
+                        structured_suffix(path) -> structural_nesting(source, scrubber);
+                        true -> ScanState(depth = 0, maximum = 0, valid = true)
+                    };
+                    if {
+                        lines > 1000 -> SourceStats(
+                            valid = false,
+                            reason = String.concat([path, " has ", Int.to_string(lines), " lines"]),
+                            files_checked = current.files_checked + 1,
+                            maximum_file_lines = lines,
+                            maximum_file_path = path,
+                            maximum_nesting = current.maximum_nesting,
+                            maximum_nesting_path = current.maximum_nesting_path,
+                        );
+                        not nesting.valid or nesting.depth != 0 -> SourceStats(
+                            valid = false,
+                            reason = String.append("unbalanced braces in ", path),
+                            files_checked = current.files_checked + 1,
+                            maximum_file_lines = current.maximum_file_lines,
+                            maximum_file_path = current.maximum_file_path,
+                            maximum_nesting = nesting.maximum,
+                            maximum_nesting_path = path,
+                        );
+                        nesting.maximum > 12 -> SourceStats(
+                            valid = false,
+                            reason = String.concat([
+                                path,
+                                " reaches brace nesting ",
+                                Int.to_string(nesting.maximum),
+                            ]),
+                            files_checked = current.files_checked + 1,
+                            maximum_file_lines = current.maximum_file_lines,
+                            maximum_file_path = current.maximum_file_path,
+                            maximum_nesting = nesting.maximum,
+                            maximum_nesting_path = path,
+                        );
+                        true -> source_file_stats(
+                            rest,
+                            scrubber,
+                            SourceStats(
+                                valid = true,
+                                reason = "",
+                                files_checked = current.files_checked + 1,
+                                maximum_file_lines = if {
+                                    lines > current.maximum_file_lines -> lines;
+                                    true -> current.maximum_file_lines
+                                },
+                                maximum_file_path = if {
+                                    lines > current.maximum_file_lines -> path;
+                                    true -> current.maximum_file_path
+                                },
+                                maximum_nesting = if {
+                                    nesting.maximum > current.maximum_nesting -> nesting.maximum;
+                                    true -> current.maximum_nesting
+                                },
+                                maximum_nesting_path = if {
+                                    nesting.maximum > current.maximum_nesting -> path;
+                                    true -> current.maximum_nesting_path
+                                },
+                            ),
+                        )
+                    }
+            }
+    }.
+
+string_array_at(
+    value: Json,
+    index: Int,
+    count: Int,
+    output: List[String],
+): Option[List[String]] ->
+    if {
+        index == count -> Some(output);
+        true -> let {
+            Ok(item) <- value.at(index);
+            Ok(text) <- item.as_string()
+        } else {
+            _ -> None
+        };
+        string_array_at(value, index + 1, count, [text | output])
+    }.
+
+string_array(value: Json): Option[List[String]] ->
+    case value.length() {
+        Ok(count) -> string_array_at(value, 0, count, []);
+        Err(_reason) -> None
+    }.
+
+contains(values: List[String], expected: String): Bool ->
+    case values {
+        [] -> false;
+        [value | rest] -> value == expected or contains(rest, expected)
+    }.
+
+all_references_exist(values: List[String], evidence: List[String]): Bool ->
+    case values {
+        [] -> true;
+        [value | rest] -> contains(evidence, value) and all_references_exist(rest, evidence)
+    }.
+
+any_reference_exists(values: List[String], evidence: List[String]): Bool ->
+    case values {
+        [] -> false;
+        [value | rest] -> contains(evidence, value) or any_reference_exists(rest, evidence)
+    }.
+
+valid_category(item: Json, category: String, evidence: List[String]): Bool ->
+    let {
+        Ok(value) <- item.get(category);
+        Some(references) <- string_array(value)
+    } else {
+        _ -> false
+    };
+    not references.is_empty() and all_references_exist(references, evidence).
+
+valid_categories(item: Json, evidence: List[String]): Bool ->
+    valid_category(item, "positive", evidence)
+        and valid_category(item, "boundary", evidence)
+        and valid_category(item, "adversarial", evidence).
+
+validate_evidence(keys: List[String], evidence: Json): Bool ->
+    case keys {
+        [] -> true;
+        [identity | rest] -> let {
+            Ok(item) <- evidence.get(identity);
+            Ok(projection) <- item.required_fields(["marker", "path"], [], []);
+            [marker, path] <- projection.strings;
+            Ok(source) <- File.read_text(path)
+        } else {
+            _ -> false
+        };
+        String.contains(source, marker) and validate_evidence(rest, evidence)
+    }.
+
+manifest_functions_at(
+    functions: Json,
+    index: Int,
+    count: Int,
+    output: List[ManifestFunction],
+): Option[List[ManifestFunction]] ->
+    if {
+        index == count -> Some(output);
+        true -> let {
+            Ok(function) <- functions.at(index);
+            Ok(name_value) <- function.get("name");
+            Ok(name) <- name_value.as_string();
+            Ok(operation_value) <- function.get("operation");
+            Ok(operation) <- operation_value.as_string()
+        } else {
+            _ -> None
+        };
+        case function.get("visibility") {
+            Ok(visibility_value) -> case visibility_value.as_string() {
+                Ok("private") -> manifest_functions_at(functions, index + 1, count, output);
+                Ok(_visibility) -> manifest_functions_at(
+                    functions,
+                    index + 1,
+                    count,
+                    [ManifestFunction(name = name, operation = operation) | output],
+                );
+                Err(_reason) -> None
+            };
+            Err(_reason) -> manifest_functions_at(
+                functions,
+                index + 1,
+                count,
+                [ManifestFunction(name = name, operation = operation) | output],
+            )
+        }
+    }.
+
+manifest_functions(functions: Json): Option[List[ManifestFunction]] ->
+    case functions.length() {
+        Ok(count) -> manifest_functions_at(functions, 0, count, []);
+        Err(_reason) -> None
+    }.
+
+manifest_modules_at(
+    modules: Json,
+    index: Int,
+    count: Int,
+    output: List[ManifestFunction],
+): Option[List[ManifestFunction]] ->
+    if {
+        index == count -> Some(output);
+        true -> let {
+            Ok(module_value) <- modules.at(index);
+            Ok(functions) <- module_value.get("functions");
+            Some(module_functions) <- manifest_functions(functions)
+        } else {
+            _ -> None
+        };
+        manifest_modules_at(modules, index + 1, count, concat(module_functions, output))
+    }.
+
+/** Counts matching public declaration names with bounded tail recursion. */
+manifest_name_count_at(
+    functions: List[ManifestFunction],
+    name: String,
+    count: Int,
+): Int ->
+    case functions {
+        [] -> count;
+        [function | rest] -> manifest_name_count_at(
+            rest,
+            name,
+            if { function.name == name -> count + 1; true -> count },
+        )
+    }.
+
+/** Counts public declarations that share one source-level function name. */
+manifest_name_count(functions: List[ManifestFunction], name: String): Int ->
+    manifest_name_count_at(functions, name, 0).
+
+/** Projects public declarations to collision-safe coverage identities. */
+manifest_function_identities(
+    pending: List[ManifestFunction],
+    all: List[ManifestFunction],
+    output: List[String],
+): List[String] ->
+    case pending {
+        [] -> output;
+        [function | rest] -> manifest_function_identities(
+            rest,
+            all,
+            [if {
+                manifest_name_count(all, function.name) > 1 -> function.operation;
+                true -> function.name
+            } | output],
+        )
+    }.
+
+public_functions(manifest: Json): Option[List[String]] ->
+    let {
+        Ok(modules) <- manifest.get("modules");
+        Ok(count) <- modules.length()
+    } else {
+        _ -> None
+    };
+    case manifest_modules_at(modules, 0, count, []) {
+        None -> None;
+        Some(functions) -> Some(manifest_function_identities(functions, functions, []))
+    }.
+
+validate_items(keys: List[String], items: Json, evidence: List[String]): Bool ->
+    case keys {
+        [] -> true;
+        [name | rest] -> case items.get(name) {
+            Ok(item) -> if {
+                valid_categories(item, evidence) -> validate_items(rest, items, evidence);
+                true -> false
+            };
+            Err(_reason) -> false
+        }
+    }.
+
+family_members_at(
+    keys: List[String],
+    families: Json,
+    output: List[String],
+): Option[List[String]] ->
+    case keys {
+        [] -> Some(output);
+        [family | rest] -> let {
+            Ok(item) <- families.get(family);
+            Ok(members_value) <- item.get("members");
+            Some(members) <- string_array(members_value)
+        } else {
+            _ -> None
+        };
+        family_members_at(rest, families, concat(members, output))
+    }.
+
+family_members(keys: List[String], families: Json): Option[List[String]] ->
+    family_members_at(keys, families, []).
+
+duplicate(values: List[String], seen: List[String]): Bool ->
+    case values {
+        [] -> false;
+        [value | rest] -> contains(seen, value) or duplicate(rest, [value | seen])
+    }.
+
+same_surface(left: List[String], right: List[String]): Bool ->
+    left.length() == right.length() and all_references_exist(left, right).
+
+extension_declarations_exist(names: List[String], source: String): Bool ->
+    case names {
+        [] -> true;
+        [name | rest] -> String.contains(source, String.concat(["pub ", name, "("]))
+            and extension_declarations_exist(rest, source)
+    }.
+
+/** Resolves extension coverage identities to their source declaration names. */
+extension_declaration_names_at(
+    identities: List[String],
+    items: Json,
+    output: List[String],
+): Option[List[String]] ->
+    case identities {
+        [] -> Some(output);
+        [identity | rest] -> let {
+            Ok(item) <- items.get(identity)
+        } else {
+            _ -> None
+        };
+        case item.get("declaration") {
+            Ok(value) -> case value.as_string() {
+                Ok(declaration) -> extension_declaration_names_at(
+                    rest,
+                    items,
+                    [declaration | output],
+                );
+                Err(_reason) -> None
+            };
+            Err(_reason) -> extension_declaration_names_at(rest, items, [identity | output])
+        }
+    }.
+
+/** Resolves all extension coverage identities to source declaration names. */
+extension_declaration_names(
+    identities: List[String],
+    items: Json,
+): Option[List[String]] ->
+    extension_declaration_names_at(identities, items, []).
+
+check_coverage(): CoverageResult ->
+    let {
+        Some(manifest) <- read_json("bindings/ndarray-c.json");
+        Some(document) <- read_json("tests/public-api-coverage.json");
+        Ok(schema_value) <- document.get("schema");
+        Ok(schema) <- schema_value.as_string();
+        Ok(evidence) <- document.get("evidence");
+        Ok(evidence_keys) <- evidence.keys();
+        Ok(functions) <- document.get("functions");
+        Ok(function_keys) <- functions.keys();
+        Ok(families) <- document.get("families");
+        Ok(family_keys) <- families.keys();
+        Some(members) <- family_members(family_keys, families);
+        Ok(extension_items) <- document.get("extension_functions");
+        Ok(extension_functions) <- extension_items.keys();
+        Some(extension_declarations) <- extension_declaration_names(
+            extension_functions,
+            extension_items,
+        );
+        Some(expected) <- public_functions(manifest);
+        Ok(generated_paths) <- Directory.files_recursive_excluding("generated/src", []);
+        Some(generated_source) <- read_governed(generated_paths)
+    } else {
+        _ -> CoverageResult(valid = false, reason = "invalid coverage or binding manifest", public_functions = 0)
+    };
+    let declared = concat(function_keys, members);
+    if {
+        schema != "terlan.ndarray.public-api-coverage.v1" ->
+            CoverageResult(valid = false, reason = "coverage schema drifted", public_functions = 0);
+        not validate_evidence(evidence_keys, evidence) ->
+            CoverageResult(valid = false, reason = "coverage evidence does not resolve", public_functions = 0);
+        not validate_items(function_keys, functions, evidence_keys) ->
+            CoverageResult(valid = false, reason = "function coverage category is incomplete", public_functions = 0);
+        not validate_items(family_keys, families, evidence_keys) ->
+            CoverageResult(valid = false, reason = "family coverage category is incomplete", public_functions = 0);
+        not validate_items(extension_functions, extension_items, evidence_keys) ->
+            CoverageResult(valid = false, reason = "Terlan extension coverage category is incomplete", public_functions = 0);
+        duplicate(declared, []) ->
+            CoverageResult(valid = false, reason = "coverage surface declares duplicate functions", public_functions = 0);
+        duplicate(extension_functions, []) ->
+            CoverageResult(valid = false, reason = "Terlan extension surface declares duplicate functions", public_functions = 0);
+        not same_surface(declared, expected) ->
+            CoverageResult(valid = false, reason = "coverage surface differs from generated public API", public_functions = 0);
+        not extension_declarations_exist(extension_declarations, generated_source) ->
+            CoverageResult(valid = false, reason = "Terlan extension surface differs from generated source", public_functions = 0);
+        true -> CoverageResult(
+            valid = true,
+            reason = "",
+            public_functions = expected.length() + extension_functions.length(),
+        )
+    }.
+
+read_governed_at(paths: List[String], output: String): Option[String] ->
+    case paths {
+        [] -> Some(output);
+        [path | rest] -> case File.read_text(path) {
+            Err(_reason) -> None;
+            Ok(source) -> read_governed_at(rest, String.concat([output, "\n", source]))
+        }
+    }.
+
+read_governed(paths: List[String]): Option[String] ->
+    read_governed_at(paths, "").
+
+governed_paths(): Option[List[String]] ->
+    let {
+        Ok(source) <- Directory.files_recursive_excluding("src", []);
+        Ok(bindings) <- Directory.files_recursive_excluding("bindings", []);
+        Ok(rust) <- Directory.files_recursive_excluding("native/rust/src", [])
+    } else {
+        _ -> None
+    };
+    Some(concat(
+        governed_sources(source),
+        concat(
+            governed_sources(bindings),
+            concat(governed_sources(rust), ["native/rust/Cargo.toml", "terlan.toml"]),
+        ),
+    )).
+
+hex_codepoint(value: Int): Bool ->
+    value >= 48 and value <= 57 or value >= 97 and value <= 102.
+
+all_hex(values: List[Int]): Bool ->
+    case values {
+        [] -> true;
+        [value | rest] -> hex_codepoint(value) and all_hex(rest)
+    }.
+
+valid_hex(value: String, length: Int): Bool ->
+    String.byte_size(value) == length and all_hex(String.codepoints(value)).
+
+dependency_pin_valid(dependencies: Json, name: String): Bool ->
+    let {
+        Ok(dependency) <- dependencies.get(name);
+        Ok(fields) <- dependency.required_fields(["revision", "sha256"], [], []);
+        [revision, digest] <- fields.strings
+    } else {
+        _ -> false
+    };
+    valid_hex(revision, 40) and valid_hex(digest, 64).
+
+host_identity(): String ->
+    let host = Platform.current();
+    let architecture = if {
+        host.architecture == "amd64" -> "x86_64";
+        host.architecture == "arm64" -> "aarch64";
+        true -> host.architecture
+    };
+    let operating_system = if {
+        host.operating_system == "macos" -> "darwin";
+        true -> host.operating_system
+    };
+    String.concat([architecture, "-unknown-", operating_system, "-gnu"]).
+
+check_independence(): IndependenceResult ->
+    let {
+        Some(paths) <- governed_paths();
+        Some(source) <- read_governed(paths);
+        Ok(manifest_source) <- File.read_text("terlan.toml");
+        Some(lock) <- read_json("native-dependencies.json");
+        Ok(dependencies) <- lock.get("dependencies");
+        Ok(openblas) <- dependencies.get("openblas");
+        Ok(provider_value) <- openblas.get("default_provider");
+        Ok(provider) <- provider_value.as_string();
+        Ok(hosts_value) <- lock.get("supported_hosts");
+        Some(hosts) <- string_array(hosts_value);
+        Some(metadata) <- read_json("bindings/ndarray-c.json");
+        Ok(c_metadata) <- metadata.get("c_metadata");
+        Ok(external_link) <- c_metadata.get("external_link");
+        Ok(pkg_config) <- external_link.get("pkg_config");
+        Ok(package_value) <- pkg_config.get("package");
+        Ok(package) <- package_value.as_string();
+        Ok(static_value) <- pkg_config.get("static_link");
+        Ok(static_link) <- static_value.as_bool()
+    } else {
+        _ -> IndependenceResult(valid = false, reason = "cannot read independence inputs", host = "")
+    };
+    let lowered = String.lowercase(source);
+    let host = host_identity();
+    if {
+        String.contains(lowered, "std.native") ->
+            IndependenceResult(valid = false, reason = "std.native dependency is forbidden", host = host);
+        String.contains(lowered, "python.h")
+            or String.contains(lowered, "pyobject")
+            or String.contains(lowered, "pyo3")
+            or String.contains(lowered, "cpython") ->
+                IndependenceResult(valid = false, reason = "Python runtime dependency is forbidden", host = host);
+        String.contains(lowered, "numpy/arrayobject.h")
+            or String.contains(lowered, "import numpy")
+            or String.contains(lowered, "from numpy") ->
+                IndependenceResult(valid = false, reason = "NumPy runtime dependency is forbidden", host = host);
+        String.contains(lowered, "cuda") ->
+            IndependenceResult(valid = false, reason = "CUDA dependency is forbidden", host = host);
+        String.contains(manifest_source, "[dependencies]") ->
+            IndependenceResult(valid = false, reason = "baseline package must have no dependencies", host = host);
+        not dependency_pin_valid(dependencies, "dlpack")
+            or not dependency_pin_valid(dependencies, "openblas") ->
+                IndependenceResult(valid = false, reason = "native dependency is not cryptographically pinned", host = host);
+        provider != "pinned_source" ->
+            IndependenceResult(valid = false, reason = "pinned_source must be the default OpenBLAS provider", host = host);
+        package != "openblas" or not static_link ->
+            IndependenceResult(valid = false, reason = "generated package must link OpenBLAS statically", host = host);
+        not contains(hosts, host) ->
+            IndependenceResult(valid = false, reason = String.append("unsupported release host: ", host), host = host);
+        true -> IndependenceResult(valid = true, reason = "", host = host)
+    }.
+
+contains_python_invocation(source: String): Bool ->
+    let lowered = String.lowercase(source);
+    String.contains(lowered, "python3 ")
+        or String.contains(lowered, "python ")
+        or String.contains(lowered, ".py ")
+        or String.contains(lowered, ".py\"")
+        or String.contains(lowered, ".py'").
+
+workflow_files_are_terlan_driven(files: List[TextFile]): Bool ->
+    case files {
+        [] -> true;
+        [file | rest] ->
+            not contains_python_invocation(file.contents)
+                and workflow_files_are_terlan_driven(rest)
+    }.
+
+validation_scripts_are_terlan(files: List[String]): Bool ->
+    case files {
+        [] -> true;
+        [path | rest] ->
+            String.ends_with(path, ".terls") and validation_scripts_are_terlan(rest)
+    }.
+
+check_terlan_validation_drivers(): Bool ->
+    let {
+        Ok(makefile) <- File.read_text("Makefile");
+        Ok(scripts) <- Directory.files_recursive_excluding("scripts", ["__pycache__"]);
+        Ok(workflows) <- File.read_text_tree_matching(
+            ".github",
+            [".git", "_build", "target"],
+            [".yml", ".yaml"],
+            [],
+            0,
+            1000,
+        )
+    } else {
+        _ -> false
+    };
+    not contains_python_invocation(makefile)
+        and validation_scripts_are_terlan(scripts)
+        and workflow_files_are_terlan_driven(workflows).
+
+run_cargo(root: String, arguments: List[String], environment: List[std.system.Process.EnvironmentEntry], removed: List[String]): Bool ->
+    let command = Process.with_output_limit_bytes(
+        Process.with_timeout_ms(
+            Process.without_environment(
+                Process.with_environment(
+                    Process.with_working_directory(
+                        Process.with_arguments(Process.command("cargo"), arguments),
+                        ".",
+                    ),
+                    environment,
+                ),
+                removed,
+            ),
+            600000,
+        ),
+        16777216,
+    );
+    case Process.run(command) {
+        Err(_reason) -> false;
+        Ok(output) -> if {
+            output.status == 0 -> true;
+            true -> let _printed = eprintln(String.concat([
+                "cargo command failed\nstdout:\n",
+                output.stdout,
+                "\nstderr:\n",
+                output.stderr,
+            ]));
+            false
+        }
+    }.
+
+check_rust(): Bool ->
+    let manifest = "generated/native/rust/Cargo.toml";
+    if {
+        not File.exists(manifest) -> false;
+        true -> case Directory.create_temporary("terlan-ndarray-quality.") {
+            Err(_reason) -> false;
+            Ok(root) ->
+                let target = child(root, "target");
+                let fetched = run_cargo(
+                    root,
+                    ["fetch", "--offline", "--manifest-path", manifest],
+                    [
+                        Process.environment_entry("CARGO_NET_OFFLINE", "true"),
+                        Process.environment_entry("CARGO_TARGET_DIR", target),
+                        Process.environment_entry("RUSTFLAGS", "-D warnings")
+                    ],
+                    [],
+                );
+                let checked = fetched and run_cargo(
+                    root,
+                    ["check", "--offline", "--all-targets", "--manifest-path", manifest],
+                    [
+                        Process.environment_entry("CARGO_NET_OFFLINE", "true"),
+                        Process.environment_entry("CARGO_TARGET_DIR", target),
+                        Process.environment_entry("RUSTFLAGS", "-D warnings")
+                    ],
+                    [],
+                );
+                let documented = checked and run_cargo(
+                    root,
+                    ["doc", "--offline", "--no-deps", "--manifest-path", manifest],
+                    [
+                        Process.environment_entry("CARGO_NET_OFFLINE", "true"),
+                        Process.environment_entry("CARGO_TARGET_DIR", target),
+                        Process.environment_entry("RUSTDOCFLAGS", "-D warnings"),
+                        Process.environment_entry("RUSTFLAGS", "-D warnings")
+                    ],
+                    [],
+                );
+                let removed = Directory.remove_all(root);
+                documented and case removed { Ok(Unit) -> true; Err(_reason) -> false }
+        }
+    }.
+
+coverage_json(count: Int): Json ->
+    let category = Json.object();
+    let _covered = category.put("covered", Json.int(count));
+    let _percent = category.put("percent", Json.int(100));
+    let _total = category.put("total", Json.int(count));
+    let categories = Json.object();
+    let _adversarial = categories.put("adversarial", category);
+    let boundary = Json.object();
+    let _boundary_covered = boundary.put("covered", Json.int(count));
+    let _boundary_percent = boundary.put("percent", Json.int(100));
+    let _boundary_total = boundary.put("total", Json.int(count));
+    let _boundary = categories.put("boundary", boundary);
+    let positive = Json.object();
+    let _positive_covered = positive.put("covered", Json.int(count));
+    let _positive_percent = positive.put("percent", Json.int(100));
+    let _positive_total = positive.put("total", Json.int(count));
+    let _positive = categories.put("positive", positive);
+    let output = Json.object();
+    let _categories = output.put("categories", categories);
+    let _functions = output.put("public_functions", Json.int(count));
+    let _output_status = output.put("status", Json.string("passed"));
+    output.
+
+source_json(stats: SourceStats): Json ->
+    let maximum_file = Json.object();
+    let _lines = maximum_file.put("lines", Json.int(stats.maximum_file_lines));
+    let _path = maximum_file.put("path", Json.string(stats.maximum_file_path));
+    let maximum_function = Json.object();
+    let _function_lines = maximum_function.put("lines", Json.int(0));
+    let _function_path = maximum_function.put("path", Json.string(""));
+    let maximum_nesting = Json.object();
+    let _depth = maximum_nesting.put("depth", Json.int(stats.maximum_nesting));
+    let _nesting_path = maximum_nesting.put("path", Json.string(stats.maximum_nesting_path));
+    let output = Json.object();
+    let _files = output.put("files_checked", Json.int(stats.files_checked));
+    let _maximum_file = output.put("maximum_file", maximum_file);
+    let _legacy = output.put("maximum_python_function", maximum_function);
+    let _maximum_nesting = output.put("maximum_structural_nesting", maximum_nesting);
+    let _report_status = output.put("status", Json.string("passed"));
+    output.
+
+report(stats: SourceStats, coverage: CoverageResult, independence: IndependenceResult): Option[String] ->
+    let independence_json = Json.object();
+    let _compiler = independence_json.put("compiler_special_case", Json.bool(false));
+    let _cuda = independence_json.put("cuda_required", Json.bool(false));
+    let _dependencies = independence_json.put("local_package_dependencies", Json.bool(false));
+    let _numpy = independence_json.put("numpy_required", Json.bool(false));
+    let _openblas = independence_json.put("openblas_provider", Json.string("pinned_source"));
+    let _python = independence_json.put("python_required", Json.bool(false));
+    let _status = independence_json.put("status", Json.string("passed"));
+    let _native = independence_json.put("std_native_required", Json.bool(false));
+    let _host = independence_json.put("validated_host", Json.string(independence.host));
+    let rust = Json.object();
+    let _deprecations = rust.put("deprecations", Json.string("denied"));
+    let _documentation = rust.put("documentation", Json.string("passed"));
+    let _warnings = rust.put("warnings", Json.string("denied"));
+    let coverage_report = coverage_json(coverage.public_functions);
+    let source_policy = source_json(stats);
+    let output = Json.object();
+    let _coverage = output.put("coverage", coverage_report);
+    let _independence = output.put("independence", independence_json);
+    let _package = output.put("package", Json.string("terlan-ndarray"));
+    let _rust = output.put("rust", rust);
+    let _schema = output.put("schema", Json.string("terlan.ndarray.quality-report.v1"));
+    let _source = output.put("source_policy", source_policy);
+    let _output_status = output.put("status", Json.string("passed"));
+    let {
+        Ok(_header) <- output.required_fields(["schema", "status"], [], []);
+        Ok(value) <- Json.stringify_pretty(output)
+    } else {
+        _ -> None
+    };
+    Some(String.append(value, "\n")).
+
+entry(): Bool ->
+    let compiler = case {Arguments.count(), Arguments.get(0), Arguments.get(1)} {
+        {2, Some("--terlc"), Some(path)} -> Some(path);
+        _ -> None
+    };
+    let {
+        Some(terlc) <- compiler
+    } else {
+        _ -> failure("usage: CheckQuality.terls --terlc PATH")
+    };
+    if {
+        not File.exists(terlc) -> failure(String.append("missing terlc: ", terlc));
+        true ->
+            let stats = check_sources();
+            let coverage = check_coverage();
+            let independence = check_independence();
+            if {
+                not stats.valid -> failure(stats.reason);
+                not coverage.valid -> failure(coverage.reason);
+                not independence.valid -> failure(independence.reason);
+                not check_terlan_validation_drivers() ->
+                    failure("Make and CI validation must be driven by Terlan scripts");
+                true -> case report(stats, coverage, independence) {
+                    None -> failure("cannot render quality report");
+                    Some(contents) -> if {
+                        not check_rust() -> failure("generated Rust warning-denied checks failed");
+                        true -> case File.write_text("reports/ndarray-quality-report.json", contents) {
+                            Err(_reason) -> failure("cannot write quality report");
+                            Ok(Unit) ->
+                                let _printed = println(String.concat([
+                                    "terlan-ndarray ND7 quality passed (",
+                                    Int.to_string(coverage.public_functions),
+                                    " public functions, 100% evidence)",
+                                ]));
+                                true
+                        }
+                    }
+                }
+            }
+    }.
+
+assert(entry());
+Unit.

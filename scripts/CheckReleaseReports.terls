@@ -1,0 +1,358 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Reproduces release evidence and runs cross-package validation from Terlan.
+ */
+import std.collections.List.{concat}.
+import std.core.Option.{None, Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.{Int, String, Unit}.
+import std.data.Json.
+import std.io.Console.{eprintln, println}.
+import std.io.{Directory, File}.
+import std.system.{Arguments, Environment, Platform, Process}.
+
+import type std.core.{Option, Result}.
+import type std.data.Json.
+import type std.system.Process.{EnvironmentEntry, Output}.
+
+struct Inputs {
+    terlc: String,
+    polars: String,
+    pytorch: String,
+    libtorch: String,
+}.
+
+struct ReportSpec {
+    name: String,
+    schema: String,
+}.
+
+struct ReportSnapshot {
+    name: String,
+    source: String,
+}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.release]: ", message));
+    false.
+
+child(parent: String, relative: String): String ->
+    if {
+        String.ends_with(parent, "/") -> String.append(parent, relative);
+        true -> String.concat([parent, "/", relative])
+    }.
+
+absolute(repository: String, path: String): String ->
+    if { String.starts_with(path, "/") -> path; true -> child(repository, path) }.
+
+diagnostic(output: Output): String ->
+    String.concat([output.stdout, output.stderr]).
+
+run_command(
+    program: String,
+    arguments: List[String],
+    working_directory: String,
+    environment: List[EnvironmentEntry],
+): Result[Output, String] ->
+    let command = Process.command(program)
+        .with_arguments(arguments)
+        .with_working_directory(working_directory)
+        .with_environment(environment)
+        .with_timeout_ms(3600000)
+        .with_output_limit_bytes(16777216);
+    case Process.run(command) {
+        Err(reason) -> Err(String.concat([
+            "cannot run `", reason.program, "`: ",
+            reason.message,
+        ]));
+        Ok(output) -> if {
+            output.status != 0 -> Err(String.concat([
+                "command failed: ", program, " ", String.join(arguments, " "), "\n",
+                diagnostic(output),
+            ]));
+            true -> Ok(output)
+        }
+    }.
+
+read_json(path: String): Result[{String, Json}, String] ->
+    case File.read_text(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(source) -> case Json.parse(source) {
+            Err(reason) -> Err(reason.message);
+            Ok(value) -> Ok({source, value})
+        }
+    }.
+
+remove_directory(path: String): Result[Unit, String] ->
+    case Directory.remove_all(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+json_string(value: Json, key: String): Option[String] ->
+    case value.get(key) {
+        Err(_reason) -> None;
+        Ok(member) -> case member.as_string() {
+            Err(_reason) -> None;
+            Ok(text) -> Some(text)
+        }
+    }.
+
+report_specs(): List[ReportSpec] ->
+    [
+        ReportSpec(name = "ndarray-abi-report.json", schema = "terlan.ndarray.abi-report.v1"),
+        ReportSpec(name = "ndarray-package-report.json", schema = "terlan.ndarray.package-report.v1"),
+        ReportSpec(name = "ndarray-blas-report.json", schema = "terlan.ndarray.blas-report.v1"),
+        ReportSpec(name = "ndarray-dlpack-report.json", schema = "terlan.ndarray.dlpack-report.v1"),
+        ReportSpec(name = "ndarray-quality-report.json", schema = "terlan.ndarray.quality-report.v1"),
+        ReportSpec(name = "ndarray-random-report.json", schema = "terlan.ndarray.random-report.v1"),
+    ].
+
+read_reports(
+    specs: List[ReportSpec],
+    repository: String,
+    output: List[ReportSnapshot],
+): Result[List[ReportSnapshot], String] ->
+    case specs {
+        [] -> Ok(output);
+        [spec | rest] ->
+            let path = child(child(repository, "reports"), spec.name);
+            case read_json(path) {
+                Err(reason) -> Err(String.concat([spec.name, ": ", reason]));
+                Ok({source, report}) -> if {
+                    json_string(report, "schema") != Some(spec.schema) ->
+                        Err(String.append(spec.name, " has an invalid schema"));
+                    json_string(report, "status") != Some("passed") ->
+                        Err(String.append(spec.name, " does not record passed status"));
+                    true -> read_reports(
+                        rest,
+                        repository,
+                        concat(output, [ReportSnapshot(name = spec.name, source = source)]),
+                    )
+                }
+            }
+    }.
+
+same_reports(left: List[ReportSnapshot], right: List[ReportSnapshot]): Result[Unit, String] ->
+    case {left, right} {
+        {[], []} -> Ok(Unit);
+        {[first | left_rest], [second | right_rest]} -> if {
+            first.name != second.name -> Err("release report inventories changed between runs");
+            first.source != second.source -> Err(String.concat([
+                "semantic report changed across identical runs: ", first.name,
+            ]));
+            true -> same_reports(left_rest, right_rest)
+        };
+        _ -> Err("release report counts changed between runs")
+    }.
+
+nonempty_words(values: List[String], output: List[String]): List[String] ->
+    case values {
+        [] -> output;
+        [value | rest] -> if {
+            String.trim(value) == "" -> nonempty_words(rest, output);
+            true -> nonempty_words(rest, concat(output, [String.trim(value)]))
+        }
+    }.
+
+provider_environment(repository: String): Result[List[EnvironmentEntry], String] ->
+    let lock_path = child(repository, "native-dependencies.json");
+    let {
+        Ok({_source, lock}) <- read_json(lock_path);
+        Ok(dependencies) <- lock.get("dependencies");
+        Ok(openblas) <- dependencies.get("openblas");
+        Ok(revision_value) <- openblas.get("revision");
+        Ok(revision) <- revision_value.as_string()
+    } else {
+        _ -> Err(String.append("cannot read pinned OpenBLAS revision from ", lock_path))
+    };
+    let base = case Environment.get("TERLAN_NDARRAY_NATIVE_CACHE") {
+        Some(value) -> value;
+        None -> case Environment.get("HOME") {
+            Some(home) -> child(home, ".cache/terlan/native");
+            None -> ""
+        }
+    };
+    let host = Platform.current();
+    let root = child(
+        child(child(child(base, "openblas"), revision), String.concat([
+            String.lowercase(host.architecture), "-", String.lowercase(host.operating_system),
+        ])),
+        "install",
+    );
+    let pkg = child(root, "lib/pkgconfig");
+    let environment = [
+        Process.environment_entry("PKG_CONFIG_LIBDIR", pkg),
+        Process.environment_entry("PKG_CONFIG_PATH", pkg),
+        Process.environment_entry("OPENBLAS_STATIC", "1"),
+        Process.environment_entry("PKG_CONFIG_ALL_STATIC", "1"),
+        Process.environment_entry("OPENBLAS_NUM_THREADS", "1"),
+        Process.environment_entry("TERLAN_NDARRAY_OPENBLAS_ROOT", root),
+        Process.environment_entry("RUSTFLAGS", "-D warnings"),
+    ];
+    case run_command(
+        "pkg-config", ["--static", "--cflags", "--libs", "openblas"],
+        repository, environment,
+    ) {
+        Err(reason) -> Err(reason);
+        Ok(output) -> if {
+            nonempty_words(String.split(output.stdout, " "), []) == [] ->
+                Err("pinned OpenBLAS provider returned no compiler flags");
+            true -> Ok(environment)
+        }
+    }.
+
+run_terlan_script(
+    terlc: String,
+    script: String,
+    arguments: List[String],
+    repository: String,
+    environment: List[EnvironmentEntry],
+): Result[Output, String] ->
+    run_command(
+        terlc,
+        concat(["run", child(repository, script), "--"], arguments),
+        repository,
+        environment,
+    ).
+
+produce_reports(
+    repository: String,
+    terlc: String,
+    environment: List[EnvironmentEntry],
+): Result[Unit, String] ->
+    let {
+        Ok(Unit) <- remove_directory(child(repository, "generated"));
+        Ok(_generated) <- run_command(
+            terlc,
+            ["bind", "c", "--manifest", child(repository, "bindings/ndarray-c.json"), "--out", child(repository, "generated")],
+            repository,
+            environment,
+        );
+        Ok(_abi) <- run_terlan_script(
+            terlc, "scripts/CheckAbi.terls",
+            ["--terlc", terlc, "--manifest", "bindings/ndarray-c.json"],
+            repository, environment,
+        );
+        Ok(_package) <- run_terlan_script(
+            terlc, "scripts/CheckPackage.terls", ["--terlc", terlc],
+            repository, environment,
+        );
+        Ok(_blas) <- run_terlan_script(
+            terlc, "scripts/CheckBlas.terls", [], repository, environment,
+        );
+        Ok(_dlpack) <- run_terlan_script(
+            terlc, "scripts/CheckDlpack.terls", ["--terlc", terlc],
+            repository, environment,
+        );
+        Ok(_quality) <- run_terlan_script(
+            terlc, "scripts/CheckQuality.terls", ["--terlc", terlc],
+            repository, environment,
+        )
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    Ok(Unit).
+
+make_assignment(name: String, value: String): String ->
+    String.concat([name, "=", value]).
+
+run_integrations(
+    inputs: Inputs,
+    repository: String,
+    environment: List[EnvironmentEntry],
+): Result[Unit, String] ->
+    let terlc = inputs.terlc;
+    let polars = inputs.polars;
+    let pytorch = inputs.pytorch;
+    let libtorch = inputs.libtorch;
+    let {
+        Ok(_ndarray_pytorch) <- run_command(
+            "make",
+            ["-C", pytorch, "ndarray-interop-check", make_assignment("TERLC", terlc), make_assignment("NDARRAY", repository), make_assignment("LIBTORCH", libtorch)],
+            repository, environment,
+        );
+        Ok(_polars_pytorch) <- run_command(
+            "make",
+            ["-C", polars, "polars-pytorch-interop-check", make_assignment("TERLC", terlc), make_assignment("PYTORCH", pytorch), make_assignment("LIBTORCH", libtorch)],
+            repository, environment,
+        );
+        Ok(_polars_ndarray) <- run_command(
+            "make",
+            ["-C", polars, "polars-ndarray-pytorch-interop-check", make_assignment("TERLC", terlc), make_assignment("NDARRAY", repository), make_assignment("PYTORCH", pytorch), make_assignment("LIBTORCH", libtorch)],
+            repository, environment,
+        );
+        Ok(_immutable) <- run_command(
+            "make",
+            ["-C", polars, "polars-immutable-ml-interop-check", make_assignment("TERLC", terlc), make_assignment("NDARRAY", repository), make_assignment("PYTORCH", pytorch), make_assignment("LIBTORCH", libtorch)],
+            repository, environment,
+        );
+        Ok(_report) <- run_terlan_script(
+            terlc,
+            "scripts/WriteIntegrationReport.terls",
+            ["--ndarray", repository, "--polars", polars, "--pytorch", pytorch, "--output", "reports/ndarray-integration-report.json"],
+            repository,
+            environment,
+        )
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    Ok(Unit).
+
+workflow(inputs: Inputs): Result[Unit, String] ->
+    let repository = Environment.current_directory();
+    let normalized = Inputs(
+        terlc = absolute(repository, inputs.terlc),
+        polars = absolute(repository, inputs.polars),
+        pytorch = absolute(repository, inputs.pytorch),
+        libtorch = absolute(repository, inputs.libtorch),
+    );
+    if {
+        not File.exists(normalized.terlc) -> Err(String.append("missing terlc: ", normalized.terlc));
+        not File.exists(child(normalized.polars, "terlan.toml")) -> Err(String.append("missing polars package: ", normalized.polars));
+        not File.exists(child(normalized.pytorch, "terlan.toml")) -> Err(String.append("missing pytorch package: ", normalized.pytorch));
+        not File.exists(child(normalized.libtorch, "build-version")) -> Err(String.append("missing LibTorch distribution: ", normalized.libtorch));
+        true ->
+            let {
+                Ok(environment) <- provider_environment(repository);
+                Ok(Unit) <- produce_reports(repository, normalized.terlc, environment);
+                Ok(first) <- read_reports(report_specs(), repository, []);
+                Ok(Unit) <- produce_reports(repository, normalized.terlc, environment);
+                Ok(second) <- read_reports(report_specs(), repository, []);
+                Ok(Unit) <- same_reports(first, second);
+                Ok(Unit) <- run_integrations(normalized, repository, environment)
+            } else {
+                Err(reason) -> Err(reason)
+            };
+            Ok(Unit)
+    }.
+
+arguments(): Option[Inputs] ->
+    case {
+        Arguments.count(), Arguments.get(0), Arguments.get(1), Arguments.get(2),
+        Arguments.get(3), Arguments.get(4), Arguments.get(5), Arguments.get(6),
+        Arguments.get(7),
+    } {
+        {
+            8,
+            Some("--terlc"), Some(terlc),
+            Some("--polars"), Some(polars),
+            Some("--pytorch"), Some(pytorch),
+            Some("--libtorch"), Some(libtorch),
+        } -> Some(Inputs(terlc = terlc, polars = polars, pytorch = pytorch, libtorch = libtorch));
+        _ -> None
+    }.
+
+entry(): Bool ->
+    case arguments() {
+        None -> failure("usage: CheckReleaseReports.terls --terlc PATH --polars PATH --pytorch PATH --libtorch PATH");
+        Some(inputs) -> case workflow(inputs) {
+            Err(reason) -> failure(reason);
+            Ok(Unit) ->
+                let _printed = println("terlan-ndarray deterministic release and integration checks passed");
+                true
+        }
+    }.
+
+assert(entry());
+Unit.

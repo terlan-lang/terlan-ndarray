@@ -1,0 +1,8 @@
+module=ndarray.ClipTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=6501218760703657061
+interface_hash=2908158518935149465
+interface_doc_hash=16246000700675121210
+deps=0

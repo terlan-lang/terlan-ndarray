@@ -1,0 +1,130 @@
+//! Matrix decompositions, condition analysis, powers, pseudoinverses, and tensor equation solving.
+
+module ndarray.LinearAlgebra.
+
+/// Selects the lower or upper triangle of a Hermitian matrix.
+
+pub type HermitianTriangle: Int =
+    LOWER = 0
+  | UPPER = 1.
+
+/// Selects a named vector or matrix norm.
+
+pub type NormOrder: Int =
+    DEFAULT = 0
+  | NEG_INFINITY = 1
+  | INFINITY = 2
+  | FROBENIUS = 3
+  | NUCLEAR = 4.
+
+/// Selects the result contract produced by a QR decomposition.
+
+pub type QrMode: Int =
+    REDUCED = 0
+  | COMPLETE = 1
+  | R = 2
+  | RAW = 3.
+
+/// Computes a lower-triangular Cholesky factor for a symmetric positive-definite matrix.
+
+pub cholesky(array: Array): Array.
+
+/// Computes a matrix condition number for a selected spectral, column-sum, or row-sum norm.
+
+pub cond(array: Array, order: Int): Float.
+
+/// Computes one condition number per matrix while preserving leading batch dimensions.
+
+pub condition(array: Array, order: Int): Array.
+
+/// Computes one determinant per square matrix while preserving leading batch dimensions.
+
+pub det(array: Array): Array.
+
+/// Computes general complex eigenvalues and right eigenvectors.
+
+pub eig(array: Array): List[Array].
+
+/// Computes general complex eigenvalues without materializing eigenvectors.
+
+pub eigvals(array: Array): Array.
+
+/// Computes ascending eigenvalues of a finite Hermitian matrix.
+
+pub eigvalsh(array: Array): Array.
+
+/// Computes Hermitian eigenvalues from the selected triangle.
+
+pub eigvalsh(array: Array, triangle: HermitianTriangle): Array.
+
+/// Solves a finite real least-squares system through an SVD pseudoinverse.
+
+pub least_squares(matrix: Array, rhs: Array, tolerance: Float): Array.
+
+/// Returns solution, residuals, rank, and singular values for a least-squares system.
+
+pub lstsq(coefficients: Array, rhs: Array, rcond: Float = 0.0): List[Array].
+
+/// Raises a square matrix to an integer power by checked exponentiation.
+
+pub matrix_power(array: Array, exponent: Int): Array.
+
+/// Computes numerical rank for a scalar, vector, matrix, or matrix stack.
+
+pub matrix_rank(array: Array, tolerance: Float = 0.0, hermitian: Bool = false): Array.
+
+/// Multiplies a chain of arrays using package matmul semantics.
+
+pub multi_dot(arrays: List[Array]): Array.
+
+/// Multiplies a chain and atomically writes the result into a validated destination.
+
+pub multi_dot_into(destination: Array, arrays: List[Array]): Unit.
+
+/// Computes the default Euclidean vector or Frobenius matrix norm.
+
+pub norm(array: Array): Float.
+
+/// Computes a named norm over all dimensions or one/two explicit axes.
+
+pub norm(array: Array, order: NormOrder, axes: List[Int] = [], keepdims: Bool = false): Array.
+
+/// Computes a finite p-norm over all dimensions or one/two explicit axes.
+
+pub norm(array: Array, order: Float, axes: List[Int] = [], keepdims: Bool = false): Array.
+
+/// Computes an SVD pseudoinverse with an explicit singular-value cutoff.
+
+pub pinv(array: Array, tolerance: Float): Array.
+
+/// Computes reduced, complete, R-only, or raw QR output.
+
+pub qr(array: Array, mode: QrMode = QrMode.REDUCED): List[Array].
+
+/// Computes singular values without materializing singular vectors.
+
+pub singular_values(array: Array): Array.
+
+/// Computes determinant sign and logarithmic absolute determinant as scalar arrays.
+
+pub slogdet(array: Array): List[Array].
+
+/// Computes singular-value factors and returns U, singular values, and Vh.
+
+pub svd(array: Array, full_matrices: Bool): List[Array].
+
+/// Computes a symmetric eigendecomposition and returns ascending eigenvalues followed by eigenvectors.
+
+pub symmetric_eigen(array: Array, tolerance: Float): List[Array].
+
+/// Computes a Hermitian eigendecomposition from the selected triangle.
+
+pub symmetric_eigen(array: Array, tolerance: Float, triangle: HermitianTriangle): List[Array].
+
+/// Computes the inverse of a tensor interpreted as a square matrix split at an index.
+
+pub tensorinv(array: Array, index: Int): Array.
+
+/// Solves a tensor equation after optionally moving selected coefficient axes to the end.
+
+pub tensorsolve(coefficients: Array, rhs: Array, axes: List[Int]): Array.

@@ -1,0 +1,781 @@
+/**
+ * NumPy-compatible numerical completion operations.
+ */
+
+module ndarray.Numpy.
+
+import ndarray.Array.{Array, CastingRule, concatenate, dispose, dtype_code, from_floats, from_ints, shape, zeros}.
+import std.collections.List.{length}.
+
+/** Returns stable lexicographic indexes for stacked keys along one normalized key axis, using the final key as primary. */
+@compiler.native {ndarray.numpy.lexsort} pub lexsort(keys: Array, axis: Int): Array -> native.
+/** Provides NumPy-compatible allclose behavior. */
+@compiler.native {ndarray.numpy.allclose} pub allclose(lhs: Array, rhs: Array, relative_tolerance: Float, absolute_tolerance: Float, equal_nan: Bool): Bool -> native.
+/** Returns elementwise NumPy-compatible closeness. */
+@compiler.native {ndarray.numpy.isclose} pub isclose(lhs: Array, rhs: Array, relative_tolerance: Float, absolute_tolerance: Float, equal_nan: Bool): Array -> native.
+/** Provides NumPy-compatible angle behavior. */
+@compiler.native {ndarray.numpy.angle} pub angle(array: Array, degrees: Bool): Array -> native.
+/** Provides NumPy-compatible array equal behavior. */
+@compiler.native {ndarray.numpy.array_equal} pub array_equal(lhs: Array, rhs: Array): Bool -> native.
+/** Returns strict equality while treating paired NaNs as equal. */
+@compiler.native {ndarray.numpy.array_equal_nan} pub array_equal_nan(lhs: Array, rhs: Array): Bool -> native.
+/** Provides NumPy-compatible array equiv behavior. */
+@compiler.native {ndarray.numpy.array_equiv} pub array_equiv(lhs: Array, rhs: Array): Bool -> native.
+/** Provides NumPy-compatible asarray chkfinite behavior. */
+@compiler.native {ndarray.numpy.asarray_chkfinite} pub asarray_chkfinite(array: Array): Array -> native.
+/** Returns a finite-only copy in an explicit dtype and memory order. */
+@compiler.native {ndarray.numpy.asarray_chkfinite_as} pub asarray_chkfinite(array: Array, requested_dtype: Int, order: Int): Array -> native.
+/** Provides NumPy-compatible asfarray behavior. */
+@compiler.native {ndarray.numpy.asfarray} pub asfarray(array: Array): Array -> native.
+/** Returns repeated differences after prepending compatible values along one axis. */
+@compiler.native {ndarray.numpy.difference_prepend} pub difference_prepend(array: Array, prepend: Array, order: Int, axis: Int): Array -> native.
+/** Returns repeated differences after appending compatible values along one axis. */
+@compiler.native {ndarray.numpy.difference_append} pub difference_append(array: Array, append: Array, order: Int, axis: Int): Array -> native.
+/** Returns repeated differences with compatible values on both ends of one axis. */
+@compiler.native {ndarray.numpy.difference_surround} pub difference_surround(array: Array, prepend: Array, append: Array, order: Int, axis: Int): Array -> native.
+/** Returns a uniform-spacing gradient with first- or second-order boundaries. */
+@compiler.native {ndarray.numpy.gradient_edge} pub gradient_edge(array: Array, spacing: Float, axis: Int, edge_order: Int): Array -> native.
+/** Returns a gradient along one axis using rank-one sample coordinates. */
+@compiler.native {ndarray.numpy.gradient_coordinates} pub gradient_coordinates(array: Array, coordinates: Array, axis: Int, edge_order: Int): Array -> native.
+/** Returns one uniform-spacing gradient for every source axis. */
+@compiler.native {ndarray.numpy.gradient_all} pub gradient_all(array: Array, spacing: Float, edge_order: Int): List[Array] -> native.
+/** Returns gradients for selected axes using one scalar spacing per axis. */
+@compiler.native {ndarray.numpy.gradient_uniform_axes} pub gradient_uniform_axes(array: Array, spacings: List[Float], axes: List[Int], edge_order: Int): List[Array] -> native.
+/** Returns gradients for selected axes using scalar or coordinate spacing arrays. */
+@compiler.native {ndarray.numpy.gradient_axes} pub gradient_axes(array: Array, spacings: List[Array], axes: List[Int], edge_order: Int): List[Array] -> native.
+/** Unwraps a real-valued signal using an explicit discontinuity threshold. */
+@compiler.native {ndarray.numpy.unwrap_discontinuity} pub unwrap_discontinuity(array: Array, period: Float, discontinuity: Float, axis: Int): Array -> native.
+/** Unwraps using integral period arithmetic and preserves integral semantics. */
+@compiler.native {ndarray.numpy.unwrap_integer_period} pub unwrap_integer_period(array: Array, period: Int, discontinuity: Int, axis: Int): Array -> native.
+/** Interpolates with the first and last samples as the default boundaries. */
+@compiler.native {ndarray.numpy.interpolate_default} pub interpolate_default(values: Array, coordinates: Array, samples: Array): Array -> native.
+/** Interpolates with explicit real or complex scalar boundary arrays. */
+@compiler.native {ndarray.numpy.interpolate_boundaries} pub interpolate_boundaries(values: Array, coordinates: Array, samples: Array, left: Array, right: Array): Array -> native.
+/** Interpolates over normalized and sorted periodic coordinates. */
+@compiler.native {ndarray.numpy.interpolate_periodic} pub interpolate_periodic(values: Array, coordinates: Array, samples: Array, period: Float): Array -> native.
+/** Counts occurrences of each nonnegative integer value. */
+@compiler.native {ndarray.numpy.bincount} pub bincount(values: Array, minimum_length: Int = 0): Array -> native.
+/** Provides NumPy-compatible average behavior. */
+@compiler.native {ndarray.numpy.average} pub average(array: Array, axes: List[Int], keep_dims: Bool): Array -> native.
+/** Provides NumPy-compatible bartlett behavior. */
+@compiler.native {ndarray.numpy.bartlett} pub bartlett(length: Int): Array -> native.
+/** Provides NumPy-compatible blackman behavior. */
+@compiler.native {ndarray.numpy.blackman} pub blackman(length: Int): Array -> native.
+/** Provides NumPy-compatible hamming behavior. */
+@compiler.native {ndarray.numpy.hamming} pub hamming(length: Int): Array -> native.
+/** Provides NumPy-compatible hanning behavior. */
+@compiler.native {ndarray.numpy.hanning} pub hanning(length: Int): Array -> native.
+/** Provides NumPy-compatible kaiser behavior. */
+@compiler.native {ndarray.numpy.kaiser} pub kaiser(length: Int, beta: Float): Array -> native.
+/** Provides NumPy-compatible bitwise not behavior. */
+@compiler.native {ndarray.numpy.bitwise_not} pub bitwise_not(array: Array): Array -> native.
+/** Provides NumPy-compatible convolve behavior. */
+@compiler.native {ndarray.numpy.convolve} pub convolve(lhs: Array, rhs: Array, mode: Int): Array -> native.
+/** Provides NumPy-compatible correlate behavior. */
+@compiler.native {ndarray.numpy.correlate} pub correlate(lhs: Array, rhs: Array, mode: Int): Array -> native.
+/** Provides NumPy-compatible divmod behavior. */
+@compiler.native {ndarray.numpy.divmod} pub divmod(lhs: Array, rhs: Array): List[Array] -> native.
+/** Provides NumPy-compatible fix behavior. */
+@compiler.native {ndarray.numpy.fix} pub fix(array: Array): Array -> native.
+/** Provides NumPy-compatible float power behavior. */
+@compiler.native {ndarray.numpy.float_power} pub float_power(lhs: Array, rhs: Array): Array -> native.
+/** Provides NumPy-compatible fmod behavior. */
+@compiler.native {ndarray.numpy.fmod} pub fmod(lhs: Array, rhs: Array): Array -> native.
+/** Provides NumPy-compatible heaviside behavior. */
+@compiler.native {ndarray.numpy.heaviside} pub heaviside(lhs: Array, zero_value: Array): Array -> native.
+/** Provides NumPy-compatible i0 behavior. */
+@compiler.native {ndarray.numpy.i0} pub i0(array: Array): Array -> native.
+/** Provides NumPy-compatible real behavior. */
+@compiler.native {ndarray.numpy.real} pub real(array: Array): Array -> native.
+/** Provides NumPy-compatible imag behavior. */
+@compiler.native {ndarray.numpy.imag} pub imag(array: Array): Array -> native.
+/** Provides NumPy-compatible iscomplex behavior. */
+@compiler.native {ndarray.numpy.iscomplex} pub iscomplex(array: Array): Array -> native.
+/** Provides NumPy-compatible isreal behavior. */
+@compiler.native {ndarray.numpy.isreal} pub isreal(array: Array): Array -> native.
+/** Provides NumPy-compatible iscomplexobj behavior. */
+@compiler.native {ndarray.numpy.iscomplexobj} pub iscomplexobj(array: Array): Bool -> native.
+/** Provides NumPy-compatible isrealobj behavior. */
+@compiler.native {ndarray.numpy.isrealobj} pub isrealobj(array: Array): Bool -> native.
+/** Provides NumPy-compatible isneginf behavior. */
+@compiler.native {ndarray.numpy.isneginf} pub isneginf(array: Array): Array -> native.
+/** Provides NumPy-compatible isposinf behavior. */
+@compiler.native {ndarray.numpy.isposinf} pub isposinf(array: Array): Array -> native.
+/** Provides NumPy-compatible ldexp behavior. */
+@compiler.native {ndarray.numpy.ldexp} pub ldexp(values: Array, exponents: Array): Array -> native.
+/** Provides NumPy-compatible nan to num behavior. */
+@compiler.native {ndarray.numpy.nan_to_num} pub nan_to_num(array: Array, nan: Float, positive_infinity: Float, negative_infinity: Float): Array -> native.
+/** Provides NumPy-compatible real if close behavior. */
+@compiler.native {ndarray.numpy.real_if_close} pub real_if_close(array: Array, tolerance: Float): Array -> native.
+/** Provides NumPy-compatible sinc behavior. */
+@compiler.native {ndarray.numpy.sinc} pub sinc(array: Array): Array -> native.
+/** Provides NumPy-compatible spacing behavior. */
+@compiler.native {ndarray.numpy.spacing} pub spacing(array: Array): Array -> native.
+/** Provides NumPy-compatible sort complex behavior. */
+@compiler.native {ndarray.numpy.sort_complex} pub sort_complex(array: Array): Array -> native.
+/** Provides NumPy-compatible trim zeros behavior. */
+@compiler.native {ndarray.numpy.trim_zeros} pub trim_zeros(array: Array, mode: Int): Array -> native.
+/** Provides NumPy-compatible unique behavior. */
+@compiler.native {ndarray.numpy.unique} pub unique(array: Array): Array -> native.
+/** Provides NumPy-compatible invert behavior. */
+@compiler.native {ndarray.numpy.invert} pub invert(array: Array): Array -> native.
+/** Provides NumPy-compatible trunc behavior. */
+@compiler.native {ndarray.numpy.trunc} pub trunc(array: Array): Array -> native.
+/** Provides NumPy-compatible frombuffer behavior. */
+@compiler.native {ndarray.numpy.frombuffer} pub frombuffer(bytes: Bytes): Array -> native.
+/** Provides NumPy-compatible nanargmax behavior. */
+@compiler.native {ndarray.numpy.nanargmax} pub nanargmax(array: Array): Int -> native.
+/** Provides NumPy-compatible nanargmin behavior. */
+@compiler.native {ndarray.numpy.nanargmin} pub nanargmin(array: Array): Int -> native.
+/** Provides NumPy-compatible nancumprod behavior. */
+@compiler.native {ndarray.numpy.nancumprod} pub nancumprod(array: Array, axis: Int): Array -> native.
+/** Provides NumPy-compatible nancumsum behavior. */
+@compiler.native {ndarray.numpy.nancumsum} pub nancumsum(array: Array, axis: Int): Array -> native.
+/** Provides NumPy-compatible nanmedian behavior. */
+@compiler.native {ndarray.numpy.nanmedian} pub nanmedian(array: Array): Array -> native.
+/** Provides NumPy-compatible nanpercentile behavior. */
+@compiler.native {ndarray.numpy.nanpercentile} pub nanpercentile(array: Array, percentile: Float): Array -> native.
+/** Provides NumPy-compatible nanquantile behavior. */
+@compiler.native {ndarray.numpy.nanquantile} pub nanquantile(array: Array, quantile: Float): Array -> native.
+/** Returns one NaN-skipping quantile across normalized axes. */
+@compiler.native {ndarray.numpy.nanquantile_axes} pub nanquantile_axes(array: Array, quantile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Array -> native.
+/** Returns one NaN-skipping percentile across normalized axes. */
+@compiler.native {ndarray.numpy.nanpercentile_axes} pub nanpercentile_axes(array: Array, percentile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Array -> native.
+/** Returns multiple NaN-skipping quantiles with the quantile dimension first. */
+@compiler.native {ndarray.numpy.nanquantiles} pub nanquantiles(array: Array, quantiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Array -> native.
+/** Returns multiple NaN-skipping percentiles with the percentile dimension first. */
+@compiler.native {ndarray.numpy.nanpercentiles} pub nanpercentiles(array: Array, percentiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Array -> native.
+/** Returns a NaN-skipping median across normalized axes. */
+@compiler.native {ndarray.numpy.nanmedian_axes} pub nanmedian_axes(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
+/** Atomically writes a median into an exactly shaped writable destination. */
+@compiler.native {ndarray.numpy.median_into} pub median_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit -> native.
+/** Atomically writes a NaN-skipping median into an exactly shaped writable destination. */
+@compiler.native {ndarray.numpy.nanmedian_into} pub nanmedian_into(destination: Array, array: Array, axes: List[Int], keep_dims: Int): Unit -> native.
+/** Atomically writes one quantile into an exactly shaped writable destination. */
+@compiler.native {ndarray.numpy.quantile_into} pub quantile_into(destination: Array, array: Array, quantile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Unit -> native.
+/** Atomically writes one percentile into an exactly shaped writable destination. */
+@compiler.native {ndarray.numpy.percentile_into} pub percentile_into(destination: Array, array: Array, percentile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Unit -> native.
+/** Atomically writes multiple quantiles into an exactly shaped writable destination. */
+@compiler.native {ndarray.numpy.quantiles_into} pub quantiles_into(destination: Array, array: Array, quantiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Unit -> native.
+/** Atomically writes multiple percentiles into an exactly shaped writable destination. */
+@compiler.native {ndarray.numpy.percentiles_into} pub percentiles_into(destination: Array, array: Array, percentiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Unit -> native.
+/** Atomically writes one NaN-skipping quantile into an exactly shaped writable destination. */
+@compiler.native {ndarray.numpy.nanquantile_into} pub nanquantile_into(destination: Array, array: Array, quantile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Unit -> native.
+/** Atomically writes one NaN-skipping percentile into an exactly shaped writable destination. */
+@compiler.native {ndarray.numpy.nanpercentile_into} pub nanpercentile_into(destination: Array, array: Array, percentile: Float, axes: List[Int], keep_dims: Int, interpolation: Int): Unit -> native.
+/** Atomically writes multiple NaN-skipping quantiles into an exactly shaped writable destination. */
+@compiler.native {ndarray.numpy.nanquantiles_into} pub nanquantiles_into(destination: Array, array: Array, quantiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Unit -> native.
+/** Atomically writes multiple NaN-skipping percentiles into an exactly shaped writable destination. */
+@compiler.native {ndarray.numpy.nanpercentiles_into} pub nanpercentiles_into(destination: Array, array: Array, percentiles: List[Float], axes: List[Int], keep_dims: Int, interpolation: Int): Unit -> native.
+/** Provides NumPy-compatible packbits behavior. */
+@compiler.native {ndarray.numpy.packbits} pub packbits(array: Array, bit_order: Int): Array -> native.
+/** Provides NumPy-compatible unpackbits behavior. */
+@compiler.native {ndarray.numpy.unpackbits} pub unpackbits(array: Array, count: Int, bit_order: Int): Array -> native.
+/** Unpacks every available flattened UInt8 bit. */
+@compiler.native {ndarray.numpy.unpackbits_all} pub unpackbits_all(array: Array, bit_order: Int): Array -> native.
+/** Packs truth values into UInt8 bytes along one normalized axis. */
+@compiler.native {ndarray.numpy.packbits_axis} pub packbits_axis(array: Array, axis: Int, bit_order: Int): Array -> native.
+/** Unpacks a counted number of UInt8 bits along one normalized axis. */
+@compiler.native {ndarray.numpy.unpackbits_axis} pub unpackbits_axis(array: Array, axis: Int, count: Int, bit_order: Int): Array -> native.
+/** Unpacks every available UInt8 bit along one normalized axis. */
+@compiler.native {ndarray.numpy.unpackbits_axis_all} pub unpackbits_axis_all(array: Array, axis: Int, bit_order: Int): Array -> native.
+/** Provides NumPy-compatible alen behavior. */
+@compiler.native {ndarray.numpy.alen} pub alen(array: Array): Int -> native.
+/** Provides NumPy-compatible append behavior. */
+@compiler.native {ndarray.numpy.append} pub append(array: Array, values: Array, axis: Int): Array -> native.
+/** Provides NumPy-compatible block behavior. */
+@compiler.native {ndarray.numpy.block_native} block_native(arrays: List[Array], layout: List[Int]): Array -> native.
+/** Provides NumPy-compatible broadcast arrays behavior. */
+@compiler.native {ndarray.numpy.broadcast_arrays} pub broadcast_arrays(first: Array, remaining: List[Array]): List[Array] -> native.
+/** Provides NumPy-compatible broadcast shapes behavior. */
+@compiler.native {ndarray.numpy.broadcast_shapes} pub broadcast_shapes(lhs: List[Int], rhs: List[Int]): Array -> native.
+/** Returns a read-only shared view with an explicit shape and element strides. */
+@compiler.native {ndarray.numpy.as_strided} pub as_strided(array: Array, shape: List[Int], strides: List[Int]): Array -> native.
+/** Returns a read-only shared sliding-window view, using every axis when axes is empty. */
+@compiler.native {ndarray.numpy.sliding_window_view} pub sliding_window_view(array: Array, window_shape: List[Int], axes: List[Int] = []): Array -> native.
+/** Provides NumPy-compatible column stack behavior. */
+@compiler.native {ndarray.numpy.column_stack} pub column_stack(arrays: List[Array]): Array -> native.
+/** Provides NumPy-compatible copyto behavior. */
+@compiler.native {ndarray.numpy.copyto} pub copyto(destination: Array, source: Array): Unit -> native.
+/** Broadcasts and copies values under an explicit NumPy-compatible casting rule. */
+@compiler.native {ndarray.numpy.copyto_casting} pub copyto(destination: Array, source: Array, casting: Int): Unit -> native.
+/** Broadcasts a source and truth mask before copying selected values under an explicit casting rule. */
+@compiler.native {ndarray.numpy.copyto_where} pub copyto(destination: Array, source: Array, mask: Array, casting: Int): Unit -> native.
+/** Provides NumPy-compatible delete behavior. */
+@compiler.native {ndarray.numpy.delete} pub delete(array: Array, indexes: List[Int]): Array -> native.
+/** Deletes normalized integer indexes along one axis. */
+@compiler.native {ndarray.numpy.delete_axis} pub delete(array: Array, indexes: List[Int], axis: Int): Array -> native.
+/** Deletes positions selected by an exact-length Bool mask along one axis. */
+@compiler.native {ndarray.numpy.delete_mask_axis} pub delete(array: Array, mask: Array, axis: Int): Array -> native.
+/** Extracts a matrix diagonal view or constructs a dtype-preserving diagonal matrix from a vector. */
+@compiler.native {ndarray.numpy.diag} pub diag(array: Array, offset: Int = 0): Array -> native.
+/** Provides NumPy-compatible diag indices behavior. */
+@compiler.native {ndarray.numpy.diag_indices} pub diag_indices(size: Int, rank: Int): Array -> native.
+/** Provides NumPy-compatible diag indices from behavior. */
+@compiler.native {ndarray.numpy.diag_indices_from} pub diag_indices_from(array: Array): Array -> native.
+/** Provides NumPy-compatible dsplit behavior. */
+@compiler.native {ndarray.numpy.dsplit} pub dsplit(array: Array, sections: Int): List[Array] -> native.
+/** Provides NumPy-compatible dstack behavior. */
+@compiler.native {ndarray.numpy.dstack} pub dstack(arrays: List[Array]): Array -> native.
+/** Provides NumPy-compatible ediff1d behavior. */
+@compiler.native {ndarray.numpy.ediff1d} pub ediff1d(array: Array): Array -> native.
+/** Provides NumPy-compatible fill diagonal behavior. */
+@compiler.native {ndarray.numpy.fill_diagonal_native} fill_diagonal_native(array: Array, value: Float, wrap: Bool): Unit -> native.
+/** Provides NumPy-compatible full behavior. */
+@compiler.native {ndarray.numpy.full} pub full(shape: List[Int], value: Float): Array -> native.
+/** Provides NumPy-compatible full like behavior. */
+@compiler.native {ndarray.numpy.full_like} pub full_like(array: Array, value: Float): Array -> native.
+/** Builds a one-dimensional histogram with an inferred finite range. */
+@compiler.native {ndarray.numpy.histogram} pub histogram(array: Array, bins: Int = 10, density: Bool = false): List[Array] -> native.
+/** Builds a one-dimensional histogram over an explicit finite range. */
+@compiler.native {ndarray.numpy.histogram_range} pub histogram_range(array: Array, bins: Int, lower: Float, upper: Float, density: Bool = false): List[Array] -> native.
+/** Builds a one-dimensional histogram from explicit increasing edges. */
+@compiler.native {ndarray.numpy.histogram_edges} pub histogram_edges(array: Array, edges: Array, density: Bool = false): List[Array] -> native.
+/** Builds a weighted histogram with an inferred finite range. */
+@compiler.native {ndarray.numpy.histogram_weighted} pub histogram_weighted(array: Array, weights: Array, bins: Int = 10, density: Bool = false): List[Array] -> native.
+/** Builds a weighted histogram over an explicit finite range. */
+@compiler.native {ndarray.numpy.histogram_weighted_range} pub histogram_weighted_range(array: Array, weights: Array, bins: Int, lower: Float, upper: Float, density: Bool = false): List[Array] -> native.
+/** Builds a weighted histogram from explicit increasing edges. */
+@compiler.native {ndarray.numpy.histogram_weighted_edges} pub histogram_weighted_edges(array: Array, weights: Array, edges: Array, density: Bool = false): List[Array] -> native.
+/** Builds a histogram using a typed automatic bin estimator. */
+@compiler.native {ndarray.numpy.histogram_estimator} pub histogram_estimator(array: Array, estimator: HistogramEstimator, density: Bool = false): List[Array] -> native.
+/** Builds an estimator-selected histogram over an explicit finite range. */
+@compiler.native {ndarray.numpy.histogram_estimator_range} pub histogram_estimator_range(array: Array, estimator: HistogramEstimator, lower: Float, upper: Float, density: Bool = false): List[Array] -> native.
+/** Returns inferred fixed-count histogram edges. */
+@compiler.native {ndarray.numpy.histogram_bin_edges} pub histogram_bin_edges(array: Array, bins: Int = 10): Array -> native.
+/** Returns estimator-selected histogram edges. */
+@compiler.native {ndarray.numpy.histogram_bin_edges_estimator} pub histogram_bin_edges_estimator(array: Array, estimator: HistogramEstimator): Array -> native.
+/** Builds a two-dimensional histogram with equal bin counts and inferred axis ranges. */
+@compiler.native {ndarray.numpy.histogram2d} pub histogram2d(x: Array, y: Array, bins: Int = 10, density: Bool = false): List[Array] -> native.
+/** Builds a two-dimensional histogram with explicit per-axis counts and ranges. */
+@compiler.native {ndarray.numpy.histogram2d_range} pub histogram2d_range(x: Array, y: Array, x_bins: Int, y_bins: Int, minima: Array, maxima: Array, density: Bool = false): List[Array] -> native.
+/** Builds a two-dimensional histogram from explicit edge vectors. */
+@compiler.native {ndarray.numpy.histogram2d_edges} pub histogram2d_edges(x: Array, y: Array, x_edges: Array, y_edges: Array, density: Bool = false): List[Array] -> native.
+/** Builds a histogram with explicit x edges and uniform y bins. */
+@compiler.native {ndarray.numpy.histogram2d_x_edges} pub histogram2d_x_edges(x: Array, y: Array, x_edges: Array, y_bins: Int, y_lower: Float, y_upper: Float, density: Bool = false): List[Array] -> native.
+/** Builds a histogram with uniform x bins and explicit y edges. */
+@compiler.native {ndarray.numpy.histogram2d_y_edges} pub histogram2d_y_edges(x: Array, y: Array, x_bins: Int, x_lower: Float, x_upper: Float, y_edges: Array, density: Bool = false): List[Array] -> native.
+/** Builds a multidimensional histogram with one inferred-range bin count. */
+@compiler.native {ndarray.numpy.histogramdd} pub histogramdd(samples: Array, bins: Int = 10, density: Bool = false): List[Array] -> native.
+/** Internal per-axis bin-count primitive for multidimensional histograms. */
+@compiler.native {ndarray.numpy.histogramdd_bins_array} histogramdd_bins_array(samples: Array, bins: Array, density: Bool = false): List[Array] -> native.
+/** Internal explicit-range primitive for multidimensional histograms. */
+@compiler.native {ndarray.numpy.histogramdd_range_arrays} histogramdd_range_arrays(samples: Array, bins: Array, minima: Array, maxima: Array, density: Bool = false): List[Array] -> native.
+/** Internal packed-edge primitive for multidimensional histograms. */
+@compiler.native {ndarray.numpy.histogramdd_edges_packed} histogramdd_edges_packed(samples: Array, edges: Array, offsets: Array, dtypes: Array, density: Bool = false): List[Array] -> native.
+/** Builds a weighted multidimensional histogram with one inferred-range bin count. */
+@compiler.native {ndarray.numpy.histogramdd_weighted} pub histogramdd_weighted(samples: Array, weights: Array, bins: Int = 10, density: Bool = false): List[Array] -> native.
+/** Internal weighted per-axis bin-count primitive for multidimensional histograms. */
+@compiler.native {ndarray.numpy.histogramdd_weighted_bins_array} histogramdd_weighted_bins_array(samples: Array, weights: Array, bins: Array, density: Bool = false): List[Array] -> native.
+/** Internal weighted explicit-range primitive for multidimensional histograms. */
+@compiler.native {ndarray.numpy.histogramdd_weighted_range_arrays} histogramdd_weighted_range_arrays(samples: Array, weights: Array, bins: Array, minima: Array, maxima: Array, density: Bool = false): List[Array] -> native.
+/** Internal weighted packed-edge primitive for multidimensional histograms. */
+@compiler.native {ndarray.numpy.histogramdd_weighted_edges_packed} histogramdd_weighted_edges_packed(samples: Array, weights: Array, edges: Array, offsets: Array, dtypes: Array, density: Bool = false): List[Array] -> native.
+/** Provides NumPy-compatible hsplit behavior. */
+@compiler.native {ndarray.numpy.hsplit} pub hsplit(array: Array, sections: Int): List[Array] -> native.
+/** Provides NumPy-compatible hstack behavior. */
+@compiler.native {ndarray.numpy.hstack} pub hstack(arrays: List[Array]): Array -> native.
+/** Provides NumPy-compatible insert behavior. */
+@compiler.native {ndarray.numpy.insert} pub insert(array: Array, index: Int, values: Array): Array -> native.
+/** Inserts values before stable flattened integer-index positions. */
+@compiler.native {ndarray.numpy.insert_indexes} pub insert(array: Array, indexes: List[Int], values: Array): Array -> native.
+/** Inserts values before one scalar index along a normalized axis. */
+@compiler.native {ndarray.numpy.insert_scalar_axis} pub insert(array: Array, index: Int, values: Array, axis: Int): Array -> native.
+/** Inserts values before stable integer-index positions along a normalized axis. */
+@compiler.native {ndarray.numpy.insert_indexes_axis} pub insert(array: Array, indexes: List[Int], values: Array, axis: Int): Array -> native.
+/** Provides NumPy-compatible ix  behavior. */
+@compiler.native {ndarray.numpy.ix_} pub ix_(first: Array, remaining: List[Array]): List[Array] -> native.
+/** Provides NumPy-compatible may share memory behavior. */
+@compiler.native {ndarray.numpy.may_share_memory} pub may_share_memory(lhs: Array, rhs: Array): Bool -> native.
+/** Returns an exact overlap answer within a work budget and conservatively returns true when the budget is exhausted; zero selects the bounds-only query and negative one selects unlimited exact work. */
+@compiler.native {ndarray.numpy.may_share_memory_with_work} pub may_share_memory_with_work(lhs: Array, rhs: Array, max_work: Int): Bool -> native.
+/** Returns whether two or more logical indexes in one strided array address the same element. */
+@compiler.native {ndarray.numpy.internal_overlap} pub internal_overlap(array: Array): Bool -> native.
+/** Implements checked mesh-grid indexing, sparsity, and copy options for the typed public wrapper. */
+@compiler.native {ndarray.numpy.meshgrid_native} meshgrid_native(first: Array, remaining: List[Array], indexing: Int, sparse: Bool, copy: Bool): List[Array] -> native.
+/** Provides NumPy-compatible msort behavior. */
+@compiler.native {ndarray.numpy.msort} pub msort(array: Array): Array -> native.
+/** Provides NumPy-compatible pad behavior. */
+@compiler.native {ndarray.numpy.pad} pub pad(array: Array, leading: List[Int], trailing: List[Int], value: Float): Array -> native.
+/** Provides NumPy-compatible place behavior. */
+@compiler.native {ndarray.numpy.place} pub place(array: Array, mask: Array, values: Array): Unit -> native.
+/** Provides NumPy-compatible putmask behavior. */
+@compiler.native {ndarray.numpy.putmask} pub putmask(array: Array, mask: Array, values: Array): Unit -> native.
+/** Provides NumPy-compatible ravel multi index behavior. */
+@compiler.native {ndarray.numpy.ravel_multi_index_native} ravel_multi_index_native(coordinates: Array, dimensions: List[Int], modes: List[Int], order: Int): Array -> native.
+/** Provides NumPy-compatible row stack behavior. */
+@compiler.native {ndarray.numpy.row_stack} pub row_stack(arrays: List[Array]): Array -> native.
+/** Provides NumPy-compatible select behavior. */
+@compiler.native {ndarray.numpy.select} pub select(conditions: List[Array], choices: List[Array], default_value: Array): Array -> native.
+/** Provides NumPy-compatible shares memory behavior. */
+@compiler.native {ndarray.numpy.shares_memory} pub shares_memory(lhs: Array, rhs: Array): Bool -> native.
+/** Returns exact memory overlap within the supplied work budget, failing when finite work is exhausted; negative one selects unlimited exact work. */
+@compiler.native {ndarray.numpy.shares_memory_with_work} pub shares_memory_with_work(lhs: Array, rhs: Array, max_work: Int): Bool -> native.
+/** Provides NumPy-compatible tril indices behavior. */
+@compiler.native {ndarray.numpy.tril_indices} pub tril_indices(rows: Int, offset: Int = 0, columns: Int = -1): Array -> native.
+/** Provides NumPy-compatible tril indices from behavior. */
+@compiler.native {ndarray.numpy.tril_indices_from} pub tril_indices_from(array: Array, offset: Int = 0): Array -> native.
+/** Provides NumPy-compatible triu indices behavior. */
+@compiler.native {ndarray.numpy.triu_indices} pub triu_indices(rows: Int, offset: Int = 0, columns: Int = -1): Array -> native.
+/** Provides NumPy-compatible triu indices from behavior. */
+@compiler.native {ndarray.numpy.triu_indices_from} pub triu_indices_from(array: Array, offset: Int = 0): Array -> native.
+/** Provides NumPy-compatible unravel index behavior. */
+@compiler.native {ndarray.numpy.unravel_index_native} unravel_index_native(indexes: Array, dimensions: List[Int], order: Int): List[Array] -> native.
+/** Provides NumPy-compatible vsplit behavior. */
+@compiler.native {ndarray.numpy.vsplit} pub vsplit(array: Array, sections: Int): List[Array] -> native.
+/** Provides NumPy-compatible vstack behavior. */
+@compiler.native {ndarray.numpy.vstack} pub vstack(arrays: List[Array]): Array -> native.
+/** Returns an average weighted by a same-shape array or one-dimensional axis weights. */
+@compiler.native {ndarray.numpy.average_weighted} pub average_weighted(array: Array, weights: Array, axes: List[Int], keep_dims: Bool): Array -> native.
+/** Returns an unweighted average followed by its broadcast reduction cardinality. */
+@compiler.native {ndarray.numpy.average_with_sum} pub average_with_sum(array: Array, axes: List[Int], keep_dims: Bool): List[Array] -> native.
+/** Returns a weighted average followed by its broadcast weight sum. */
+@compiler.native {ndarray.numpy.average_weighted_with_sum} pub average_weighted_with_sum(array: Array, weights: Array, axes: List[Int], keep_dims: Bool): List[Array] -> native.
+/** Returns covariance in the requested floating-point or complex dtype. */
+@compiler.native {ndarray.numpy.covariance_typed} pub covariance_typed(array: Array, row_variables: Int, correction: Int, dtype: Int): Array -> native.
+/** Returns covariance after appending variables from a second observation array. */
+@compiler.native {ndarray.numpy.covariance_pair} pub covariance_pair(array: Array, other: Array, row_variables: Int, correction: Int, dtype: Int): Array -> native.
+/** Returns covariance with nonnegative integral observation frequencies. */
+@compiler.native {ndarray.numpy.covariance_frequency_weighted} pub covariance_frequency_weighted(array: Array, frequency_weights: Array, row_variables: Int, correction: Int, dtype: Int): Array -> native.
+/** Returns covariance with nonnegative relative observation weights. */
+@compiler.native {ndarray.numpy.covariance_analytic_weighted} pub covariance_analytic_weighted(array: Array, analytic_weights: Array, row_variables: Int, correction: Int, dtype: Int): Array -> native.
+/** Returns covariance with combined frequency and analytic observation weights. */
+@compiler.native {ndarray.numpy.covariance_weighted} pub covariance_weighted(array: Array, frequency_weights: Array, analytic_weights: Array, row_variables: Int, correction: Int, dtype: Int): Array -> native.
+/** Returns paired covariance with combined observation weights. */
+@compiler.native {ndarray.numpy.covariance_pair_weighted} pub covariance_pair_weighted(array: Array, other: Array, frequency_weights: Array, analytic_weights: Array, row_variables: Int, correction: Int, dtype: Int): Array -> native.
+/** Returns correlation coefficients in the requested floating-point or complex dtype. */
+@compiler.native {ndarray.numpy.correlation_typed} pub correlation_typed(array: Array, row_variables: Int, dtype: Int): Array -> native.
+/** Returns correlation coefficients after appending variables from a second observation array. */
+@compiler.native {ndarray.numpy.correlation_pair} pub correlation_pair(array: Array, other: Array, row_variables: Int, dtype: Int): Array -> native.
+/** Returns sums while omitting NaN values. */
+@compiler.native {ndarray.numpy.nansum} pub nansum(array: Array, axes: List[Int], keep_dims: Bool): Array -> native.
+/** Returns products while omitting NaN values. */
+@compiler.native {ndarray.numpy.nanprod} pub nanprod(array: Array, axes: List[Int], keep_dims: Bool): Array -> native.
+/** Returns means while omitting NaN values. */
+@compiler.native {ndarray.numpy.nanmean} pub nanmean(array: Array, axes: List[Int], keep_dims: Bool): Array -> native.
+/** Returns minima while omitting NaN values. */
+@compiler.native {ndarray.numpy.nanmin} pub nanmin(array: Array, axes: List[Int], keep_dims: Bool): Array -> native.
+/** Returns maxima while omitting NaN values. */
+@compiler.native {ndarray.numpy.nanmax} pub nanmax(array: Array, axes: List[Int], keep_dims: Bool): Array -> native.
+/** Returns variance while omitting NaN values. */
+@compiler.native {ndarray.numpy.nanvar} pub nanvar(array: Array, axes: List[Int], keep_dims: Bool, correction: Int): Array -> native.
+/** Returns standard deviation while omitting NaN values. */
+@compiler.native {ndarray.numpy.nanstd} pub nanstd(array: Array, axes: List[Int], keep_dims: Bool, correction: Int): Array -> native.
+/** Returns NaN-omitting sums in an explicit dtype. */
+@compiler.native {ndarray.numpy.nansum_as} pub nansum_as(array: Array, axes: List[Int], keep_dims: Bool, dtype: Int): Array -> native.
+/** Returns NaN-omitting products in an explicit dtype. */
+@compiler.native {ndarray.numpy.nanprod_as} pub nanprod_as(array: Array, axes: List[Int], keep_dims: Bool, dtype: Int): Array -> native.
+/** Returns NaN-omitting means in an explicit inexact dtype. */
+@compiler.native {ndarray.numpy.nanmean_as} pub nanmean_as(array: Array, axes: List[Int], keep_dims: Bool, dtype: Int): Array -> native.
+/** Returns NaN-omitting variances in an explicit inexact dtype. */
+@compiler.native {ndarray.numpy.nanvar_as} pub nanvar_as(array: Array, axes: List[Int], keep_dims: Bool, correction: Int, dtype: Int): Array -> native.
+/** Returns NaN-omitting standard deviations in an explicit inexact dtype. */
+@compiler.native {ndarray.numpy.nanstd_as} pub nanstd_as(array: Array, axes: List[Int], keep_dims: Bool, correction: Int, dtype: Int): Array -> native.
+/** Returns minimum indexes over normalized axes while omitting NaNs. */
+@compiler.native {ndarray.numpy.nanargmin_axes} pub nanargmin_axes(array: Array, axes: List[Int], keep_dims: Bool): Array -> native.
+/** Returns maximum indexes over normalized axes while omitting NaNs. */
+@compiler.native {ndarray.numpy.nanargmax_axes} pub nanargmax_axes(array: Array, axes: List[Int], keep_dims: Bool): Array -> native.
+/** Writes NaN-omitting sums into an exact-shape destination. */
+@compiler.native {ndarray.numpy.nansum_into} pub nansum_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool): Unit -> native.
+/** Writes NaN-omitting products into an exact-shape destination. */
+@compiler.native {ndarray.numpy.nanprod_into} pub nanprod_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool): Unit -> native.
+/** Writes NaN-omitting means into an exact-shape inexact destination. */
+@compiler.native {ndarray.numpy.nanmean_into} pub nanmean_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool): Unit -> native.
+/** Writes NaN-omitting minima into an exact-shape destination. */
+@compiler.native {ndarray.numpy.nanmin_into} pub nanmin_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool): Unit -> native.
+/** Writes NaN-omitting maxima into an exact-shape destination. */
+@compiler.native {ndarray.numpy.nanmax_into} pub nanmax_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool): Unit -> native.
+/** Writes NaN-omitting variances into an exact-shape inexact destination. */
+@compiler.native {ndarray.numpy.nanvar_into} pub nanvar_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool, correction: Int): Unit -> native.
+/** Writes NaN-omitting standard deviations into an exact-shape inexact destination. */
+@compiler.native {ndarray.numpy.nanstd_into} pub nanstd_into(destination: Array, array: Array, axes: List[Int], keep_dims: Bool, correction: Int): Unit -> native.
+/** Returns a flattened cumulative sum with NaNs replaced by zero. */
+@compiler.native {ndarray.numpy.nancumsum_flat} pub nancumsum_flat(array: Array): Array -> native.
+/** Returns a flattened cumulative product with NaNs replaced by one. */
+@compiler.native {ndarray.numpy.nancumprod_flat} pub nancumprod_flat(array: Array): Array -> native.
+/** Returns a NaN-normalized cumulative sum in an explicit dtype. */
+@compiler.native {ndarray.numpy.nancumsum_as} pub nancumsum_as(array: Array, axis: Int, requested_dtype: Int): Array -> native.
+/** Returns a NaN-normalized cumulative product in an explicit dtype. */
+@compiler.native {ndarray.numpy.nancumprod_as} pub nancumprod_as(array: Array, axis: Int, requested_dtype: Int): Array -> native.
+/** Writes a NaN-normalized cumulative sum into an exact-shape destination. */
+@compiler.native {ndarray.numpy.nancumsum_into} pub nancumsum_into(destination: Array, array: Array, axis: Int): Unit -> native.
+/** Writes a NaN-normalized cumulative product into an exact-shape destination. */
+@compiler.native {ndarray.numpy.nancumprod_into} pub nancumprod_into(destination: Array, array: Array, axis: Int): Unit -> native.
+/** Writes a flattened NaN-normalized cumulative sum into a vector destination. */
+@compiler.native {ndarray.numpy.nancumsum_flat_into} pub nancumsum_flat_into(destination: Array, array: Array): Unit -> native.
+/** Writes a flattened NaN-normalized cumulative product into a vector destination. */
+@compiler.native {ndarray.numpy.nancumprod_flat_into} pub nancumprod_flat_into(destination: Array, array: Array): Unit -> native.
+/** Replaces NaN and infinity components with dtype-specific finite defaults. */
+@compiler.native {ndarray.numpy.nan_to_num_default} pub nan_to_num_default(array: Array): Array -> native.
+/** Writes non-finite replacements into an exact-shape, exact-dtype destination. */
+@compiler.native {ndarray.numpy.nan_to_num_into} pub nan_to_num_into(destination: Array, array: Array, nan: Float, positive_infinity: Float, negative_infinity: Float): Unit -> native.
+/** Writes a broadcast addition into an exact-shape destination after staging all aliased inputs. */
+@compiler.native {ndarray.numpy.add_into} pub add_into(destination: Array, lhs: Array, rhs: Array): Unit -> native.
+/** Writes broadcast sums where a Bool mask is true while preserving masked destination elements and staging aliases. */
+@compiler.native {ndarray.numpy.add_where_into} pub add_where_into(destination: Array, lhs: Array, rhs: Array, mask: Array): Unit -> native.
+/** Writes magnitudes into an exact-shape destination after staging aliased input. */
+@compiler.native {ndarray.numpy.absolute_into} pub absolute_into(destination: Array, array: Array): Unit -> native.
+/** Writes truth-value negation into an exact-shape Bool destination. */
+@compiler.native {ndarray.numpy.logical_not_into} pub logical_not_into(destination: Array, array: Array): Unit -> native.
+/** Writes broadcast truth-value conjunction into an exact-shape Bool destination. */
+@compiler.native {ndarray.numpy.logical_and_into} pub logical_and_into(destination: Array, lhs: Array, rhs: Array): Unit -> native.
+/** Writes broadcast truth-value disjunction into an exact-shape Bool destination. */
+@compiler.native {ndarray.numpy.logical_or_into} pub logical_or_into(destination: Array, lhs: Array, rhs: Array): Unit -> native.
+/** Writes broadcast truth-value exclusive disjunction into an exact-shape Bool destination. */
+@compiler.native {ndarray.numpy.logical_xor_into} pub logical_xor_into(destination: Array, lhs: Array, rhs: Array): Unit -> native.
+/** Writes bitwise inversion into an exact-shape destination after staging aliased input. */
+@compiler.native {ndarray.numpy.invert_into} pub invert_into(destination: Array, array: Array): Unit -> native.
+/** Writes bitwise inversion where a Bool mask is true and stages masks that alias the destination. */
+@compiler.native {ndarray.numpy.invert_where_into} pub invert_where_into(destination: Array, array: Array, mask: Array): Unit -> native.
+/** Writes reciprocals into an exact-shape destination after staging aliased input. */
+@compiler.native {ndarray.numpy.reciprocal_into} pub reciprocal_into(destination: Array, array: Array): Unit -> native.
+/** Writes reciprocals where a Bool mask is true while preserving masked destination elements. */
+@compiler.native {ndarray.numpy.reciprocal_where_into} pub reciprocal_where_into(destination: Array, array: Array, mask: Array): Unit -> native.
+/** Applies unbuffered bitwise inversion at rank-one integer indexes after stabilizing aliased indexes. */
+@compiler.native {ndarray.numpy.invert_at} pub invert_at(array: Array, indexes: Array): Unit -> native.
+/** Applies sequential unbuffered addition at rank-one integer indexes with broadcast values and stable aliases. */
+@compiler.native {ndarray.numpy.add_at} pub add_at(array: Array, indexes: Array, values: Array): Unit -> native.
+/** Returns parity reductions of truthy values over selected axes. */
+@compiler.native {ndarray.numpy.logical_xor_reduce} pub logical_xor_reduce(array: Array, axes: List[Int], keep_dims: Int): Array -> native.
+/** Returns segmented addition reductions beginning at each rank-one integer index along an axis. */
+@compiler.native {ndarray.numpy.add_reduceat} pub add_reduceat(array: Array, indexes: Array, axis: Int): Array -> native.
+/** Writes segmented addition reductions into an exact-shape destination after staging aliased inputs. */
+@compiler.native {ndarray.numpy.add_reduceat_into} pub add_reduceat_into(destination: Array, array: Array, indexes: Array, axis: Int): Unit -> native.
+
+import type ndarray.Array.{ArrayOrder}.
+
+import ndarray.Indexing.{take_indices_into, take_indices_mode}.
+
+/** Selects the triangular masking rule used by `mask_indices`. */
+pub type TriangleMask: Int = LOWER = 0 | UPPER = 1.
+
+/** Selects a NumPy-compatible automatic histogram bin estimator. */
+pub type HistogramEstimator: Int =
+    SQUARE_ROOT = 0
+    | STURGES = 1
+    | RICE = 2
+    | SCOTT = 3
+    | STONE = 4
+    | DOANE = 5
+    | FREEDMAN_DIACONIS = 6
+    | AUTO = 7.
+
+/** Selects Cartesian `xy` or matrix `ij` coordinate placement for `meshgrid`. */
+pub type MeshIndexing: Int = XY = 0 | IJ = 1.
+
+/** Selects how out-of-bounds coordinates are handled by `ravel_multi_index`. */
+pub type RavelMode: Int = RAISE = 0 | WRAP = 1 | CLIP = 2.
+
+/** Selects how `take` handles indexes outside the selected axis. */
+pub type TakeMode: Int = RAISE = 0 | WRAP = 1 | CLIP = 2.
+
+/** Takes values with an integer index Array while preserving every index dimension. */
+pub take(
+    array: Array,
+    indices: Array,
+    axis: Int,
+    mode: TakeMode = TakeMode.RAISE,
+): Array ->
+    take_indices_mode(array, indices, axis, mode).
+
+/** Atomically writes a shaped `take` result into an exact destination Array. */
+pub take_into(
+    destination: Array,
+    array: Array,
+    indices: Array,
+    axis: Int,
+    mode: TakeMode = TakeMode.RAISE,
+): Unit ->
+    take_indices_into(destination, array, indices, axis, mode).
+
+/** Represents one array or recursively nested list accepted by `block`. */
+pub type Block = Array | List[Block].
+
+/** Collects block leaves in source traversal order. */
+block_arrays(value: Block): List[Array] ->
+    case value {
+        [] -> [];
+        [first | rest] ->
+            std.collections.List.concat(block_arrays(first), block_array_children(rest));
+        array -> [array]
+    }.
+
+/** Collects leaves from one list without changing their source order. */
+block_array_children(values: List[Block]): List[Array] ->
+    case values {
+        [] -> [];
+        [first | rest] ->
+            std.collections.List.concat(block_arrays(first), block_array_children(rest))
+    }.
+
+/** Prefix-encodes one recursive block tree for the package-native boundary. */
+block_layout(value: Block): List[Int] ->
+    block_layout_pending([value], []).
+
+/** Prefix-encodes nodes from an explicit depth-first work list. */
+block_layout_pending(pending: List[Block], layout: List[Int]): List[Int] ->
+    case pending {
+        [] -> block_reverse_ints(layout, []);
+        [value | remaining] ->
+            case value {
+                [] -> block_layout_pending(remaining, [0 | layout]);
+                [first | rest] ->
+                    let children = [first | rest];
+                    let reversed = block_reverse_blocks(children, []);
+                    block_layout_pending(
+                        block_reverse_blocks(reversed, remaining),
+                        [block_list_length(children, 0) | layout],
+                    );
+                _array -> block_layout_pending(remaining, [-1 | layout])
+            }
+    }.
+
+/** Reverses block nodes onto an existing work-list tail. */
+block_reverse_blocks(values: List[Block], tail: List[Block]): List[Block] ->
+    case values {
+        [] -> tail;
+        [first | rest] -> block_reverse_blocks(rest, [first | tail])
+    }.
+
+/** Restores collected layout tokens to source order. */
+block_reverse_ints(values: List[Int], tail: List[Int]): List[Int] ->
+    case values {
+        [] -> tail;
+        [first | rest] -> block_reverse_ints(rest, [first | tail])
+    }.
+
+/** Counts one block-child list using a constant-stack tail recursion. */
+block_list_length(values: List[Block], count: Int): Int ->
+    case values {
+        [] -> count;
+        [_first | rest] -> block_list_length(rest, count + 1)
+    }.
+
+/**
+ * Assembles an owned array from recursively nested blocks using NumPy axis and rank rules.
+ */
+pub block(value: Block): Array ->
+    block_native(block_arrays(value), block_layout(value)).
+
+/** Returns an empty coordinate-grid list for an empty input sequence. */
+pub meshgrid(): List[Array] ->
+    [].
+
+/**
+ * Builds coordinate grids while preserving each input dtype and explicit sparse/copy semantics.
+ */
+pub meshgrid(
+    first: Array,
+    remaining: List[Array],
+    indexing: MeshIndexing = MeshIndexing.XY,
+    sparse: Bool = false,
+    copy: Bool = true,
+): List[Array] ->
+    meshgrid_native(first, remaining, indexing, sparse, copy).
+
+/**
+ * Returns square-matrix coordinates selected by a typed triangular mask.
+ */
+pub mask_indices(size: Int, mask: TriangleMask, offset: Int = 0): Array ->
+    case mask {
+        TriangleMask.LOWER -> tril_indices(size, offset);
+        TriangleMask.UPPER -> triu_indices(size, offset)
+    }.
+
+/** Writes a scalar across a diagonal, optionally wrapping through tall matrices. */
+pub fill_diagonal(array: Array, value: Float, wrap: Bool = false): Unit ->
+    fill_diagonal_native(array, value, wrap).
+
+/** Lowers an admitted index memory order to its native ABI code. */
+index_order_code(order: ArrayOrder): Int ->
+    case order {
+        ArrayOrder.C -> 0;
+        ArrayOrder.FORTRAN -> 1;
+        ArrayOrder.KEEP -> -1;
+        ArrayOrder.ANY -> -1
+    }.
+
+/** Converts packed coordinates to flat indexes with explicit per-axis modes and order. */
+pub ravel_multi_index(
+    coordinates: Array,
+    dimensions: List[Int],
+    modes: List[RavelMode] = [RavelMode.RAISE],
+    order: ArrayOrder = ArrayOrder.C,
+): Array ->
+    ravel_multi_index_native(coordinates, dimensions, modes, index_order_code(order)).
+
+/** Converts flat indexes into coordinate arrays with explicit memory order. */
+pub unravel_index(
+    indexes: Array,
+    dimensions: List[Int],
+    order: ArrayOrder = ArrayOrder.C,
+): List[Array] ->
+    unravel_index_native(indexes, dimensions, index_order_code(order)).
+
+/** Creates an array by broadcasting an Array-valued fill pattern. */
+pub full_from(shape: List[Int], fill_values: Array): Array ->
+    let output = zeros(shape, dtype_code(fill_values));
+    copyto(output, fill_values);
+    output.
+
+/** Broadcasts and copies values under an explicit numerical casting rule. */
+pub copyto_with_casting(destination: Array, source: Array, casting: CastingRule): Unit ->
+    copyto(
+        destination,
+        source,
+        case casting {
+            CastingRule.NO -> 0;
+            CastingRule.EQUIVALENT -> 1;
+            CastingRule.SAFE -> 2;
+            CastingRule.SAME_KIND -> 3;
+            CastingRule.UNSAFE -> 4
+        },
+    ).
+
+/** Broadcasts a source and truth mask before copying selected values. */
+pub copyto_where(
+    destination: Array,
+    source: Array,
+    mask: Array,
+    casting: CastingRule,
+): Unit ->
+    copyto(
+        destination,
+        source,
+        mask,
+        case casting {
+            CastingRule.NO -> 0;
+            CastingRule.EQUIVALENT -> 1;
+            CastingRule.SAFE -> 2;
+            CastingRule.SAME_KIND -> 3;
+            CastingRule.UNSAFE -> 4
+        },
+    ).
+
+/** Returns packed explicit-edge offsets beginning at `offset`. */
+histogramdd_edge_offsets(edges: List[Array], offset: Int): List[Int] ->
+    case edges {
+        [] -> [offset];
+        [edge | rest] -> let [length] = shape(edge);
+            [offset | histogramdd_edge_offsets(rest, offset + length)]
+    }.
+
+/** Returns the exact dtype identifier for each explicit edge vector. */
+histogramdd_edge_dtypes(edges: List[Array]): List[Int] ->
+    case edges {
+        [] -> [];
+        [edge | rest] -> [dtype_code(edge) | histogramdd_edge_dtypes(rest)]
+    }.
+
+/** Builds a multidimensional histogram from one bin count per axis. */
+pub histogramdd_bins(
+    samples: Array,
+    bins: List[Int],
+    density: Bool = false,
+): List[Array] ->
+    let bins_array = from_ints(bins, [length(bins)]);
+    let result = histogramdd_bins_array(samples, bins_array, density);
+    dispose(bins_array);
+    result.
+
+/** Builds a multidimensional histogram from per-axis counts and ranges. */
+pub histogramdd_range(
+    samples: Array,
+    bins: List[Int],
+    minima: List[Float],
+    maxima: List[Float],
+    density: Bool = false,
+): List[Array] ->
+    let bins_array = from_ints(bins, [length(bins)]);
+    let minima_array = from_floats(minima, [length(minima)]);
+    let maxima_array = from_floats(maxima, [length(maxima)]);
+    let result = histogramdd_range_arrays(
+        samples,
+        bins_array,
+        minima_array,
+        maxima_array,
+        density,
+    );
+    dispose(maxima_array);
+    dispose(minima_array);
+    dispose(bins_array);
+    result.
+
+/** Builds a multidimensional histogram from explicit edge vectors. */
+pub histogramdd_edges(
+    samples: Array,
+    edges: List[Array],
+    density: Bool = false,
+): List[Array] ->
+    let offset_values = histogramdd_edge_offsets(edges, 0);
+    let dtype_values = histogramdd_edge_dtypes(edges);
+    let packed = concatenate(edges, 0);
+    let offsets = from_ints(offset_values, [length(offset_values)]);
+    let dtypes = from_ints(dtype_values, [length(dtype_values)]);
+    let result = histogramdd_edges_packed(samples, packed, offsets, dtypes, density);
+    dispose(dtypes);
+    dispose(offsets);
+    dispose(packed);
+    result.
+
+/** Builds a weighted multidimensional histogram from one bin count per axis. */
+pub histogramdd_weighted_bins(
+    samples: Array,
+    weights: Array,
+    bins: List[Int],
+    density: Bool = false,
+): List[Array] ->
+    let bins_array = from_ints(bins, [length(bins)]);
+    let result = histogramdd_weighted_bins_array(samples, weights, bins_array, density);
+    dispose(bins_array);
+    result.
+
+/** Builds a weighted multidimensional histogram from per-axis ranges. */
+pub histogramdd_weighted_range(
+    samples: Array,
+    weights: Array,
+    bins: List[Int],
+    minima: List[Float],
+    maxima: List[Float],
+    density: Bool = false,
+): List[Array] ->
+    let bins_array = from_ints(bins, [length(bins)]);
+    let minima_array = from_floats(minima, [length(minima)]);
+    let maxima_array = from_floats(maxima, [length(maxima)]);
+    let result = histogramdd_weighted_range_arrays(
+        samples,
+        weights,
+        bins_array,
+        minima_array,
+        maxima_array,
+        density,
+    );
+    dispose(maxima_array);
+    dispose(minima_array);
+    dispose(bins_array);
+    result.
+
+/** Builds a weighted multidimensional histogram from explicit edge vectors. */
+pub histogramdd_weighted_edges(
+    samples: Array,
+    weights: Array,
+    edges: List[Array],
+    density: Bool = false,
+): List[Array] ->
+    let offset_values = histogramdd_edge_offsets(edges, 0);
+    let dtype_values = histogramdd_edge_dtypes(edges);
+    let packed = concatenate(edges, 0);
+    let offsets = from_ints(offset_values, [length(offset_values)]);
+    let dtypes = from_ints(dtype_values, [length(dtype_values)]);
+    let result = histogramdd_weighted_edges_packed(
+        samples,
+        weights,
+        packed,
+        offsets,
+        dtypes,
+        density,
+    );
+    dispose(dtypes);
+    dispose(offsets);
+    dispose(packed);
+    result.

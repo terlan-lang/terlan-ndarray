@@ -1,0 +1,87 @@
+module ndarray.TriangleIndexTest.
+
+import ndarray.Array.{arange, dispose, from_ints, gather_coordinates, live_count, put_coordinates, reshape, to_ints_cast, transpose}.
+import ndarray.Numpy.{TriangleMask, mask_indices, tril_indices, tril_indices_from, triu_indices, triu_indices_from}.
+
+@test
+pub lower_triangle_indices_gather_and_assign_like_numpy(): Bool ->
+    let matrix_values = arange(1, 17);
+    let matrix = matrix_values |> reshape([4, 4]);
+    matrix_values |> dispose();
+    let lower = tril_indices(4);
+    let lower_coordinates = transpose(lower, 0, 1);
+    let selected = gather_coordinates(matrix, lower_coordinates);
+    let negative_one = from_ints([-1], []);
+    put_coordinates(matrix, lower_coordinates, negative_one);
+    let offset = tril_indices(4, 2);
+    let offset_coordinates = transpose(offset, 0, 1);
+    let negative_ten = from_ints([-10], []);
+    put_coordinates(matrix, offset_coordinates, negative_ten);
+    let rectangular_values = arange(1, 21);
+    let rectangular = rectangular_values |> reshape([4, 5]);
+    rectangular_values |> dispose();
+    let rectangular_lower = tril_indices(4, columns = 5);
+    let rectangular_coordinates = transpose(rectangular_lower, 0, 1);
+    let rectangular_selected = gather_coordinates(rectangular, rectangular_coordinates);
+    let valid = to_ints_cast(selected) == [1, 5, 6, 9, 10, 11, 13, 14, 15, 16]
+        and to_ints_cast(matrix) == [-10, -10, -10, 4, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10, -10]
+        and to_ints_cast(rectangular_selected) == [1, 6, 7, 11, 12, 13, 16, 17, 18, 19];
+    dispose(rectangular_selected);
+    dispose(rectangular_coordinates);
+    dispose(rectangular_lower);
+    dispose(rectangular);
+    dispose(negative_ten);
+    dispose(offset_coordinates);
+    dispose(offset);
+    dispose(negative_one);
+    dispose(selected);
+    dispose(lower_coordinates);
+    dispose(lower);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub upper_mask_defaults_rectangles_and_from_forms_match_numpy(): Bool ->
+    let square_values = arange(0, 16);
+    let square = square_values |> reshape([4, 4]);
+    square_values |> dispose();
+    let upper = triu_indices(4);
+    let upper_coordinates = transpose(upper, 0, 1);
+    let selected = gather_coordinates(square, upper_coordinates);
+    let rectangular_values = arange(1, 21);
+    let rectangular = rectangular_values |> reshape([4, 5]);
+    rectangular_values |> dispose();
+    let upper_rectangular = triu_indices(4, columns = 5);
+    let upper_rectangular_coordinates = transpose(upper_rectangular, 0, 1);
+    let rectangular_selected = gather_coordinates(rectangular, upper_rectangular_coordinates);
+    let lower_from = tril_indices_from(rectangular);
+    let lower_direct = tril_indices(4, columns = 5);
+    let upper_from = triu_indices_from(rectangular);
+    let mask = mask_indices(3, TriangleMask.UPPER, 1);
+    let mask_coordinates = transpose(mask, 0, 1);
+    let mask_values = arange(0, 9);
+    let mask_source = mask_values |> reshape([3, 3]);
+    mask_values |> dispose();
+    let mask_selected = gather_coordinates(mask_source, mask_coordinates);
+    let valid = to_ints_cast(selected) == [0, 1, 2, 3, 5, 6, 7, 10, 11, 15]
+        and to_ints_cast(rectangular_selected) == [1, 2, 3, 4, 5, 7, 8, 9, 10, 13, 14, 15, 19, 20]
+        and to_ints_cast(lower_from) == to_ints_cast(lower_direct)
+        and to_ints_cast(upper_from) == to_ints_cast(upper_rectangular)
+        and to_ints_cast(mask_selected) == [1, 2, 5]
+        and to_ints_cast(square) == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+    dispose(mask_selected);
+    dispose(mask_source);
+    dispose(mask_coordinates);
+    dispose(mask);
+    dispose(upper_from);
+    dispose(lower_direct);
+    dispose(lower_from);
+    dispose(rectangular_selected);
+    dispose(upper_rectangular_coordinates);
+    dispose(upper_rectangular);
+    dispose(rectangular);
+    dispose(selected);
+    dispose(upper_coordinates);
+    dispose(upper);
+    dispose(square);
+    valid and live_count() == 0.

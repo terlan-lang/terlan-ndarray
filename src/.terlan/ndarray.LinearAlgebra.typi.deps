@@ -1,0 +1,9 @@
+module=ndarray.LinearAlgebra
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=16218735037330096124
+interface_hash=13096070641760867220
+interface_doc_hash=13763616155499364733
+deps=1
+ndarray.Array=14540436248669504260

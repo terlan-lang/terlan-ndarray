@@ -1,0 +1,965 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Validates the generated ndarray package, helper lifecycle, and consumers.
+ */
+import std.collections.List.{concat}.
+import std.core.Option.{None, Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.{Int, String, Unit}.
+import std.crypto.Hash.
+import std.data.Json.
+import std.encoding.Base64.
+import std.io.Console.{eprintln, println}.
+import std.io.{Directory, File}.
+import std.system.Process.{SpawnFailed}.
+import std.system.{Arguments, Environment, Platform, Process}.
+
+import type std.core.{Option, Result}.
+import type std.data.Json.
+import type std.system.Process.{EnvironmentEntry, Output}.
+
+struct NativeProvider {
+    environment: List[EnvironmentEntry],
+    flags: List[String],
+    revision: String,
+}.
+
+struct NegativeCase {
+    name: String,
+    body: String,
+    code: String,
+    operation: String,
+}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.package]: ", message));
+    false.
+
+child(parent: String, relative: String): String ->
+    if {
+        String.ends_with(parent, "/") -> String.append(parent, relative);
+        true -> String.concat([parent, "/", relative])
+    }.
+
+diagnostic(output: Output): String ->
+    String.concat([output.stdout, output.stderr]).
+
+run_command(
+    program: String,
+    arguments: List[String],
+    working_directory: String,
+    environment: List[EnvironmentEntry],
+    expect_success: Bool,
+): Result[Output, String] ->
+    let command =
+        Process.command(program)
+            .with_arguments(arguments)
+            .with_working_directory(working_directory)
+            .with_environment(environment)
+            .with_timeout_ms(1800000)
+            .with_output_limit_bytes(16777216);
+    case Process.run(command) {
+        Err(reason) ->
+            Err(
+                String.concat(
+                    [
+                        "cannot run `",
+                        reason.program,
+                        "`: ",
+                        reason.message,
+                    ],
+                ),
+            );
+        Ok(output) ->
+            if {
+                expect_success and output.status != 0 -> Err(diagnostic(output));
+                not expect_success and output.status == 0 -> Err(
+                    String.concat(
+                        ["command unexpectedly passed: ", program, " ", String.join(arguments, " ")],
+                    ),
+                );
+                true -> Ok(output)
+            }
+    }.
+
+run_with_stdin(
+    program: String,
+    stdin: String,
+    working_directory: String,
+    environment: List[EnvironmentEntry],
+): Result[Output, String] ->
+    let command =
+        Process.command(program)
+            .with_working_directory(working_directory)
+            .with_environment(environment)
+            .with_stdin(stdin)
+            .with_timeout_ms(1800000)
+            .with_output_limit_bytes(16777216);
+    case Process.run(command) {
+        Err(reason) ->
+            Err(
+                String.concat(
+                    [
+                        "cannot run `",
+                        reason.program,
+                        "`: ",
+                        reason.message,
+                    ],
+                ),
+            );
+        Ok(output) ->
+            if {
+                output.status != 0 -> Err(diagnostic(output));
+                true -> Ok(output)
+            }
+    }.
+
+create_directory(path: String): Result[Unit, String] ->
+    case Directory.create_all(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+remove_directory(path: String): Result[Unit, String] ->
+    case Directory.remove_all(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+copy_tree(source: String, destination: String): Result[Unit, String] ->
+    case Directory.copy_tree_excluding(source, destination, [".git", "target", "reports"]) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+write_file(path: String, contents: String): Result[Unit, String] ->
+    case File.write_text(path, contents) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+read_json(path: String): Result[Json, String] ->
+    let {
+        Ok(source) <- File.read_text(path);
+        Ok(value) <- Json.parse(source)
+    } else {
+        _ -> Err(String.append("cannot parse JSON: ", path))
+    };
+    Ok(value).
+
+hash_file(path: String): Result[String, String] ->
+    case Hash.sha256_file(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(digest) -> Ok(digest)
+    }.
+
+json_member(value: Json, key: String): Result[Json, String] ->
+    case value.get(key) {
+        Err(_reason) -> Err(String.append("missing JSON member: ", key));
+        Ok(member) -> Ok(member)
+    }.
+
+json_string(value: Json, key: String): Result[String, String] ->
+    let {
+        Ok(member) <- json_member(value, key);
+        Ok(text) <- member.as_string()
+    } else {
+        _ -> Err(String.append("invalid JSON string member: ", key))
+    };
+    Ok(text).
+
+nonempty_words(values: List[String], output: List[String]): List[String] ->
+    case values {
+        [] -> output;
+        [value | rest] ->
+            if {
+                String.trim(value) == "" -> nonempty_words(rest, output);
+                true -> nonempty_words(rest, concat(output, [String.trim(value)]))
+            }
+    }.
+
+provider(repository: String): Result[NativeProvider, String] ->
+    let {
+        Ok(lock) <- read_json(child(repository, "native-dependencies.json"));
+        Ok(dependencies) <- json_member(lock, "dependencies");
+        Ok(openblas) <- json_member(dependencies, "openblas");
+        Ok(revision) <- json_string(openblas, "revision")
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    (let host = Platform.current();
+let base =
+    case Environment.get("TERLAN_NDARRAY_NATIVE_CACHE") {
+        Some(value) -> value;
+        None ->
+            case Environment.get("HOME") {
+                Some(home) -> child(home, ".cache/terlan/native");
+                None -> ""
+            }
+    };
+let root =
+    child(
+        child(
+            child(child(base, "openblas"), revision),
+            String.concat(
+                [String.lowercase(host.architecture), "-", String.lowercase(host.operating_system)],
+            ),
+        ),
+        "install",
+    );
+let pkg = child(root, "lib/pkgconfig");
+let environment =
+    [
+        Process.environment_entry("PKG_CONFIG_LIBDIR", pkg),
+        Process.environment_entry("PKG_CONFIG_PATH", pkg),
+        Process.environment_entry("OPENBLAS_STATIC", "1"),
+        Process.environment_entry("PKG_CONFIG_ALL_STATIC", "1"),
+        Process.environment_entry("OPENBLAS_NUM_THREADS", "1"),
+        Process.environment_entry("TERLAN_NDARRAY_OPENBLAS_ROOT", root),
+    ];
+case run_command(
+    "pkg-config",
+    ["--static", "--cflags", "--libs", "openblas"],
+    repository,
+    environment,
+    true,
+) {
+    Err(reason) -> Err(reason);
+    Ok(output) ->
+        Ok(
+            NativeProvider(
+                environment = environment,
+                flags = nonempty_words(String.split(output.stdout, " "), []),
+                revision = revision,
+            ),
+        )
+}).
+
+helper_transcript(): String ->
+    let from_ints = Base64.encode("ndarray.array.from_ints");
+    let dispose = Base64.encode("ndarray.array.dispose");
+    let rank = Base64.encode("ndarray.array.rank");
+    let live_count = Base64.encode("ndarray.array.live_count");
+    let wrong_type = Base64.encode("other.Resource");
+    String.concat(
+        [
+            "call 1 ",
+            from_ints,
+            " li:11,12 li:2\n",
+            "call 2 ",
+            dispose,
+            " r:1\n",
+            "call 3 ",
+            dispose,
+            " r:1\n",
+            "call 4 ",
+            from_ints,
+            " li:21,22 li:2\n",
+            "call 5 ",
+            rank,
+            " r:1\n",
+            "call 6 ",
+            rank,
+            " r:4:",
+            wrong_type,
+            "\n",
+            "call 7 ",
+            dispose,
+            " r:4\n",
+            "call 8 ",
+            live_count,
+            "\n",
+        ],
+    ).
+
+check_helper_lifecycle(
+    helper: String,
+    repository: String,
+    environment: List[EnvironmentEntry],
+): Result[Json, String] ->
+    case run_with_stdin(helper, helper_transcript(), repository, environment) {
+        Err(reason) -> Err(reason);
+        Ok(output) ->
+            let stdout = output.stdout;
+            let stale = Base64.encode("stale_handle");
+            let mismatch = Base64.encode("handle_type_mismatch");
+            let handle_type = Base64.encode("ndarray.Array.Array");
+            if {
+                not String.contains(stdout, "reply 1 1 ok_handle") -> Err(stdout);
+                not String.contains(stdout, "reply 2 1 ok_unit") -> Err(stdout);
+                not String.contains(stdout, String.concat(["reply 3 1 err ", stale])) -> Err(stdout);
+                not String.contains(stdout, "reply 4 1 ok_handle") -> Err(stdout);
+                not String.contains(stdout, String.concat([" 1 2 ", handle_type])) -> Err(stdout);
+                not String.contains(stdout, String.concat(["reply 5 1 err ", stale])) -> Err(stdout);
+                not String.contains(stdout, String.concat(["reply 6 1 err ", mismatch])) -> Err(stdout);
+                not String.contains(stdout, "reply 7 1 ok_unit") -> Err(stdout);
+                not String.contains(stdout, "reply 8 1 ok_int 0") -> Err(stdout);
+                true -> Ok(
+                    Json.object()
+                        .put("double_disposal", Json.string("passed"))
+                        .put("slot_generation_reuse", Json.string("passed"))
+                        .put("stale_generation", Json.string("passed"))
+                        .put("stale_handle", Json.string("passed"))
+                        .put("wrong_resource_kind", Json.string("passed")),
+                )
+            }
+    }.
+
+string_array(value: Json, index: Int, output: List[String]): Result[List[String], String] ->
+    case value.length() {
+        Err(_reason) -> Err("expected JSON string array");
+        Ok(length) ->
+            if {
+                index >= length -> Ok(output);
+                true -> case value.at(index) {
+                    Err(_reason) -> Err("cannot read JSON array item");
+                    Ok(item) ->
+                        case item.as_string() {
+                            Err(_reason) -> Err("JSON array item is not a string");
+                            Ok(text) -> string_array(value, index + 1, concat(output, [text]))
+                        }
+                }
+            }
+    }.
+
+prefix_paths(values: List[String], root: String, output: List[String]): List[String] ->
+    case values {
+        [] -> output;
+        [value | rest] -> prefix_paths(rest, root, concat(output, [child(root, value)]))
+    }.
+
+native_sources(repository: String): Result[List[String], String] ->
+    let {
+        Ok(manifest) <- read_json(child(repository, "bindings/ndarray-c.json"));
+        Ok(metadata) <- json_member(manifest, "c_metadata");
+        Ok(sources) <- json_member(metadata, "sources");
+        Ok(names) <- string_array(sources, 0, [])
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    Ok(prefix_paths(names, child(repository, "bindings"), [])).
+
+native_tests(): List[String] ->
+    [
+        "abi_test.c",
+        "advanced_indexing_test.c",
+        "operations_test.c",
+        "operations_property_test.c",
+        "reduction_test.c",
+        "shape_test.c",
+        "shape_extra_test.c",
+        "blas_test.c",
+        "broadcast_test.c",
+        "creation_test.c",
+        "creation_extra_test.c",
+        "completion_test.c",
+        "dlpack_test.c",
+        "dtype_test.c",
+        "histogram_numerical_test.c",
+        "indexing_view_test.c",
+        "linear_algebra_test.c",
+        "numeric_ufunc_test.c",
+        "ordering_test.c",
+        "set_test.c",
+        "statistics_test.c",
+        "unary_test.c",
+    ].
+
+compile_native_test(
+    test: String,
+    prefix: String,
+    extra_flags: List[String],
+    sources: List[String],
+    provider_flags: List[String],
+    repository: String,
+    temporary: String,
+    environment: List[EnvironmentEntry],
+): Result[String, String] ->
+    let compiler =
+        case Environment.get("CC") {
+            Some(value) -> value;
+            None -> "cc"
+        };
+    let binary = child(temporary, String.concat([prefix, String.replace(test, ".c", "")]));
+    case run_command(
+    compiler,
+    concat(
+        ["-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror"],
+        concat(
+            extra_flags,
+            concat(
+                sources,
+                concat(
+                    [child(child(repository, "tests"), test), "-lm"],
+                    concat(provider_flags, ["-o", binary]),
+                ),
+            ),
+        ),
+    ),
+    repository,
+    environment,
+    true,
+) {
+        Err(reason) -> Err(reason);
+        Ok(_output) -> Ok(binary)
+    }.
+
+run_sanitized_tests(
+    tests: List[String],
+    sources: List[String],
+    provider: NativeProvider,
+    repository: String,
+    temporary: String,
+): Result[Json, String] ->
+    case tests {
+        [] ->
+            Ok(
+                Json.object()
+                    .put("status", Json.string("passed"))
+                    .put(
+                        "tools",
+                        Json.array().push(Json.string("address")).push(Json.string("undefined")),
+                    ),
+            );
+        [test | rest] ->
+            let environment =
+                concat(
+                    provider.environment,
+                    [
+                        Process.environment_entry("ASAN_OPTIONS", "detect_leaks=1:halt_on_error=1"),
+                        Process.environment_entry(
+                            "UBSAN_OPTIONS",
+                            "halt_on_error=1:print_stacktrace=1",
+                        ),
+                    ],
+                );
+            let {
+                Ok(binary) <-
+                    compile_native_test(
+                        test,
+                        "sanitized-",
+                        ["-fno-omit-frame-pointer", "-fsanitize=address,undefined"],
+                        sources,
+                        provider.flags,
+                        repository,
+                        temporary,
+                        environment,
+                    );
+                Ok(_ran) <- run_command(binary, [], repository, environment, true)
+            } else {
+                Err(reason) -> Err(reason)
+            };
+            run_sanitized_tests(rest, sources, provider, repository, temporary)
+    }.
+
+run_valgrind_tests(
+    tests: List[String],
+    sources: List[String],
+    provider: NativeProvider,
+    repository: String,
+    temporary: String,
+): Result[Json, String] ->
+    case tests {
+        [] -> Ok(Json.object().put("status", Json.string("passed")));
+        [test | rest] ->
+            let {
+                Ok(binary) <-
+                    compile_native_test(
+                        test,
+                        "valgrind-",
+                        [],
+                        sources,
+                        provider.flags,
+                        repository,
+                        temporary,
+                        provider.environment,
+                    );
+                Ok(_ran) <-
+                    run_command(
+                        "valgrind",
+                        [
+                            "--error-exitcode=97",
+                            "--leak-check=full",
+                            "--show-leak-kinds=all",
+                            binary,
+                        ],
+                        repository,
+                        provider.environment,
+                        true,
+                    )
+            } else {
+                Err(reason) -> Err(reason)
+            };
+            run_valgrind_tests(rest, sources, provider, repository, temporary)
+    }.
+
+tooling(
+    sources: List[String],
+    provider: NativeProvider,
+    repository: String,
+    temporary: String,
+): Result[Json, String] ->
+    case run_sanitized_tests(native_tests(), sources, provider, repository, temporary) {
+        Err(reason) -> Err(reason);
+        Ok(sanitizers) ->
+            let version =
+                Process.command("valgrind")
+                    .with_arguments(["--version"])
+                    .with_working_directory(repository)
+                    .with_environment(provider.environment)
+                    .with_timeout_ms(1800000)
+                    .with_output_limit_bytes(16777216);
+            case Process.run(version) {
+                Err(reason) ->
+                    if {
+                        reason.code == SpawnFailed -> Ok(
+                            Json.object()
+                                .put("sanitizers", sanitizers)
+                                .put(
+                                    "valgrind",
+                                    Json.object()
+                                        .put(
+                                            "reason",
+                                            Json.string("valgrind executable is unavailable"),
+                                        )
+                                        .put("status", Json.string("skipped")),
+                                ),
+                        );
+                        true -> Err(
+                            String.concat(
+                                [
+                                    "cannot run `",
+                                    reason.program,
+                                    "`: ",
+                                    reason.message,
+                                ],
+                            ),
+                        )
+                    };
+                Ok(output) ->
+                    if {
+                        output.status != 0 -> Err(diagnostic(output));
+                        true -> case run_valgrind_tests(native_tests(), sources, provider, repository, temporary) {
+                            Err(reason) -> Err(reason);
+                            Ok(valgrind) ->
+                                Ok(
+                                    Json.object()
+                                        .put("sanitizers", sanitizers)
+                                        .put("valgrind", valgrind),
+                                )
+                        }
+                    }
+            }
+    }.
+
+consumer_source(): String ->
+    String.concat(
+        [
+            "module ndarray_consumer.Main.\n\n",
+            "import ndarray.Array.{add, byte_count, device_type_code, dispose, dtype_code, from_floats, live_count, matmul, numel, rank, reshape, shape, strides, subtract, sum, to_floats, transpose}.\n",
+            "import std.io.Console.{println}.\n\n",
+            "pub main(): Unit ->\n",
+            "    let values = [1.25, 2.25, 3.25, 4.25, 5.25, 6.25];\n",
+            "    let array = from_floats(values, [2, 3]);\n",
+            "    let reshaped = reshape(array, [3, 2]);\n",
+            "    let transposed = transpose(reshaped, 0, 1);\n",
+            "    let doubled = add(array, array);\n",
+            "    let restored = subtract(doubled, array);\n",
+            "    let total = sum(array, [], 0);\n",
+            "    let left = from_floats([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [2, 3]);\n",
+            "    let right = from_floats([7.0, 8.0, 9.0, 10.0, 11.0, 12.0], [3, 2]);\n",
+            "    let product = matmul(left, right);\n",
+            "    let valid = rank(array) == 2 and shape(array) == [2, 3] and strides(array) == [3, 1] and numel(array) == 6 and byte_count(array) == 48 and dtype_code(array) == 3 and device_type_code(array) == 1 and to_floats(array) == values and shape(reshaped) == [3, 2] and to_floats(transposed) == [1.25, 3.25, 5.25, 2.25, 4.25, 6.25] and to_floats(restored) == values and to_floats(total) == [22.5] and to_floats(product) == [58.0, 64.0, 139.0, 154.0];\n",
+            "    dispose(array); dispose(reshaped); dispose(transposed); dispose(doubled); dispose(restored); dispose(total); dispose(product); dispose(right); dispose(left);\n",
+            "    if { valid and live_count() == 0 -> println(\"NDARRAY_PACKAGE_CONSUMER_OK\"); true -> println(\"NDARRAY_PACKAGE_CONSUMER_FAILED\") }.\n",
+        ],
+    ).
+
+negative_cases(): List[NegativeCase] ->
+    [
+        NegativeCase(
+            name = "broadcast",
+            code = "c_abi_status_108",
+            operation = "ndarray.array.add",
+            body = "    let lhs = from_ints([1, 2, 3, 4, 5, 6], [2, 3]); let rhs = from_ints([1, 2], [2]); let result = add(lhs, rhs); dispose(result).\n",
+        ),
+        NegativeCase(
+            name = "integer-overflow",
+            code = "c_abi_status_112",
+            operation = "ndarray.array.add",
+            body = "    let lhs = from_ints([9223372036854775807], [1]); let rhs = from_ints([1], [1]); let result = add(lhs, rhs); dispose(result).\n",
+        ),
+        NegativeCase(
+            name = "duplicate-axis",
+            code = "c_abi_status_111",
+            operation = "ndarray.array.sum",
+            body = "    let source = from_ints([1, 2, 3, 4], [2, 2]); let result = sum(source, [0, -2], 0); dispose(result).\n",
+        ),
+        NegativeCase(
+            name = "axis-range",
+            code = "c_abi_status_110",
+            operation = "ndarray.array.sum",
+            body = "    let source = from_ints([1, 2, 3, 4], [2, 2]); let result = sum(source, [2], 0); dispose(result).\n",
+        ),
+        NegativeCase(
+            name = "reshape-count",
+            code = "c_abi_status_102",
+            operation = "ndarray.array.reshape",
+            body = "    let source = from_ints([1, 2, 3, 4], [2, 2]); let result = reshape(source, [3, 2]); dispose(result).\n",
+        ),
+        NegativeCase(
+            name = "matmul-shape",
+            code = "c_abi_status_108",
+            operation = "ndarray.array.matmul",
+            body = "    let lhs = from_floats([1.0, 2.0, 3.0, 4.0], [2, 2]); let rhs = from_floats([1.0, 2.0, 3.0], [3, 1]); let result = matmul(lhs, rhs); dispose(result).\n",
+        ),
+        NegativeCase(
+            name = "matmul-rank",
+            code = "c_abi_status_108",
+            operation = "ndarray.array.matmul",
+            body = "    let lhs = from_floats([1.0], []); let rhs = from_floats([1.0], [1]); let result = matmul(lhs, rhs); dispose(result).\n",
+        ),
+    ].
+
+negative_source(body: String): String ->
+    String.concat(
+        [
+            "module ndarray_consumer.Main.\n\n",
+            "import ndarray.Array.{add, dispose, from_floats, from_ints, matmul, reshape, sum}.\n\n",
+            "pub main(): Unit ->\n",
+            body,
+        ],
+    ).
+
+run_negative_consumers(
+    cases: List[NegativeCase],
+    source: String,
+    consumer: String,
+    terlc: String,
+    temporary: String,
+    environment: List[EnvironmentEntry],
+    passed: Json,
+): Result[Json, String] ->
+    case cases {
+        [] -> Ok(passed);
+        [test_case | rest] ->
+            let {
+                Ok(Unit) <- write_file(source, negative_source(test_case.body));
+                Ok(output) <-
+                    run_command(
+                        terlc,
+                        [
+                            "run",
+                            consumer,
+                            "--target",
+                            "terlan-vm",
+                            "--out-dir",
+                            child(temporary, String.append("negative-", test_case.name)),
+                        ],
+                        temporary,
+                        environment,
+                        false,
+                    )
+            } else {
+                Err(reason) ->
+                    Err(
+                        String.concat(["negative consumer `", test_case.name, "` failed: ", reason]),
+                    )
+            };
+            (let observed = diagnostic(output);
+if {
+    not String.contains(observed, test_case.code)
+        or not String.contains(observed, test_case.operation) -> Err(
+        String.concat(
+            ["negative consumer `", test_case.name, "` returned unexpected diagnostics: ", observed],
+        ),
+    );
+    true -> run_negative_consumers(
+        rest,
+        source,
+        consumer,
+        terlc,
+        temporary,
+        environment,
+        passed.push(Json.string(test_case.name)),
+    )
+})
+    }.
+
+fresh_consumer(
+    generated: String,
+    terlc: String,
+    temporary: String,
+    environment: List[EnvironmentEntry],
+): Result[Json, String] ->
+    let package = child(temporary, "package");
+    let consumer = child(temporary, "consumer");
+    let source = child(consumer, "src/ndarray_consumer/Main.terl");
+    let {
+        Ok(Unit) <- copy_tree(generated, package);
+        Ok(_init) <- run_command("git", ["init", "--quiet"], package, [], true);
+        Ok(_email) <-
+            run_command(
+                "git",
+                ["config", "user.email", "terlan-ndarray-tests@example.invalid"],
+                package,
+                [],
+                true,
+            );
+        Ok(_name) <- run_command("git", ["config", "user.name", "Terlan NdArray Tests"], package, [], true);
+        Ok(_add) <- run_command("git", ["add", "."], package, [], true);
+        Ok(_commit) <-
+            run_command(
+                "git",
+                ["commit", "--quiet", "-m", "generated ndarray package"],
+                package,
+                [],
+                true,
+            );
+        Ok(revision_output) <- run_command("git", ["rev-parse", "HEAD"], package, [], true);
+        Ok(Unit) <- create_directory(child(consumer, "src/ndarray_consumer"));
+        Ok(Unit) <-
+            write_file(
+                child(consumer, "terlan.toml"),
+                String.concat(
+                    [
+                        "[package]\nname = \"terlan-ndarray-consumer\"\nversion = \"0.0.0\"\nnamespace = \"ndarray_consumer\"\n\n",
+                        "[build]\nsource_roots = [\"src\"]\nartifact = \"terlan-vm\"\n\n",
+                        "[dependencies]\nndarray = { git = \"",
+                        package,
+                        "\", rev = \"",
+                        String.trim(revision_output.stdout),
+                        "\" }\n",
+                    ],
+                ),
+            );
+        Ok(Unit) <- write_file(source, consumer_source());
+        Ok(_fetch) <- run_command(terlc, ["package", "fetch", consumer], temporary, environment, true)
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    if {
+        not File.exists(child(consumer, "terlan.lock")) -> Err("fresh consumer did not write terlan.lock");
+        true -> let {
+            Ok(Unit) <- remove_directory(package);
+            Ok(output) <-
+                run_command(
+                    terlc,
+                    [
+                        "run",
+                        consumer,
+                        "--target",
+                        "terlan-vm",
+                        "--out-dir",
+                        child(temporary, "consumer-build"),
+                    ],
+                    temporary,
+                    environment,
+                    true,
+                )
+        } else {
+            Err(reason) -> Err(String.append("fresh consumer execution failed: ", reason))
+        };
+        if {
+            not String.contains(output.stdout, "NDARRAY_PACKAGE_CONSUMER_OK")
+                or String.contains(output.stdout, "NDARRAY_PACKAGE_CONSUMER_FAILED") -> Err(output.stdout);
+            true -> case run_negative_consumers(
+    negative_cases(),
+    source,
+    consumer,
+    terlc,
+    temporary,
+    environment,
+    Json.array(),
+) {
+                Err(reason) -> Err(reason);
+                Ok(passed) ->
+                    Ok(
+                        Json.object()
+                            .put("negative_cases", passed)
+                            .put("revision_locked", Json.bool(true))
+                            .put("status", Json.string("passed")),
+                    )
+            }
+        }
+    }.
+
+write_report(path: String, value: Json): Result[Unit, String] ->
+    case Json.stringify_pretty(value) {
+        Err(reason) -> Err(reason.message);
+        Ok(source) -> write_file(path, String.append(source, "\n"))
+    }.
+
+operations(): Json ->
+    Json.array()
+        .push(Json.string("add"))
+        .push(Json.string("argpartition"))
+        .push(Json.string("argsort_unstable"))
+        .push(Json.string("cholesky"))
+        .push(Json.string("determinant"))
+        .push(Json.string("matmul"))
+        .push(Json.string("reshape"))
+        .push(Json.string("serialize"))
+        .push(Json.string("solve"))
+        .push(Json.string("svd"))
+        .push(Json.string("transpose"))
+        .push(Json.string("unique_all"))
+        .push(Json.string("is_in")).
+
+package_report(
+    abi_digest: String,
+    consumer: Json,
+    lifecycle: Json,
+    provider: NativeProvider,
+    tooling: Json,
+): Json ->
+    Json.object()
+        .put("abi_report_sha256", Json.string(abi_digest))
+        .put("consumer", consumer)
+        .put(
+            "dtypes",
+            Json.array()
+                .push(Json.string("bool8"))
+                .push(Json.string("float64"))
+                .push(Json.string("int64")),
+        )
+        .put(
+            "decomposition_provider",
+            Json.object()
+                .put("crate", Json.string("faer"))
+                .put("provider_mode", Json.string("pinned_rust"))
+                .put("version", Json.string("0.24.4")),
+        )
+        .put("lifecycle", lifecycle)
+        .put(
+            "openblas_provider",
+            Json.object()
+                .put("provider_mode", Json.string("pinned_source"))
+                .put("revision", Json.string(provider.revision)),
+        )
+        .put("operations", operations())
+        .put("package", Json.string("terlan-ndarray"))
+        .put("schema", Json.string("terlan.ndarray.package-report.v1"))
+        .put("status", Json.string("passed"))
+        .put(
+            "terlan_tests",
+            Json.object().put("passed", Json.int(109)).put("status", Json.string("passed")),
+        )
+        .put("tooling", tooling).
+
+prepare_helper(
+    generated: String,
+    target: String,
+    repository: String,
+    environment: List[EnvironmentEntry],
+): Result[String, String] ->
+    case Environment.get("TERLAN_NDARRAY_PACKAGE_HELPER_PATH") {
+        Some(helper) ->
+            if {
+                File.exists(helper) -> Ok(helper);
+                true -> Err(String.append("configured package helper does not exist: ", helper))
+            };
+        None ->
+            let helper = child(target, "debug/native-boundary-helper");
+            case run_command(
+    "cargo",
+    [
+        "build",
+        "--offline",
+        "--manifest-path",
+        child(generated, "native/rust/Cargo.toml"),
+        "--bin",
+        "native-boundary-helper",
+    ],
+    repository,
+    concat(environment, [Process.environment_entry("CARGO_TARGET_DIR", target)]),
+    true,
+) {
+                Err(reason) -> Err(reason);
+                Ok(_output) -> Ok(helper)
+            }
+    }.
+
+workflow(repository: String, terlc: String, temporary: String): Result[Unit, String] ->
+    let generated = child(repository, "generated");
+    let target = child(temporary, "cargo-target");
+    let {
+        Ok(provider) <- provider(repository);
+        Ok(helper) <- prepare_helper(generated, target, repository, provider.environment);
+        Ok(lifecycle) <- check_helper_lifecycle(helper, repository, provider.environment);
+        Ok(sources) <- native_sources(repository);
+        Ok(test_output) <-
+            run_command(
+                terlc,
+                ["run", child(repository, "scripts/CheckTerlanTests.terls"), "--", "--terlc", terlc],
+                repository,
+                concat(
+                    provider.environment,
+                    [
+                        Process.environment_entry(
+                            "TERLAN_NDARRAY_NATIVE_BOUNDARY_HELPER_PATH",
+                            helper,
+                        ),
+                    ],
+                ),
+                true,
+            )
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    if {
+        not String.contains(test_output.stdout, "terlan-ndarray Terlan tests passed: 109") -> Err(test_output.stdout);
+        true -> let environment =
+            concat(
+                provider.environment,
+                [
+                    Process.environment_entry("CARGO_NET_OFFLINE", "true"),
+                    Process.environment_entry("CARGO_TARGET_DIR", target),
+                    Process.environment_entry("TERLAN_NDARRAY_NATIVE_BOUNDARY_HELPER_PATH", helper),
+                ],
+            );
+        let {
+            Ok(consumer) <- fresh_consumer(generated, terlc, temporary, environment);
+            Ok(tooling) <- tooling(sources, provider, repository, temporary);
+            Ok(abi_digest) <- hash_file(child(repository, "reports/ndarray-abi-report.json"));
+            Ok(Unit) <- create_directory(child(repository, "reports"));
+            Ok(Unit) <-
+                write_report(
+                    child(repository, "reports/ndarray-package-report.json"),
+                    package_report(abi_digest, consumer, lifecycle, provider, tooling),
+                )
+        } else {
+            Err(reason) -> Err(reason)
+        };
+        Ok(Unit)
+    }.
+
+execute(terlc_argument: String): Bool ->
+    let repository = Environment.current_directory();
+    let terlc =
+        if {
+            String.starts_with(terlc_argument, "/") -> terlc_argument;
+            true -> child(repository, terlc_argument)
+        };
+    case Directory.create_temporary("terlan_ndarray_package_") {
+        Err(reason) -> failure(reason.message);
+        Ok(temporary) ->
+            let result = workflow(repository, terlc, temporary);
+            let cleanup = remove_directory(temporary);
+            case {result, cleanup} {
+                {Err(reason), _} -> failure(reason);
+                {_, Err(reason)} -> failure(reason);
+                {Ok(Unit), Ok(Unit)} ->
+                    let _printed = println("terlan-ndarray operations and package lifecycle passed");
+                    true
+            }
+    }.
+
+entry(): Bool ->
+    case {Arguments.count(), Arguments.get(0), Arguments.get(1)} {
+        {2, Some("--terlc"), Some(terlc)} -> execute(terlc);
+        _ -> failure("usage: CheckPackage.terls --terlc PATH")
+    }.
+
+assert(entry());
+Unit.

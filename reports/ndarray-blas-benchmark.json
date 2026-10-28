@@ -1,0 +1,113 @@
+{
+  "acceptance_threshold": null,
+  "openblas_threads": 1,
+  "package": "terlan-ndarray",
+  "provider_library_sha256": "b9eefadc45ef3331c13f091e8c411585ce458ddf0227bf9cf35394b26c3fd7c7",
+  "provider_version": "0.3.33",
+  "results": [
+    {
+      "samples": [
+        {
+          "checksum": "0.0090497737556561094",
+          "elapsed_ns": 1511,
+          "sample": 0
+        },
+        {
+          "checksum": "0.0090497737556561094",
+          "elapsed_ns": 1035,
+          "sample": 1
+        },
+        {
+          "checksum": "0.0090497737556561094",
+          "elapsed_ns": 551,
+          "sample": 2
+        }
+      ],
+      "size": 1
+    },
+    {
+      "samples": [
+        {
+          "checksum": "8.619909502262443",
+          "elapsed_ns": 2396,
+          "sample": 0
+        },
+        {
+          "checksum": "8.619909502262443",
+          "elapsed_ns": 1967,
+          "sample": 1
+        },
+        {
+          "checksum": "8.619909502262443",
+          "elapsed_ns": 1269,
+          "sample": 2
+        }
+      ],
+      "size": 16
+    },
+    {
+      "samples": [
+        {
+          "checksum": "35.687782805429855",
+          "elapsed_ns": 40458,
+          "sample": 0
+        },
+        {
+          "checksum": "35.687782805429855",
+          "elapsed_ns": 39164,
+          "sample": 1
+        },
+        {
+          "checksum": "35.687782805429855",
+          "elapsed_ns": 39016,
+          "sample": 2
+        }
+      ],
+      "size": 64
+    },
+    {
+      "samples": [
+        {
+          "checksum": "145.05882352941177",
+          "elapsed_ns": 954096,
+          "sample": 0
+        },
+        {
+          "checksum": "145.05882352941177",
+          "elapsed_ns": 846850,
+          "sample": 1
+        },
+        {
+          "checksum": "145.05882352941177",
+          "elapsed_ns": 689997,
+          "sample": 2
+        }
+      ],
+      "size": 256
+    },
+    {
+      "samples": [
+        {
+          "checksum": "583.57918552036199",
+          "elapsed_ns": 41466415,
+          "sample": 0
+        },
+        {
+          "checksum": "583.57918552036199",
+          "elapsed_ns": 42270860,
+          "sample": 1
+        },
+        {
+          "checksum": "583.57918552036199",
+          "elapsed_ns": 39339278,
+          "sample": 2
+        }
+      ],
+      "size": 1024
+    }
+  ],
+  "samples_per_size": 3,
+  "schema": "terlan.ndarray.blas-benchmark.v1",
+  "status": "recorded",
+  "warmup_runs": 1
+}

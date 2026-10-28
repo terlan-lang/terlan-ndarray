@@ -1,0 +1,307 @@
+module ndarray.LinearAlgebraTest.
+
+import std.core.Float.{abs}.
+
+import ndarray.Array.{dispose, dtype_code, from_complex, from_floats, from_floats_as, from_ints_as, inverse, live_count, shape, solve, to_floats_cast, to_ints_cast, zeros}.
+import ndarray.LinearAlgebra.{HermitianTriangle, NormOrder, QrMode, cholesky, cond, condition, det, eig, eigvals, eigvalsh, lstsq, matrix_power, matrix_rank, multi_dot, multi_dot_into, norm, qr, singular_values, svd, symmetric_eigen}.
+import ndarray.Numpy.{allclose}.
+
+close(actual: Float, expected: Float): Bool ->
+    abs(actual - expected) < 1e-12.
+
+@test
+pub condition_orders_match_numpy_matrix_norms(): Bool ->
+    let matrix = from_floats([1.0, 0.0, 1.0, 0.0, -2.0, 0.0, 0.0, 0.0, 3.0], [3, 3]);
+    let valid =
+        close(cond(matrix, 3), 4.0)
+            and close(cond(matrix, -3), 0.6666666666666666)
+            and close(cond(matrix, 1), 4.0)
+            and close(cond(matrix, -1), 0.5)
+            and close(cond(matrix, 4), 4.699290726623895);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub matrix_power_preserves_stacks_and_promotes_negative_integer_powers(): Bool ->
+    let shift_values = [0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
+    let shift = from_ints_as(shift_values, [4, 4], 6);
+    let stacked = from_ints_as(
+        [
+            0, 0, 0, 1,
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1,
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+        ],
+        [2, 4, 4],
+        6,
+    );
+    let squared = matrix_power(stacked, 2);
+    let inverse = matrix_power(shift, -1);
+    let valid =
+        shape(squared) == [2, 4, 4]
+            and dtype_code(squared) == 6
+            and to_ints_cast(squared) == [
+                0, 0, 1, 0,
+                0, 0, 0, 1,
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1,
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+            ]
+            and dtype_code(inverse) == 3
+            and to_floats_cast(inverse) == [
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0,
+                1.0, 0.0, 0.0, 0.0,
+            ];
+    dispose(inverse);
+    dispose(squared);
+    dispose(stacked);
+    dispose(shift);
+    valid and live_count() == 0.
+
+@test
+pub multi_dot_supports_vector_endpoints_and_atomic_destination_writes(): Bool ->
+    let matrix = from_floats([1.0, 2.0, 3.0, 4.0], [2, 2]);
+    let scale = from_floats([2.0, 0.0, 0.0, 2.0], [2, 2]);
+    let column = from_floats([1.0, 1.0], [2, 1]);
+    let row = from_floats([1.0, 1.0], [1, 2]);
+    let vector = from_floats([1.0, 2.0], [2]);
+    let destination = zeros([2, 2], 3);
+    let expected_destination = from_floats([6.0, 6.0, 14.0, 14.0], [2, 2]);
+    let expected_left = from_floats([7.0, 10.0], [2]);
+    let expected_right = from_floats([5.0, 11.0], [2]);
+    let expected_scalar = from_floats([27.0], []);
+    multi_dot_into(destination, [matrix, scale, column, row]);
+    let left = multi_dot([vector, matrix]);
+    let right = multi_dot([matrix, vector]);
+    let scalar = multi_dot([vector, matrix, vector]);
+    let valid =
+        allclose(destination, expected_destination, 1e-12, 1e-12, false)
+            and allclose(left, expected_left, 1e-12, 1e-12, false)
+            and allclose(right, expected_right, 1e-12, 1e-12, false)
+            and shape(scalar) == []
+            and allclose(scalar, expected_scalar, 1e-12, 1e-12, false);
+    dispose(scalar);
+    dispose(right);
+    dispose(left);
+    dispose(expected_scalar);
+    dispose(expected_right);
+    dispose(expected_left);
+    dispose(expected_destination);
+    dispose(destination);
+    dispose(vector);
+    dispose(row);
+    dispose(column);
+    dispose(scale);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub generalized_norm_supports_orders_axes_keepdims_complex_and_empty_arrays(): Bool ->
+    let vector = from_floats([1.0, 2.0, 3.0, 4.0], [4]);
+    let matrix = from_floats([1.0, 3.0, 5.0, 7.0], [2, 2]);
+    let axes = from_floats([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [2, 3]);
+    let batched = from_floats([1.0, 3.0, 5.0, 7.0, 1.0, 0.0, 0.0, 1.0], [2, 2, 2]);
+    let complex = from_complex([6.0, -6.0], [7.0, 7.0], [2], 12);
+    let empty = from_floats([], [0]);
+    let vector_l1 = norm(vector, 1.0);
+    let matrix_nuclear = norm(matrix, NormOrder.NUCLEAR);
+    let row_norms = norm(axes, 2.0, [1], true);
+    let batched_norms = norm(batched, NormOrder.NUCLEAR, [1, 2], true);
+    let complex_norm = norm(complex, 3.0);
+    let empty_norm = norm(empty, NormOrder.DEFAULT, [], true);
+    let valid =
+        to_floats_cast(vector_l1) == [10.0]
+            and close(to_floats_cast(matrix_nuclear)[0], 10.0)
+            and shape(row_norms) == [2, 1]
+            and close(to_floats_cast(row_norms)[0], 3.7416573867739413)
+            and close(to_floats_cast(row_norms)[1], 8.774964387392123)
+            and shape(batched_norms) == [2, 1, 1]
+            and close(to_floats_cast(batched_norms)[0], 10.0)
+            and close(to_floats_cast(batched_norms)[1], 2.0)
+            and dtype_code(complex_norm) == 11
+            and abs(to_floats_cast(complex_norm)[0] - 11.615898132184) < 1e-5
+            and shape(empty_norm) == [1]
+            and to_floats_cast(empty_norm) == [0.0];
+    dispose(empty_norm);
+    dispose(complex_norm);
+    dispose(batched_norms);
+    dispose(row_norms);
+    dispose(matrix_nuclear);
+    dispose(vector_l1);
+    dispose(empty);
+    dispose(complex);
+    dispose(batched);
+    dispose(axes);
+    dispose(matrix);
+    dispose(vector);
+    valid and live_count() == 0.
+
+@test
+pub decompositions_preserve_dtypes_batches_and_empty_matrix_shapes(): Bool ->
+    let positive = from_complex([5.0, 0.0, 1.0, 5.0], [0.0, 0.0, -2.0, 0.0], [2, 2], 12);
+    let factor = cholesky(positive);
+    let tall = from_floats_as([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [3, 2], 11);
+    let qr_factors = qr(tall, QrMode.REDUCED);
+    let q = qr_factors[0];
+    let r = qr_factors[1];
+    let empty_tall = zeros([4, 0], 3);
+    let svd_factors = svd(empty_tall, true);
+    let u = svd_factors[0];
+    let singular = svd_factors[1];
+    let vh = svd_factors[2];
+    let empty_batches = zeros([0, 1, 1], 2);
+    let eigen = symmetric_eigen(empty_batches, 0.0);
+    let eigenvalues = eigen[0];
+    let eigenvectors = eigen[1];
+    let empty_complex = zeros([0, 0], 12);
+    let hermitian_values = eigvalsh(empty_complex);
+    let upper_only = from_floats([0.0, 1.0, 77.0, 0.0], [2, 2]);
+    let upper_values = eigvalsh(upper_only, HermitianTriangle.UPPER);
+    let valid =
+        dtype_code(factor) == 12
+            and shape(factor) == [2, 2]
+            and dtype_code(q) == 11
+            and dtype_code(r) == 11
+            and shape(q) == [3, 2]
+            and shape(r) == [2, 2]
+            and shape(u) == [4, 4]
+            and shape(singular) == [0]
+            and shape(vh) == [0, 0]
+            and to_floats_cast(u) == [
+                1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0,
+            ]
+            and shape(eigenvalues) == [0, 1]
+            and shape(eigenvectors) == [0, 1, 1]
+            and dtype_code(eigenvalues) == 3
+            and shape(hermitian_values) == [0]
+            and dtype_code(hermitian_values) == 11
+            and close(to_floats_cast(upper_values)[0], -1.0)
+            and close(to_floats_cast(upper_values)[1], 1.0);
+    dispose(upper_values);
+    dispose(upper_only);
+    dispose(hermitian_values);
+    dispose(empty_complex);
+    dispose(eigenvectors);
+    dispose(eigenvalues);
+    dispose(empty_batches);
+    dispose(vh);
+    dispose(singular);
+    dispose(u);
+    dispose(empty_tall);
+    dispose(r);
+    dispose(q);
+    dispose(tall);
+    dispose(factor);
+    dispose(positive);
+    valid and live_count() == 0.
+
+@test
+pub stacked_system_operations_preserve_shapes_dtypes_and_broadcast_rhs(): Bool ->
+    let matrices = from_floats_as(
+        [2.0, 0.0, 0.0, 4.0, 1.0, 0.0, 0.0, 5.0],
+        [2, 2, 2],
+        11,
+    );
+    let rhs = from_floats_as([4.0, 20.0], [1, 2, 1], 11);
+    let expected_inverse = from_floats_as(
+        [0.5, 0.0, 0.0, 0.25, 1.0, 0.0, 0.0, 0.2],
+        [2, 2, 2],
+        11,
+    );
+    let determinants = det(matrices);
+    let conditions = condition(matrices, 2);
+    let solved = solve(matrices, rhs);
+    let inverted = inverse(matrices);
+    let eigen = eig(matrices);
+    let eigenvalues = eigen[0];
+    let eigenvectors = eigen[1];
+    let values_only = eigvals(matrices);
+    let valid =
+        shape(determinants) == [2]
+            and dtype_code(determinants) == 11
+            and to_floats_cast(determinants) == [8.0, 5.0]
+            and shape(conditions) == [2]
+            and close(to_floats_cast(conditions)[0], 2.0)
+            and close(to_floats_cast(conditions)[1], 5.0)
+            and shape(solved) == [2, 2, 1]
+            and to_floats_cast(solved) == [2.0, 5.0, 4.0, 4.0]
+            and allclose(inverted, expected_inverse, 1e-6, 1e-6, false)
+            and shape(eigenvalues) == [2, 2]
+            and shape(eigenvectors) == [2, 2, 2]
+            and dtype_code(eigenvalues) == 11
+            and shape(values_only) == [2, 2]
+            and dtype_code(values_only) == 11;
+    dispose(values_only);
+    dispose(eigenvectors);
+    dispose(eigenvalues);
+    dispose(inverted);
+    dispose(solved);
+    dispose(conditions);
+    dispose(determinants);
+    dispose(expected_inverse);
+    dispose(rhs);
+    dispose(matrices);
+    valid and live_count() == 0.
+
+@test
+pub rank_least_squares_and_qr_modes_match_numpy_result_contracts(): Bool ->
+    let stacked = from_floats(
+        [1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0],
+        [2, 2, 2],
+    );
+    let ranks = matrix_rank(stacked);
+    let coefficients = from_floats([1.0, 0.0, 0.0, 1.0], [2, 2]);
+    let rhs = from_floats([2.0, 3.0], [2]);
+    let least_squares = lstsq(coefficients, rhs);
+    let solution = least_squares[0];
+    let residuals = least_squares[1];
+    let solved_rank = least_squares[2];
+    let singular = least_squares[3];
+    let tall = from_floats([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [3, 2]);
+    let values_only = singular_values(tall);
+    let r_result = qr(tall, QrMode.R);
+    let r = r_result[0];
+    let raw_result = qr(tall, QrMode.RAW);
+    let householder = raw_result[0];
+    let tau = raw_result[1];
+    let valid =
+        shape(ranks) == [2]
+            and to_ints_cast(ranks) == [2, 1]
+            and shape(solution) == [2]
+            and to_floats_cast(solution) == [2.0, 3.0]
+            and shape(residuals) == [0]
+            and shape(solved_rank) == []
+            and to_ints_cast(solved_rank) == [2]
+            and shape(singular) == [2]
+            and to_floats_cast(singular) == [1.0, 1.0]
+            and shape(values_only) == [2]
+            and dtype_code(values_only) == 3
+            and shape(r) == [2, 2]
+            and shape(householder) == [2, 3]
+            and shape(tau) == [2];
+    dispose(tau);
+    dispose(householder);
+    dispose(r);
+    dispose(values_only);
+    dispose(tall);
+    dispose(singular);
+    dispose(solved_rank);
+    dispose(residuals);
+    dispose(solution);
+    dispose(rhs);
+    dispose(coefficients);
+    dispose(ranks);
+    dispose(stacked);
+    valid and live_count() == 0.

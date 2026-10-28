@@ -1,0 +1,337 @@
+import type ndarray.Array.{ArrayOrder}.
+
+import ndarray.Indexing.{take_indices_into, take_indices_mode}.
+
+/** Selects the triangular masking rule used by `mask_indices`. */
+pub type TriangleMask: Int = LOWER = 0 | UPPER = 1.
+
+/** Selects a NumPy-compatible automatic histogram bin estimator. */
+pub type HistogramEstimator: Int =
+    SQUARE_ROOT = 0
+    | STURGES = 1
+    | RICE = 2
+    | SCOTT = 3
+    | STONE = 4
+    | DOANE = 5
+    | FREEDMAN_DIACONIS = 6
+    | AUTO = 7.
+
+/** Selects Cartesian `xy` or matrix `ij` coordinate placement for `meshgrid`. */
+pub type MeshIndexing: Int = XY = 0 | IJ = 1.
+
+/** Selects how out-of-bounds coordinates are handled by `ravel_multi_index`. */
+pub type RavelMode: Int = RAISE = 0 | WRAP = 1 | CLIP = 2.
+
+/** Selects how `take` handles indexes outside the selected axis. */
+pub type TakeMode: Int = RAISE = 0 | WRAP = 1 | CLIP = 2.
+
+/** Takes values with an integer index Array while preserving every index dimension. */
+pub take(
+    array: Array,
+    indices: Array,
+    axis: Int,
+    mode: TakeMode = TakeMode.RAISE,
+): Array ->
+    take_indices_mode(array, indices, axis, mode).
+
+/** Atomically writes a shaped `take` result into an exact destination Array. */
+pub take_into(
+    destination: Array,
+    array: Array,
+    indices: Array,
+    axis: Int,
+    mode: TakeMode = TakeMode.RAISE,
+): Unit ->
+    take_indices_into(destination, array, indices, axis, mode).
+
+/** Represents one array or recursively nested list accepted by `block`. */
+pub type Block = Array | List[Block].
+
+/** Collects block leaves in source traversal order. */
+block_arrays(value: Block): List[Array] ->
+    case value {
+        [] -> [];
+        [first | rest] ->
+            std.collections.List.concat(block_arrays(first), block_array_children(rest));
+        array -> [array]
+    }.
+
+/** Collects leaves from one list without changing their source order. */
+block_array_children(values: List[Block]): List[Array] ->
+    case values {
+        [] -> [];
+        [first | rest] ->
+            std.collections.List.concat(block_arrays(first), block_array_children(rest))
+    }.
+
+/** Prefix-encodes one recursive block tree for the package-native boundary. */
+block_layout(value: Block): List[Int] ->
+    block_layout_pending([value], []).
+
+/** Prefix-encodes nodes from an explicit depth-first work list. */
+block_layout_pending(pending: List[Block], layout: List[Int]): List[Int] ->
+    case pending {
+        [] -> block_reverse_ints(layout, []);
+        [value | remaining] ->
+            case value {
+                [] -> block_layout_pending(remaining, [0 | layout]);
+                [first | rest] ->
+                    let children = [first | rest];
+                    let reversed = block_reverse_blocks(children, []);
+                    block_layout_pending(
+                        block_reverse_blocks(reversed, remaining),
+                        [block_list_length(children, 0) | layout],
+                    );
+                _array -> block_layout_pending(remaining, [-1 | layout])
+            }
+    }.
+
+/** Reverses block nodes onto an existing work-list tail. */
+block_reverse_blocks(values: List[Block], tail: List[Block]): List[Block] ->
+    case values {
+        [] -> tail;
+        [first | rest] -> block_reverse_blocks(rest, [first | tail])
+    }.
+
+/** Restores collected layout tokens to source order. */
+block_reverse_ints(values: List[Int], tail: List[Int]): List[Int] ->
+    case values {
+        [] -> tail;
+        [first | rest] -> block_reverse_ints(rest, [first | tail])
+    }.
+
+/** Counts one block-child list using a constant-stack tail recursion. */
+block_list_length(values: List[Block], count: Int): Int ->
+    case values {
+        [] -> count;
+        [_first | rest] -> block_list_length(rest, count + 1)
+    }.
+
+/**
+ * Assembles an owned array from recursively nested blocks using NumPy axis and rank rules.
+ */
+pub block(value: Block): Array ->
+    block_native(block_arrays(value), block_layout(value)).
+
+/** Returns an empty coordinate-grid list for an empty input sequence. */
+pub meshgrid(): List[Array] ->
+    [].
+
+/**
+ * Builds coordinate grids while preserving each input dtype and explicit sparse/copy semantics.
+ */
+pub meshgrid(
+    first: Array,
+    remaining: List[Array],
+    indexing: MeshIndexing = MeshIndexing.XY,
+    sparse: Bool = false,
+    copy: Bool = true,
+): List[Array] ->
+    meshgrid_native(first, remaining, indexing, sparse, copy).
+
+/**
+ * Returns square-matrix coordinates selected by a typed triangular mask.
+ */
+pub mask_indices(size: Int, mask: TriangleMask, offset: Int = 0): Array ->
+    case mask {
+        TriangleMask.LOWER -> tril_indices(size, offset);
+        TriangleMask.UPPER -> triu_indices(size, offset)
+    }.
+
+/** Writes a scalar across a diagonal, optionally wrapping through tall matrices. */
+pub fill_diagonal(array: Array, value: Float, wrap: Bool = false): Unit ->
+    fill_diagonal_native(array, value, wrap).
+
+/** Lowers an admitted index memory order to its native ABI code. */
+index_order_code(order: ArrayOrder): Int ->
+    case order {
+        ArrayOrder.C -> 0;
+        ArrayOrder.FORTRAN -> 1;
+        ArrayOrder.KEEP -> -1;
+        ArrayOrder.ANY -> -1
+    }.
+
+/** Converts packed coordinates to flat indexes with explicit per-axis modes and order. */
+pub ravel_multi_index(
+    coordinates: Array,
+    dimensions: List[Int],
+    modes: List[RavelMode] = [RavelMode.RAISE],
+    order: ArrayOrder = ArrayOrder.C,
+): Array ->
+    ravel_multi_index_native(coordinates, dimensions, modes, index_order_code(order)).
+
+/** Converts flat indexes into coordinate arrays with explicit memory order. */
+pub unravel_index(
+    indexes: Array,
+    dimensions: List[Int],
+    order: ArrayOrder = ArrayOrder.C,
+): List[Array] ->
+    unravel_index_native(indexes, dimensions, index_order_code(order)).
+
+/** Creates an array by broadcasting an Array-valued fill pattern. */
+pub full_from(shape: List[Int], fill_values: Array): Array ->
+    let output = zeros(shape, dtype_code(fill_values));
+    copyto(output, fill_values);
+    output.
+
+/** Broadcasts and copies values under an explicit numerical casting rule. */
+pub copyto_with_casting(destination: Array, source: Array, casting: CastingRule): Unit ->
+    copyto(
+        destination,
+        source,
+        case casting {
+            CastingRule.NO -> 0;
+            CastingRule.EQUIVALENT -> 1;
+            CastingRule.SAFE -> 2;
+            CastingRule.SAME_KIND -> 3;
+            CastingRule.UNSAFE -> 4
+        },
+    ).
+
+/** Broadcasts a source and truth mask before copying selected values. */
+pub copyto_where(
+    destination: Array,
+    source: Array,
+    mask: Array,
+    casting: CastingRule,
+): Unit ->
+    copyto(
+        destination,
+        source,
+        mask,
+        case casting {
+            CastingRule.NO -> 0;
+            CastingRule.EQUIVALENT -> 1;
+            CastingRule.SAFE -> 2;
+            CastingRule.SAME_KIND -> 3;
+            CastingRule.UNSAFE -> 4
+        },
+    ).
+
+/** Returns packed explicit-edge offsets beginning at `offset`. */
+histogramdd_edge_offsets(edges: List[Array], offset: Int): List[Int] ->
+    case edges {
+        [] -> [offset];
+        [edge | rest] -> let [length] = shape(edge);
+            [offset | histogramdd_edge_offsets(rest, offset + length)]
+    }.
+
+/** Returns the exact dtype identifier for each explicit edge vector. */
+histogramdd_edge_dtypes(edges: List[Array]): List[Int] ->
+    case edges {
+        [] -> [];
+        [edge | rest] -> [dtype_code(edge) | histogramdd_edge_dtypes(rest)]
+    }.
+
+/** Builds a multidimensional histogram from one bin count per axis. */
+pub histogramdd_bins(
+    samples: Array,
+    bins: List[Int],
+    density: Bool = false,
+): List[Array] ->
+    let bins_array = from_ints(bins, [length(bins)]);
+    let result = histogramdd_bins_array(samples, bins_array, density);
+    dispose(bins_array);
+    result.
+
+/** Builds a multidimensional histogram from per-axis counts and ranges. */
+pub histogramdd_range(
+    samples: Array,
+    bins: List[Int],
+    minima: List[Float],
+    maxima: List[Float],
+    density: Bool = false,
+): List[Array] ->
+    let bins_array = from_ints(bins, [length(bins)]);
+    let minima_array = from_floats(minima, [length(minima)]);
+    let maxima_array = from_floats(maxima, [length(maxima)]);
+    let result = histogramdd_range_arrays(
+        samples,
+        bins_array,
+        minima_array,
+        maxima_array,
+        density,
+    );
+    dispose(maxima_array);
+    dispose(minima_array);
+    dispose(bins_array);
+    result.
+
+/** Builds a multidimensional histogram from explicit edge vectors. */
+pub histogramdd_edges(
+    samples: Array,
+    edges: List[Array],
+    density: Bool = false,
+): List[Array] ->
+    let offset_values = histogramdd_edge_offsets(edges, 0);
+    let dtype_values = histogramdd_edge_dtypes(edges);
+    let packed = concatenate(edges, 0);
+    let offsets = from_ints(offset_values, [length(offset_values)]);
+    let dtypes = from_ints(dtype_values, [length(dtype_values)]);
+    let result = histogramdd_edges_packed(samples, packed, offsets, dtypes, density);
+    dispose(dtypes);
+    dispose(offsets);
+    dispose(packed);
+    result.
+
+/** Builds a weighted multidimensional histogram from one bin count per axis. */
+pub histogramdd_weighted_bins(
+    samples: Array,
+    weights: Array,
+    bins: List[Int],
+    density: Bool = false,
+): List[Array] ->
+    let bins_array = from_ints(bins, [length(bins)]);
+    let result = histogramdd_weighted_bins_array(samples, weights, bins_array, density);
+    dispose(bins_array);
+    result.
+
+/** Builds a weighted multidimensional histogram from per-axis ranges. */
+pub histogramdd_weighted_range(
+    samples: Array,
+    weights: Array,
+    bins: List[Int],
+    minima: List[Float],
+    maxima: List[Float],
+    density: Bool = false,
+): List[Array] ->
+    let bins_array = from_ints(bins, [length(bins)]);
+    let minima_array = from_floats(minima, [length(minima)]);
+    let maxima_array = from_floats(maxima, [length(maxima)]);
+    let result = histogramdd_weighted_range_arrays(
+        samples,
+        weights,
+        bins_array,
+        minima_array,
+        maxima_array,
+        density,
+    );
+    dispose(maxima_array);
+    dispose(minima_array);
+    dispose(bins_array);
+    result.
+
+/** Builds a weighted multidimensional histogram from explicit edge vectors. */
+pub histogramdd_weighted_edges(
+    samples: Array,
+    weights: Array,
+    edges: List[Array],
+    density: Bool = false,
+): List[Array] ->
+    let offset_values = histogramdd_edge_offsets(edges, 0);
+    let dtype_values = histogramdd_edge_dtypes(edges);
+    let packed = concatenate(edges, 0);
+    let offsets = from_ints(offset_values, [length(offset_values)]);
+    let dtypes = from_ints(dtype_values, [length(dtype_values)]);
+    let result = histogramdd_weighted_edges_packed(
+        samples,
+        weights,
+        packed,
+        offsets,
+        dtypes,
+        density,
+    );
+    dispose(dtypes);
+    dispose(offsets);
+    dispose(packed);
+    result.

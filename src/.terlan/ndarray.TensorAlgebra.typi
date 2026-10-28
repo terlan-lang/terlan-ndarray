@@ -1,0 +1,31 @@
+//! General tensor contraction, Einstein summation, Kronecker products, and cross products.
+
+module ndarray.TensorAlgebra.
+
+/// Computes a three-component vector cross product along one normalized axis.
+
+pub cross(lhs: Array, rhs: Array, axis: Int): Array.
+
+/// Executes an Einstein summation expression over one or more arrays.
+
+pub einsum(operands: List[Array], equation: String): Array.
+
+/// Executes Einstein summation using a typed output memory-order policy.
+
+pub einsum(operands: List[Array], equation: String, order: ndarray.Array.ArrayOrder): Array.
+
+/// Executes Einstein summation and atomically writes the result into an exactly shaped destination.
+
+pub einsum_into(destination: Array, operands: List[Array], equation: String): Unit.
+
+/// Executes Einstein summation using an explicit C, Fortran, keep, or any output-order policy.
+
+pub einsum_ordered(operands: List[Array], equation: String, order: Int): Array.
+
+/// Computes a NumPy-compatible rank-padded Kronecker product.
+
+pub kron(lhs: Array, rhs: Array): Array.
+
+/// Contracts two tensors over paired normalized axis lists.
+
+pub tensordot(lhs: Array, rhs: Array, lhs_axes: List[Int], rhs_axes: List[Int]): Array.

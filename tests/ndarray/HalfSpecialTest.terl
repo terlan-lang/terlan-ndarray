@@ -1,0 +1,15 @@
+module ndarray.HalfSpecialTest.
+
+import ndarray.Array.{dispose, from_floats_as, live_count, nextafter}.
+import ndarray.Numpy.{allclose}.
+
+@test
+pub float16_nextafter_overflow_and_infinite_spacing_match_numpy(): Bool ->
+    let infinity = from_floats_as([65520.0], [1], 14);
+    let maximum = from_floats_as([65504.0], [1], 14);
+    let overflowed = nextafter(maximum, infinity);
+    let valid = allclose(overflowed, infinity, 0.0, 0.0, false);
+    dispose(overflowed);
+    dispose(maximum);
+    dispose(infinity);
+    valid and live_count() == 0.

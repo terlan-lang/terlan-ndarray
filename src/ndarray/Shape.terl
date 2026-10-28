@@ -1,0 +1,155 @@
+/**
+ * NumPy-compatible rank adaptation, flattening, axis movement, and geometric views.
+ */
+module ndarray.Shape.
+
+import ndarray.Array.{Array, ArrayOrder}.
+
+/**
+ * Returns a view with at least one dimension.
+ */
+@compiler.native {ndarray.shape.atleast_1d}
+pub atleast_1d(array: Array): Array ->
+    native.
+
+/**
+ * Returns a view with at least two dimensions, promoting vectors to rows.
+ */
+@compiler.native {ndarray.shape.atleast_2d}
+pub atleast_2d(array: Array): Array ->
+    native.
+
+/**
+ * Returns a view with at least three dimensions using NumPy rank-promotion rules.
+ */
+@compiler.native {ndarray.shape.atleast_3d}
+pub atleast_3d(array: Array): Array ->
+    native.
+
+/**
+ * Returns a contiguous rank-one view or materialization in logical row-major order.
+ */
+@compiler.native {ndarray.shape.ravel}
+pub ravel(array: Array): Array ->
+    native.
+
+/**
+ * Ravels using explicit C, Fortran, input-compatible, or physical traversal order.
+ */
+@compiler.native {ndarray.shape.ravel_ordered}
+pub ravel(array: Array, order: Int): Array ->
+    native.
+
+/**
+ * Returns an independent rank-one copy in logical row-major order.
+ */
+@compiler.native {ndarray.shape.flatten}
+pub flatten(array: Array): Array ->
+    native.
+
+/**
+ * Flattens into an independent copy using explicit C, Fortran, input-compatible, or physical traversal order.
+ */
+@compiler.native {ndarray.shape.flatten_ordered}
+pub flatten(array: Array, order: Int): Array ->
+    native.
+
+/**
+ * Moves distinct source axes to distinct destinations while preserving all other axis order.
+ */
+@compiler.native {ndarray.shape.moveaxis}
+pub moveaxis(array: Array, sources: List[Int], destinations: List[Int]): Array ->
+    native.
+
+/**
+ * Rolls one axis backward to an insertion position.
+ */
+@compiler.native {ndarray.shape.rollaxis}
+pub rollaxis(array: Array, axis: Int, start: Int): Array ->
+    native.
+
+/**
+ * Returns a shared negative-stride view with every axis reversed.
+ */
+@compiler.native {ndarray.shape.flip_all}
+pub flip_all(array: Array): Array ->
+    native.
+
+/**
+ * Returns a shared view reversed along axis zero.
+ */
+@compiler.native {ndarray.shape.flipud}
+pub flipud(array: Array): Array ->
+    native.
+
+/**
+ * Returns a shared view reversed along axis one.
+ */
+@compiler.native {ndarray.shape.fliplr}
+pub fliplr(array: Array): Array ->
+    native.
+
+/**
+ * Rotates matrix planes counterclockwise by a multiple of 90 degrees.
+ */
+@compiler.native {ndarray.shape.rot90}
+pub rot90(array: Array, rotations: Int, axis_a: Int, axis_b: Int): Array ->
+    native.
+
+/**
+ * Flattens every input in logical C order and concatenates the resulting vectors.
+ */
+@compiler.native {ndarray.shape.concatenate_flat}
+pub concatenate_flat(arrays: List[Array]): Array ->
+    native.
+
+/**
+ * Concatenates arrays and converts the result under an explicit dtype and casting policy.
+ */
+@compiler.native {ndarray.shape.concatenate_with_dtype}
+pub concatenate_with_dtype(arrays: List[Array], axis: Int, dtype: Int, casting: Int): Array ->
+    native.
+
+/**
+ * Flattens and concatenates arrays before explicit dtype conversion.
+ */
+@compiler.native {ndarray.shape.concatenate_flat_with_dtype}
+pub concatenate_flat_with_dtype(arrays: List[Array], dtype: Int, casting: Int): Array ->
+    native.
+
+/**
+ * Concatenates arrays into an exact-shape destination under an explicit casting policy.
+ */
+@compiler.native {ndarray.shape.concatenate_into}
+pub concatenate_into(arrays: List[Array], axis: Int, destination: Array, casting: Int): Unit ->
+    native.
+
+/**
+ * Flattens and concatenates arrays into an exact-shape destination.
+ */
+@compiler.native {ndarray.shape.concatenate_flat_into}
+pub concatenate_flat_into(arrays: List[Array], destination: Array, casting: Int): Unit ->
+    native.
+
+/**
+ * Returns the ABI code for an ordered shape traversal.
+ */
+shape_order_code(order: ArrayOrder): Int ->
+    case order {
+        ArrayOrder.C -> 0;
+        ArrayOrder.FORTRAN -> 1;
+        ArrayOrder.KEEP -> 2;
+        ArrayOrder.ANY -> 3
+    }.
+
+/**
+ * Ravels with explicit C, Fortran, input-compatible, or physical traversal order.
+ */
+pub ravel_with_order(array: Array, order: ArrayOrder): Array ->
+    ravel(array, shape_order_code(order)).
+
+/**
+ * Flattens with explicit C, Fortran, input-compatible, or physical traversal order.
+ */
+pub flatten_with_order(array: Array, order: ArrayOrder): Array ->
+    flatten(array, shape_order_code(order)).

@@ -1,0 +1,8 @@
+module=ndarray.ShapeTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=10131590212480734806
+interface_hash=5728386753270450141
+interface_doc_hash=2074946013508195877
+deps=0

@@ -1,0 +1,263 @@
+/**
+ * Matrix decompositions, condition analysis, powers, pseudoinverses, and tensor equation solving.
+ */
+module ndarray.LinearAlgebra.
+
+import ndarray.Array.
+
+/**
+ * Computes one determinant per square matrix while preserving leading batch dimensions.
+ */
+@compiler.native {ndarray.array.det}
+pub det(array: Array): Array ->
+    native.
+
+/**
+ * Solves a finite real least-squares system through an SVD pseudoinverse.
+ */
+@compiler.native {ndarray.array.least_squares}
+pub least_squares(matrix: Array, rhs: Array, tolerance: Float): Array ->
+    native.
+
+/**
+ * Computes stack-valued numerical ranks with an explicit tolerance and Hermitian policy.
+ */
+@compiler.native {ndarray.array.matrix_rank_general}
+matrix_rank_general(array: Array, tolerance: Float, hermitian: Bool): Array ->
+    native.
+
+/**
+ * Returns solution, residuals, rank, and singular values for one least-squares system.
+ */
+@compiler.native {ndarray.array.lstsq}
+lstsq_general(coefficients: Array, rhs: Array, rcond: Float): List[Array] ->
+    native.
+
+/**
+ * Computes a lower-triangular Cholesky factor for a symmetric positive-definite matrix.
+ */
+@compiler.native {ndarray.array.cholesky}
+pub cholesky(array: Array): Array ->
+    native.
+
+/**
+ * Implements the legacy boolean QR ABI behind the typed public mode contract.
+ */
+@compiler.native {ndarray.array.qr}
+qr_factors(array: Array, reduced: Bool): List[Array] ->
+    native.
+
+/**
+ * Computes singular-value factors and returns U, singular values, and Vh.
+ */
+@compiler.native {ndarray.array.svd}
+pub svd(array: Array, full_matrices: Bool): List[Array] ->
+    native.
+
+/**
+ * Computes singular values without materializing singular vectors.
+ */
+@compiler.native {ndarray.array.singular_values}
+pub singular_values(array: Array): Array ->
+    native.
+
+/**
+ * Computes reduced, complete, R-only, or raw QR outputs under a stable mode code.
+ */
+@compiler.native {ndarray.array.qr_mode}
+qr_mode(array: Array, mode: Int): List[Array] ->
+    native.
+
+/**
+ * Computes a symmetric eigendecomposition and returns ascending eigenvalues followed by eigenvectors.
+ */
+@compiler.native {ndarray.array.symmetric_eigen}
+pub symmetric_eigen(array: Array, tolerance: Float): List[Array] ->
+    native.
+
+/**
+ * Computes a Hermitian eigendecomposition from a selected triangle.
+ */
+@compiler.native {ndarray.array.symmetric_eigen_general}
+symmetric_eigen_general(array: Array, tolerance: Float, upper: Bool): List[Array] ->
+    native.
+
+/**
+ * Computes a matrix condition number for a selected spectral, column-sum, or row-sum norm.
+ */
+@compiler.native {ndarray.array.cond}
+pub cond(array: Array, order: Int): Float ->
+    native.
+
+/**
+ * Computes general complex eigenvalues and right eigenvectors.
+ */
+@compiler.native {ndarray.array.eig}
+pub eig(array: Array): List[Array] ->
+    native.
+
+/**
+ * Computes one condition number per matrix while preserving leading batch dimensions.
+ */
+@compiler.native {ndarray.array.condition}
+pub condition(array: Array, order: Int): Array ->
+    native.
+
+/**
+ * Computes general complex eigenvalues without materializing eigenvectors.
+ */
+@compiler.native {ndarray.array.eigvals}
+pub eigvals(array: Array): Array ->
+    native.
+
+/**
+ * Computes ascending eigenvalues of a finite Hermitian matrix.
+ */
+@compiler.native {ndarray.array.eigvalsh}
+pub eigvalsh(array: Array): Array ->
+    native.
+
+/**
+ * Computes Hermitian eigenvalues from a selected triangle.
+ */
+@compiler.native {ndarray.array.eigvalsh_general}
+eigvalsh_general(array: Array, upper: Bool): Array ->
+    native.
+
+/**
+ * Raises a square matrix to an integer power by checked exponentiation.
+ */
+@compiler.native {ndarray.array.matrix_power}
+pub matrix_power(array: Array, exponent: Int): Array ->
+    native.
+
+/**
+ * Multiplies a chain of arrays using package matmul semantics.
+ */
+@compiler.native {ndarray.array.multi_dot}
+pub multi_dot(arrays: List[Array]): Array ->
+    native.
+
+/**
+ * Multiplies a chain and atomically writes the result into a validated destination.
+ */
+@compiler.native {ndarray.array.multi_dot_into}
+pub multi_dot_into(destination: Array, arrays: List[Array]): Unit ->
+    native.
+
+/**
+ * Computes the default Euclidean vector or Frobenius matrix norm.
+ */
+@compiler.native {ndarray.array.norm}
+pub norm(array: Array): Float ->
+    native.
+
+/**
+ * Computes a generalized vector or matrix norm over normalized axes.
+ */
+@compiler.native {ndarray.array.norm_general}
+norm_general(
+    array: Array,
+    order_kind: Int,
+    order_value: Float,
+    axes: List[Int],
+    keepdims: Bool,
+): Array ->
+    native.
+
+/**
+ * Computes an SVD pseudoinverse with an explicit singular-value cutoff.
+ */
+@compiler.native {ndarray.array.pinv}
+pub pinv(array: Array, tolerance: Float): Array ->
+    native.
+
+/**
+ * Computes determinant sign and logarithmic absolute determinant as scalar arrays.
+ */
+@compiler.native {ndarray.array.slogdet}
+pub slogdet(array: Array): List[Array] ->
+    native.
+
+/**
+ * Computes the inverse of a tensor interpreted as a square matrix split at an index.
+ */
+@compiler.native {ndarray.array.tensorinv}
+pub tensorinv(array: Array, index: Int): Array ->
+    native.
+
+/**
+ * Solves a tensor equation after optionally moving selected coefficient axes to the end.
+ */
+@compiler.native {ndarray.array.tensorsolve}
+pub tensorsolve(coefficients: Array, rhs: Array, axes: List[Int]): Array ->
+    native.
+
+/**
+ * Selects a named vector or matrix norm.
+ */
+pub type NormOrder: Int = DEFAULT = 0 | NEG_INFINITY = 1 | INFINITY = 2 | FROBENIUS = 3 | NUCLEAR = 4.
+
+/**
+ * Selects the lower or upper triangle of a Hermitian matrix.
+ */
+pub type HermitianTriangle: Int = LOWER = 0 | UPPER = 1.
+
+/**
+ * Selects the result contract produced by a QR decomposition.
+ */
+pub type QrMode: Int = REDUCED = 0 | COMPLETE = 1 | R = 2 | RAW = 3.
+
+/**
+ * Computes a Hermitian eigendecomposition from the selected triangle.
+ */
+pub symmetric_eigen(array: Array, tolerance: Float, triangle: HermitianTriangle): List[Array] ->
+    symmetric_eigen_general(array, tolerance, triangle == HermitianTriangle.UPPER).
+
+/**
+ * Computes Hermitian eigenvalues from the selected triangle.
+ */
+pub eigvalsh(array: Array, triangle: HermitianTriangle): Array ->
+    eigvalsh_general(array, triangle == HermitianTriangle.UPPER).
+
+/**
+ * Computes numerical rank for a scalar, vector, matrix, or matrix stack.
+ */
+pub matrix_rank(array: Array, tolerance: Float = 0.0, hermitian: Bool = false): Array ->
+    matrix_rank_general(array, tolerance, hermitian).
+
+/**
+ * Returns solution, residuals, rank, and singular values for a least-squares system.
+ */
+pub lstsq(coefficients: Array, rhs: Array, rcond: Float = 0.0): List[Array] ->
+    lstsq_general(coefficients, rhs, rcond).
+
+/**
+ * Computes reduced, complete, R-only, or raw QR output.
+ */
+pub qr(array: Array, mode: QrMode = QrMode.REDUCED): List[Array] ->
+    qr_mode(array, mode).
+
+/**
+ * Computes a named norm over all dimensions or one/two explicit axes.
+ */
+pub norm(array: Array, order: NormOrder, axes: List[Int] = [], keepdims: Bool = false): Array ->
+    norm_general(
+        array,
+        if {
+            order == NormOrder.NEG_INFINITY -> 1;
+            order == NormOrder.INFINITY -> 2;
+            order == NormOrder.FROBENIUS -> 3;
+            order == NormOrder.NUCLEAR -> 4;
+            true -> 0
+        },
+        0.0,
+        axes,
+        keepdims,
+    ).
+
+/**
+ * Computes a finite p-norm over all dimensions or one/two explicit axes.
+ */
+pub norm(array: Array, order: Float, axes: List[Int] = [], keepdims: Bool = false): Array ->
+    norm_general(array, 5, order, axes, keepdims).

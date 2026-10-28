@@ -1,0 +1,8 @@
+module=ndarray.AbiTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=868483152168166883
+interface_hash=15789379022159501825
+interface_doc_hash=17843093439783220235
+deps=0

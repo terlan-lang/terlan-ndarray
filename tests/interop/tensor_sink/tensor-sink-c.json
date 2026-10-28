@@ -1,0 +1,176 @@
+{
+  "schema": "terlan.c-abi.binding.v1",
+  "package": {
+    "namespace": "tensor_sink",
+    "adapter": "c-abi",
+    "crate_name": "terlan-tensor-sink-native"
+  },
+  "validation": {
+    "deterministic_regeneration": true,
+    "warning_denied_build": true,
+    "ownership_lifecycle": true,
+    "error_translation": true,
+    "smoke": "package_owned_live"
+  },
+  "c_metadata": {
+    "schema": "terlan.c.metadata.v1",
+    "producer": {
+      "name": "terlan-curated-metadata",
+      "version": "tensor-sink-0.0.7-fixture-v1",
+      "format": "reviewed-declaration-json"
+    },
+    "abi_version": 1,
+    "header": "tensor_sink.h",
+    "sources": ["tensor_sink.c"],
+    "symbols": [
+      {
+        "id": "function.consume",
+        "c_name": "terlan_tensor_sink_v1_consume",
+        "kind": "function",
+        "status": "bind",
+        "returns": "int32_t",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {
+            "name": "packet",
+            "c_type": "const uint8_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "packet_length", "bytes": true}
+          },
+          {"name": "packet_length", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {"name": "out_sum", "c_type": "int64_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
+        "id": "function.reject",
+        "c_name": "terlan_tensor_sink_v1_reject",
+        "kind": "function",
+        "status": "bind",
+        "returns": "int32_t",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {
+            "name": "packet",
+            "c_type": "const uint8_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "packet_length", "bytes": true}
+          },
+          {"name": "packet_length", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {"name": "out_sum", "c_type": "int64_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
+        "id": "function.consume_pair",
+        "c_name": "terlan_tensor_sink_v1_consume_pair",
+        "kind": "function",
+        "status": "bind",
+        "returns": "int32_t",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {
+            "name": "first_packet",
+            "c_type": "const uint8_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "first_packet_length", "bytes": true}
+          },
+          {"name": "first_packet_length", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {
+            "name": "second_packet",
+            "c_type": "const uint8_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "second_packet_length", "bytes": true}
+          },
+          {"name": "second_packet_length", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {"name": "out_sum", "c_type": "int64_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      },
+      {
+        "id": "function.crash",
+        "c_name": "terlan_tensor_sink_v1_crash",
+        "kind": "function",
+        "status": "bind",
+        "returns": "int32_t",
+        "error_model": "status_code",
+        "success_code": 0,
+        "parameters": [
+          {
+            "name": "packet",
+            "c_type": "const uint8_t *",
+            "direction": "input",
+            "ownership": "borrowed_call",
+            "input_array": {"length_parameter": "packet_length", "bytes": true}
+          },
+          {"name": "packet_length", "c_type": "int64_t", "direction": "input", "ownership": "value"},
+          {"name": "out_sum", "c_type": "int64_t *", "direction": "output", "ownership": "borrowed_call"}
+        ]
+      }
+    ]
+  },
+  "modules": [
+    {
+      "module": "tensor_sink.Consumer",
+      "documentation": "Independent native tensor packet consumer fixture.",
+      "types": [],
+      "functions": [
+        {
+          "name": "consume",
+          "operation": "tensor_sink.consumer.consume",
+          "c_symbol": "function.consume",
+          "role": "free_function",
+          "args": [{"name": "packet", "ty": "Bytes"}],
+          "returns": "Int",
+          "blocking": "fast",
+          "resource": "value",
+          "documentation": "Validates and sums one Int64 tensor packet.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "reject",
+          "operation": "tensor_sink.consumer.reject",
+          "c_symbol": "function.reject",
+          "role": "free_function",
+          "args": [{"name": "packet", "ty": "Bytes"}],
+          "returns": "Int",
+          "blocking": "fast",
+          "resource": "value",
+          "documentation": "Rejects one otherwise valid tensor packet.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "consume_pair",
+          "operation": "tensor_sink.consumer.consume_pair",
+          "c_symbol": "function.consume_pair",
+          "role": "free_function",
+          "args": [
+            {"name": "first_packet", "ty": "Bytes"},
+            {"name": "second_packet", "ty": "Bytes"}
+          ],
+          "returns": "Int",
+          "blocking": "fast",
+          "resource": "value",
+          "documentation": "Validates and sums two Int64 tensor packets.",
+          "generated_smoke": "package_owned"
+        },
+        {
+          "name": "crash",
+          "operation": "tensor_sink.consumer.crash",
+          "c_symbol": "function.crash",
+          "role": "free_function",
+          "args": [{"name": "packet", "ty": "Bytes"}],
+          "returns": "Int",
+          "blocking": "fast",
+          "resource": "value",
+          "documentation": "Terminates the helper after accepting one tensor packet.",
+          "generated_smoke": "package_owned"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,604 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Measures executable Terlan evidence against the frozen NumPy test inventory.
+ */
+import std.collections.List.{length, subtract}.
+import std.collections.Map.
+import std.core.Option.{None, Some}.
+import std.core.Ordering.{Lt}.
+import std.core.Result.{Err, Ok}.
+import std.core.{Int, String, Unit}.
+import std.data.Json.
+import std.io.Console.{eprintln, println}.
+import std.io.File.{read_text, write_text}.
+import std.system.Arguments.
+
+import type std.core.Option.
+import type std.data.Json.
+
+struct UpstreamTest {
+    id: String,
+    operations: List[String],
+}.
+
+struct Count {
+    name: String,
+    count: Int,
+}.
+
+struct CountSelection {
+    found: Bool,
+    value: Count,
+}.
+
+struct OperationCounts {
+    values: Map[String, Int],
+    names: List[String],
+}.
+
+struct Classification {
+    valid: Bool,
+    ids: List[String],
+    occupied: Map[String, Bool],
+    counts: List[Count],
+}.
+
+struct Inventory {
+    version: String,
+    revision: String,
+    tests: List[UpstreamTest],
+}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.numpy_test_parity]: ", message));
+    false.
+
+reverse[T](values: List[T]): List[T] ->
+    reverse_into(values, std.collections.List.new[T]()).
+
+reverse_into[T](values: List[T], output: List[T]): List[T] ->
+    case values {
+        [] -> output;
+        [value | rest] -> reverse_into(rest, [value | output])
+    }.
+
+json_strings(value: Json): Option[List[String]] ->
+    let {
+        Ok(length) <- value.length()
+    } else {
+        _ -> None
+    };
+    json_strings_at(value, 0, length, std.collections.List.new[String]()).
+
+json_strings_at(
+    value: Json,
+    index: Int,
+    length: Int,
+    output: List[String],
+): Option[List[String]] ->
+    if {
+        index == length -> Some(reverse(output));
+        true -> let {
+            Ok(item) <- value.at(index);
+            Ok(text) <- item.as_string()
+        } else {
+            _ -> None
+        };
+        json_strings_at(value, index + 1, length, [text | output])
+    }.
+
+read_inventory(path: String): Option[Inventory] ->
+    let {
+        Ok(source) <- read_text(path);
+        Ok(document) <- Json.parse(source);
+        Ok(header) <- document.required_fields(
+            ["schema", "numpy_version", "numpy_revision"],
+            ["test_count"],
+            ["tests"],
+        );
+        [schema, version, revision] <- header.strings;
+        [declared_count] <- header.ints;
+        Ok(test_values) <- document.get("tests");
+        Ok(actual_count) <- test_values.length();
+        Some(tests) <- read_tests(
+            test_values,
+            0,
+            actual_count,
+            std.collections.List.new[UpstreamTest](),
+        )
+    } else {
+        _ -> None
+    };
+    if {
+        schema != "terlan.ndarray.numpy-tests.v1" -> None;
+        declared_count != actual_count -> None;
+        true -> Some(Inventory(version = version, revision = revision, tests = tests))
+    }.
+
+read_tests(
+    values: Json,
+    index: Int,
+    length: Int,
+    output: List[UpstreamTest],
+): Option[List[UpstreamTest]] ->
+    if {
+        index == length -> Some(reverse(output));
+        true -> let {
+            Ok(value) <- values.at(index);
+            Ok(fields) <- value.required_fields(["id"], [], ["operations"]);
+            [id] <- fields.strings;
+            Ok(operations_value) <- value.get("operations");
+            Some(operations) <- json_strings(operations_value)
+        } else {
+            _ -> None
+        };
+        read_tests(
+            values,
+            index + 1,
+            length,
+            [UpstreamTest(id = id, operations = operations) | output],
+        )
+    }.
+
+test_id_index(tests: List[UpstreamTest]): Map[String, Bool] ->
+    test_id_index_into(tests, Map.new[String, Bool]()).
+
+test_id_index_into(
+    tests: List[UpstreamTest],
+    output: Map[String, Bool],
+): Map[String, Bool] ->
+    case tests {
+        [] -> output;
+        [test | rest] -> let _put = output.put(test.id, true);
+            test_id_index_into(rest, output)
+    }.
+
+classified_id_index(
+    covered: List[String],
+    excluded: List[String],
+): Map[String, Bool] ->
+    classified_id_index_into(
+        std.collections.List.concat(covered, excluded),
+        Map.new[String, Bool](),
+    ).
+
+classified_id_index_into(
+    ids: List[String],
+    output: Map[String, Bool],
+): Map[String, Bool] ->
+    case ids {
+        [] -> output;
+        [id | rest] -> let _put = output.put(id, true);
+            classified_id_index_into(rest, output)
+    }.
+
+add_unique(
+    ids: List[String],
+    occupied: Map[String, Bool],
+    additions: List[String],
+): Option[List[String]] ->
+    case additions {
+        [] -> Some(ids);
+        [value | rest] ->
+            case occupied.get(value) {
+                Some(_present) -> None;
+                None -> let _put = occupied.put(value, true);
+                    add_unique([value | ids], occupied, rest)
+            }
+    }.
+
+expand_patterns(
+    patterns: List[String],
+    test_ids: Map[String, Bool],
+    ids: List[String],
+    occupied: Map[String, Bool],
+): Option[List[String]] ->
+    case patterns {
+        [] -> Some(ids);
+        [pattern | rest] -> case test_ids.get(pattern) {
+            None -> None;
+            Some(_present) -> case add_unique(ids, occupied, [pattern]) {
+                Some(next) -> expand_patterns(rest, test_ids, next, occupied);
+                None -> None
+            }
+        }
+    }.
+
+increment(counts: List[Count], name: String): List[Count] ->
+    case counts {
+        [] -> [Count(name = name, count = 1)];
+        [entry | rest] ->
+            if {
+                entry.name == name -> [Count(name = name, count = entry.count + 1) | rest];
+                true -> [entry | increment(rest, name)]
+            }
+    }.
+
+classify_evidence(
+    keys: List[String],
+    object: Json,
+    test_ids: Map[String, Bool],
+    covered: List[String],
+    occupied: Map[String, Bool],
+    counts: List[Count],
+): Classification ->
+    case keys {
+        [] -> Classification(valid = true, ids = covered, occupied = occupied, counts = counts);
+        [key | rest] -> let {
+            Ok(item) <- object.get(key);
+            Ok(fields) <- item.required_fields(["marker", "path"], [], ["upstream_tests"]);
+            [marker, path] <- fields.strings;
+            Ok(pattern_values) <- item.get("upstream_tests");
+            Some(patterns) <- json_strings(pattern_values);
+            Ok(source) <- read_text(path);
+            Some(matches) <- expand_patterns(
+                patterns,
+                test_ids,
+                std.collections.List.new[String](),
+                occupied,
+            );
+        } else {
+            _ -> Classification(valid = false, ids = covered, occupied = occupied, counts = counts)
+        };
+        if {
+            not String.contains(source, marker) ->
+                Classification(valid = false, ids = covered, occupied = occupied, counts = counts);
+            true -> classify_evidence(
+                rest,
+                object,
+                test_ids,
+                std.collections.List.concat(covered, matches),
+                occupied,
+                [Count(name = key, count = matches.length()) | counts],
+            )
+        }
+    }.
+
+classify_exclusions(
+    keys: List[String],
+    object: Json,
+    test_ids: Map[String, Bool],
+    occupied: Map[String, Bool],
+    excluded: List[String],
+    counts: List[Count],
+): Classification ->
+    case keys {
+        [] -> Classification(valid = true, ids = excluded, occupied = occupied, counts = counts);
+        [key | rest] -> let {
+            Ok(item) <- object.get(key);
+            Ok(fields) <- item.required_fields(["reason"], [], ["upstream_tests"]);
+            [reason] <- fields.strings;
+            Ok(pattern_values) <- item.get("upstream_tests");
+            Some(patterns) <- json_strings(pattern_values);
+            Some(matches) <- expand_patterns(
+                patterns,
+                test_ids,
+                std.collections.List.new[String](),
+                occupied,
+            );
+        } else {
+            _ -> Classification(valid = false, ids = excluded, occupied = occupied, counts = counts)
+        };
+        if {
+            String.trim(reason) == "" ->
+                Classification(valid = false, ids = excluded, occupied = occupied, counts = counts);
+            true -> classify_exclusions(
+                rest,
+                object,
+                test_ids,
+                occupied,
+                std.collections.List.concat(excluded, matches),
+                [Count(name = key, count = matches.length()) | counts],
+            )
+        }
+    }.
+
+uncovered_tests(
+    tests: List[UpstreamTest],
+    occupied: Map[String, Bool],
+): List[UpstreamTest] ->
+    reverse(
+        uncovered_into(
+            tests,
+            occupied,
+            std.collections.List.new[UpstreamTest](),
+        ),
+    ).
+
+uncovered_into(
+    tests: List[UpstreamTest],
+    occupied: Map[String, Bool],
+    output: List[UpstreamTest],
+): List[UpstreamTest] ->
+    case tests {
+        [] -> output;
+        [test | rest] ->
+            case occupied.get(test.id) {
+                Some(_present) -> uncovered_into(rest, occupied, output);
+                None -> uncovered_into(rest, occupied, [test | output])
+            }
+    }.
+
+operation_counts(tests: List[UpstreamTest]): OperationCounts ->
+    operation_counts_into(
+        tests,
+        OperationCounts(
+            values = Map.new[String, Int](),
+            names = std.collections.List.new[String](),
+        ),
+    ).
+
+operation_counts_into(tests: List[UpstreamTest], counts: OperationCounts): OperationCounts ->
+    case tests {
+        [] -> counts;
+        [test | rest] -> operation_counts_into(rest, increment_many(counts, test.operations))
+    }.
+
+increment_count(counts: OperationCounts, name: String): OperationCounts ->
+    let values = counts.values;
+    case values.get(name) {
+        Some(count) ->
+            let _put = values.put(name, count + 1);
+            OperationCounts(values = values, names = counts.names);
+        None ->
+            let _put = values.put(name, 1);
+            OperationCounts(values = values, names = [name | counts.names])
+    }.
+
+increment_many(counts: OperationCounts, names: List[String]): OperationCounts ->
+    case names {
+        [] -> counts;
+        [name | rest] -> increment_many(increment_count(counts, name), rest)
+    }.
+
+count_before(left: Count, right: Count): Bool ->
+    left.count > right.count
+        or left.count == right.count and left.name.compare(right.name) == Lt.
+
+best_available(
+    counts: List[Count],
+    current: CountSelection,
+): CountSelection ->
+    case counts {
+        [] -> current;
+        [candidate | rest] ->
+            if {
+                not current.found -> best_available(
+                    rest,
+                    CountSelection(found = true, value = candidate),
+                );
+                true -> best_available(
+                        rest,
+                        if {
+                            count_before(candidate, current.value) ->
+                                CountSelection(found = true, value = candidate);
+                            true -> current
+                        },
+                    )
+            }
+    }.
+
+operation_count_list(counts: OperationCounts): List[Count] ->
+    operation_count_list_into(
+        counts.names,
+        counts.values,
+        std.collections.List.new[Count](),
+    ).
+
+operation_count_list_into(
+    names: List[String],
+    values: Map[String, Int],
+    output: List[Count],
+): List[Count] ->
+    case names {
+        [] -> output;
+        [name | rest] -> case values.get(name) {
+            Some(count) -> operation_count_list_into(
+                rest,
+                values,
+                [Count(name = name, count = count) | output],
+            );
+            None -> operation_count_list_into(rest, values, output)
+        }
+    }.
+
+operation_counts_object(counts: OperationCounts): Json ->
+    let output = Json.object();
+    put_operation_counts(output, counts.names, counts.values).
+
+put_operation_counts(output: Json, names: List[String], values: Map[String, Int]): Json ->
+    case names {
+        [] -> output;
+        [name | rest] -> case values.get(name) {
+            Some(count) ->
+                let _put = output.put(name, Json.int(count));
+                put_operation_counts(output, rest, values);
+            None -> put_operation_counts(output, rest, values)
+        }
+    }.
+
+counts_object(counts: List[Count]): Json ->
+    let output = Json.object();
+    put_counts(output, counts).
+
+put_counts(output: Json, counts: List[Count]): Json ->
+    case counts {
+        [] -> output;
+        [entry | rest] ->
+            let _put = output.put(entry.name, Json.int(entry.count));
+            put_counts(output, rest)
+    }.
+
+string_array(values: List[String]): Json ->
+    let output = Json.array();
+    push_strings(output, values).
+
+push_strings(output: Json, values: List[String]): Json ->
+    case values {
+        [] -> output;
+        [value | rest] ->
+            let _push = output.push(Json.string(value));
+            push_strings(output, rest)
+    }.
+
+sorted_test_ids(tests: List[UpstreamTest]): List[String] ->
+    let index = Json.object();
+    let populated = index_test_ids(index, tests);
+    case populated.keys() {
+        Ok(keys) -> keys;
+        Err(_reason) -> std.collections.List.new[String]()
+    }.
+
+index_test_ids(index: Json, tests: List[UpstreamTest]): Json ->
+    case tests {
+        [] -> index;
+        [test | rest] ->
+            let _put = index.put(test.id, Json.bool(true));
+            index_test_ids(index, rest)
+    }.
+
+priority_array(counts: OperationCounts): Json ->
+    let output = Json.array();
+    let entries = operation_count_list(counts);
+    push_priorities(output, entries, length(entries)).
+
+push_priorities(
+    output: Json,
+    counts: List[Count],
+    remaining: Int,
+): Json ->
+    if {
+        remaining == 0 -> output;
+        true -> let selected = best_available(
+            counts,
+            CountSelection(found = false, value = Count(name = "", count = 0)),
+        );
+        if {
+            not selected.found -> output;
+            true -> let entry = selected.value;
+            let row = Json.object();
+            let _operation = row.put("operation", Json.string(entry.name));
+            let _count = row.put("uncovered_count", Json.int(entry.count));
+            let _push = output.push(row);
+            push_priorities(output, subtract(counts, [entry]), remaining - 1)
+        }
+    }.
+
+render_report(
+    inventory: Inventory,
+    evidence: Classification,
+    exclusions: Classification,
+): Option[String] ->
+    let occupied = classified_id_index(evidence.ids, exclusions.ids);
+    let uncovered = uncovered_tests(inventory.tests, occupied);
+    let totals = operation_counts(inventory.tests);
+    let missing = operation_counts(uncovered);
+    let priority_counts = operation_counts(uncovered);
+    let report = Json.object();
+    let _covered_count = report.put("covered_count", Json.int(evidence.ids.length()));
+    let _evidence_counts = report.put("evidence_counts", counts_object(evidence.counts));
+    let _excluded_count = report.put("excluded_count", Json.int(exclusions.ids.length()));
+    let _exclusion_counts = report.put("exclusion_counts", counts_object(exclusions.counts));
+    let _revision = report.put("numpy_revision", Json.string(inventory.revision));
+    let _version = report.put("numpy_version", Json.string(inventory.version));
+    let _totals = report.put("operation_totals", operation_counts_object(totals));
+    let _missing = report.put("operation_uncovered", operation_counts_object(missing));
+    let _priorities = report.put("priority_operations", priority_array(priority_counts));
+    let _schema = report.put(
+        "schema",
+        Json.string("terlan.ndarray.numpy-test-parity-report.v1"),
+    );
+    let _status = report.put(
+        "status",
+        Json.string(if { uncovered == [] -> "passed"; true -> "incomplete" }),
+    );
+    let _test_count = report.put("test_count", Json.int(inventory.tests.length()));
+    let _uncovered_count = report.put("uncovered_count", Json.int(uncovered.length()));
+    let _uncovered_tests = report.put("uncovered_tests", string_array(sorted_test_ids(uncovered)));
+    case Json.stringify_pretty(report) {
+        Ok(source) -> Some(String.append(source, "\n"));
+        Err(_reason) -> None
+    }.
+
+entry(): Bool ->
+    case {Arguments.count(), Arguments.get(0)} {
+        {0, _argument} -> run_parity(false);
+        {1, Some("--allow-uncovered")} -> run_parity(true);
+        {1, _argument} -> failure("unknown argument");
+        {_count, _argument} -> failure("expected only optional --allow-uncovered")
+    }.
+
+run_parity(allow_uncovered: Bool): Bool ->
+    let {
+        Some(inventory) <- read_inventory("tests/fixtures/numpy-1.21.5-tests.json");
+        Ok(ledger_source) <- read_text("tests/numpy-test-parity.json");
+        Ok(ledger) <- Json.parse(ledger_source);
+        Ok(header) <- ledger.required_fields(["schema", "numpy_revision"], [], []);
+        [schema, revision] <- header.strings;
+        Ok(evidence_object) <- ledger.get("evidence");
+        Ok(evidence_keys) <- evidence_object.keys();
+        Ok(exclusion_object) <- ledger.get("exclusions");
+        Ok(exclusion_keys) <- exclusion_object.keys()
+    } else {
+        _ -> failure("could not parse the frozen inventory and parity ledger")
+    };
+    let test_ids = test_id_index(inventory.tests);
+    let evidence = classify_evidence(
+        evidence_keys,
+        evidence_object,
+        test_ids,
+        std.collections.List.new[String](),
+        Map.new[String, Bool](),
+        std.collections.List.new[Count](),
+    );
+    let exclusions = classify_exclusions(
+        exclusion_keys,
+        exclusion_object,
+        test_ids,
+        evidence.occupied,
+        std.collections.List.new[String](),
+        std.collections.List.new[Count](),
+    );
+    let {
+        Some(rendered) <- render_report(inventory, evidence, exclusions)
+    } else {
+        _ -> failure("could not render the canonical parity report")
+    };
+    let uncovered = inventory.tests.length() - evidence.ids.length() - exclusions.ids.length();
+    if {
+        schema != "terlan.ndarray.numpy-test-parity.v1" -> failure("unexpected ledger schema");
+        revision != inventory.revision -> failure("NumPy revision drifted");
+        not evidence.valid -> failure("invalid or duplicate executable evidence");
+        not exclusions.valid -> failure("invalid or overlapping exclusion");
+        not write_report(rendered) -> failure("could not write parity report");
+        uncovered > 0 and not allow_uncovered -> failure("uncovered NumPy tests remain");
+        true ->
+            let _printed = println(
+                String.append(
+                    "terlan-ndarray NumPy test parity: ",
+                    String.append(
+                        Int.to_string(evidence.ids.length()),
+                        String.append(
+                            " covered, ",
+                            String.append(
+                                Int.to_string(exclusions.ids.length()),
+                                String.append(
+                                    " excluded, ",
+                                    String.append(Int.to_string(uncovered), " uncovered"),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            );
+            true
+    }.
+
+write_report(rendered: String): Bool ->
+    case write_text("reports/ndarray-numpy-test-parity-report.json", rendered) {
+        Ok(Unit) -> true;
+        Err(_reason) -> false
+    }.
+
+assert(entry());
+Unit.

@@ -1,0 +1,5 @@
+module ndarray.ClipTest.
+
+pub clip_bounds_broadcast_promote_and_preserve_strided_inputs(): Bool.
+
+pub clip_into_preserves_transposed_and_overlapping_destinations(): Bool.

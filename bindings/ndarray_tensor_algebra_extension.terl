@@ -1,0 +1,14 @@
+import type ndarray.Array.{ArrayOrder}.
+
+/** Executes Einstein summation using a typed output memory-order policy. */
+pub einsum(operands: List[Array], equation: String, order: ArrayOrder): Array ->
+    einsum_ordered(
+        operands,
+        equation,
+        case order {
+            ArrayOrder.C -> 0;
+            ArrayOrder.FORTRAN -> 1;
+            ArrayOrder.KEEP -> 2;
+            ArrayOrder.ANY -> 3
+        },
+    ).

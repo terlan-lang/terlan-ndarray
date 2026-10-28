@@ -1,0 +1,18 @@
+module ndarray.HalfSpacingTest.
+
+import ndarray.Array.{dispose, dtype_code, from_floats_as, live_count, to_floats_cast}.
+import ndarray.Numpy.{spacing}.
+
+@test
+pub float16_spacing_preserves_binary16_precision(): Bool ->
+    let input_array = from_floats_as([0.0, 1.0, -1.0], [3], 14);
+    let distances = spacing(input_array);
+    let valid = dtype_code(distances) == 14
+        and to_floats_cast(distances) == [
+            0.000000059604644775390625,
+            0.0009765625,
+            0.00048828125,
+        ];
+    dispose(distances);
+    dispose(input_array);
+    valid and live_count() == 0.

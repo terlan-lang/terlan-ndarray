@@ -1,0 +1,8 @@
+module=ndarray.PaddingTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=12032617711187125651
+interface_hash=6735717345770773123
+interface_doc_hash=10957964073936599688
+deps=0

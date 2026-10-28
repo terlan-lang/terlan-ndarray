@@ -1,0 +1,60 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Runs and validates the package's public Terlan test suites.
+ */
+import std.core.Option.{Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.String.
+import std.io.Console.{eprintln, println}.
+import std.system.{Arguments, Environment, Process}.
+
+import type std.system.Process.Output.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.terlan-tests]: ", message));
+    false.
+
+diagnostic(output: Output): String ->
+    String.concat([output.stdout, output.stderr]).
+
+execute(terlc: String): Bool ->
+    let repository = Environment.current_directory();
+    let command =
+        Process.command(terlc)
+            .with_arguments(
+                ["test", String.concat([repository, "/tests/ndarray"]), "--target", "terlan-vm"],
+            )
+            .with_working_directory(repository)
+            .with_timeout_ms(1800000)
+            .with_output_limit_bytes(16777216);
+    case Process.run(command) {
+        Err(reason) -> failure(reason.message);
+        Ok(output) ->
+            let observed = diagnostic(output);
+            if {
+                output.status != 0 -> failure(observed);
+                not String.contains(observed, "test result: ok. 8 passed; 0 failed") -> failure(observed);
+                not String.contains(observed, "test result: ok. 7 passed; 0 failed") -> failure(observed);
+                not String.contains(observed, "test result: ok. 5 passed; 0 failed") -> failure(observed);
+                not String.contains(observed, "test result: ok. 4 passed; 0 failed") -> failure(observed);
+                not String.contains(observed, "test result: ok. 2 passed; 0 failed") -> failure(observed);
+                not String.contains(observed, "stacking_and_designated_splits_follow_numpy_rank_rules ... ok") -> failure(observed);
+                not String.contains(observed, "nested_lists_follow_numpy_row_column_rank_and_copy_rules ... ok") -> failure(observed);
+                not String.contains(observed, "three_dimensional_blocks_preserve_depth_axes_and_promoted_dtype ... ok") -> failure(observed);
+                not String.contains(observed, "boolean_prefix_indexes_preserve_suffix_shape_and_assign_values ... ok") -> failure(observed);
+                not String.contains(observed, "signed_and_unsigned_index_dtypes_select_and_assign ... ok") -> failure(observed);
+                not String.contains(observed, "shaped_take_preserves_index_rank_and_stages_overlapping_outputs ... ok") -> failure(observed);
+                not String.contains(observed, "coordinate_add_at_accumulates_repeated_multidimensional_indexes ... ok") -> failure(observed);
+                true -> let _printed = println("terlan-ndarray Terlan tests passed: 109");
+                true
+            }
+    }.
+
+entry(): Bool ->
+    case {Arguments.count(), Arguments.get(0), Arguments.get(1)} {
+        {2, Some("--terlc"), Some(terlc)} -> execute(terlc);
+        _ -> failure("usage: CheckTerlanTests.terls --terlc PATH")
+    }.
+
+assert(entry());
+Unit.

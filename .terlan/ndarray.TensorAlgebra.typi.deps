@@ -1,0 +1,9 @@
+module=ndarray.TensorAlgebra
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=18228556503045311103
+interface_hash=4032525860873749344
+interface_doc_hash=6876043495578199182
+deps=1
+ndarray.Array=10196142311769670942

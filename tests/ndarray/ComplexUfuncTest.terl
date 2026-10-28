@@ -1,0 +1,96 @@
+module ndarray.ComplexUfuncTest.
+
+import ndarray.Array.{
+    absolute, complex_imags, complex_reals, conjugate, dispose, dtype_code, exp,
+    from_complex, live_count, log, power, slice_axis, sqrt, square, to_floats_cast
+}.
+import ndarray.Numpy.{allclose}.
+
+@test
+pub complex_exp_log_and_sqrt_match_numpy_principal_values(): Bool ->
+    let exp_input = from_complex([1.0, 0.0, 1.0], [0.0, 1.0, 1.0], [3], 13);
+    let exp_expected = from_complex(
+        [2.718281828459045, 0.5403023058681398, 1.4686939399158851],
+        [0.0, 0.8414709848078965, 2.2873552871788423],
+        [3],
+        13,
+    );
+    let exp_result = exp(exp_input);
+    let log_input = from_complex([1.0, 1.0], [0.0, 2.0], [2], 13);
+    let log_expected = from_complex(
+        [0.0, 0.8047189562170501],
+        [0.0, 1.1071487177940904],
+        [2],
+        13,
+    );
+    let log_result = log(log_input);
+    let sqrt_input = from_complex([1.0, 0.0, -1.0, 1.0], [0.0, 1.0, 0.0, -1.0], [4], 13);
+    let sqrt_expected = from_complex(
+        [1.0, 0.7071067811865476, 0.0, 1.09868411346781],
+        [0.0, 0.7071067811865476, 1.0, -0.45508986056222733],
+        [4],
+        13,
+    );
+    let sqrt_result = sqrt(sqrt_input);
+    let valid = allclose(exp_result, exp_expected, 1e-12, 1e-12, false)
+        and allclose(log_result, log_expected, 1e-12, 1e-12, false)
+        and allclose(sqrt_result, sqrt_expected, 1e-12, 1e-12, false);
+    dispose(sqrt_result);
+    dispose(sqrt_expected);
+    dispose(sqrt_input);
+    dispose(log_result);
+    dispose(log_expected);
+    dispose(log_input);
+    dispose(exp_result);
+    dispose(exp_expected);
+    dispose(exp_input);
+    valid and live_count() == 0.
+
+@test
+pub complex_power_absolute_square_and_conjugate_support_strided_dtypes(): Bool ->
+    let base = from_complex(
+        [1.0, 0.0, 2.0, 2.5],
+        [0.0, 1.0, 0.0, 0.37],
+        [4],
+        13,
+    );
+    let exponent = from_complex(
+        [1.0, 0.0, -0.5, -0.5],
+        [0.0, 1.0, 1.5, 1.5],
+        [4],
+        13,
+    );
+    let power_expected = from_complex(
+        [1.0, 0.20787957635076193, 0.35812203996480685, 0.12659112128185032],
+        [0.0, 0.0, 0.6097119028618724, 0.48847676699581527],
+        [4],
+        13,
+    );
+    let powered = power(base, exponent);
+    let strided_source = from_complex(
+        [3.0, 5.0, 8.0, 7.0, 20.0, 12.0, 9.0, 28.0, 11.0],
+        [4.0, 12.0, 15.0, 24.0, 21.0, 35.0, 40.0, 45.0, 60.0],
+        [9],
+        12,
+    );
+    let strided = slice_axis(strided_source, 0, 0, 9, 2);
+    let magnitudes = absolute(strided);
+    let squared = square(strided);
+    let conjugated = conjugate(strided);
+    let valid = allclose(powered, power_expected, 1e-12, 1e-12, false)
+        and dtype_code(magnitudes) == 11
+        and to_floats_cast(magnitudes) == [5.0, 17.0, 29.0, 41.0, 61.0]
+        and complex_reals(squared) == [-7.0, -161.0, -41.0, -1519.0, -3479.0]
+        and complex_imags(squared) == [24.0, 240.0, 840.0, 720.0, 1320.0]
+        and complex_reals(conjugated) == [3.0, 8.0, 20.0, 9.0, 11.0]
+        and complex_imags(conjugated) == [-4.0, -15.0, -21.0, -40.0, -60.0];
+    dispose(conjugated);
+    dispose(squared);
+    dispose(magnitudes);
+    dispose(strided);
+    dispose(strided_source);
+    dispose(powered);
+    dispose(power_expected);
+    dispose(exponent);
+    dispose(base);
+    valid and live_count() == 0.

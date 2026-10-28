@@ -1,0 +1,77 @@
+module ndarray.ConversionTest.
+
+import ndarray.Array.{ArrayOrder, CastingRule, astype_with, copy_with_order, dispose, from_bools, from_complex, from_floats, from_floats_as, from_ints_as, is_c_contiguous, is_fortran_contiguous, item_bool, item_int, live_count, positive, shape, strides, to_floats_cast, to_ints_cast, transpose, zeros}.
+import ndarray.Numpy.{copyto, copyto_where, copyto_with_casting, shares_memory}.
+
+@test
+pub astype_and_copy_preserve_numpy_order_and_ownership_semantics(): Bool ->
+    let source = from_floats_as([0.0, 1.0, 2.0, 3.0, 4.0, 5.0], [2, 3], 11);
+    let transposed = transpose(source, 0, 1);
+    let converted = astype_with(transposed, 6, ArrayOrder.KEEP, true, CastingRule.UNSAFE);
+    let shared = astype_with(source, 11, ArrayOrder.C, false, CastingRule.UNSAFE);
+    let fortran = copy_with_order(source, ArrayOrder.FORTRAN);
+    let valid = shape(converted) == [3, 2]
+        and strides(converted) == [1, 3]
+        and to_ints_cast(converted) == [0, 3, 1, 4, 2, 5]
+        and is_fortran_contiguous(converted)
+        and not is_c_contiguous(converted)
+        and shares_memory(source, shared)
+        and is_fortran_contiguous(fortran)
+        and not is_c_contiguous(fortran)
+        and to_floats_cast(fortran) == [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
+    dispose(fortran);
+    dispose(shared);
+    dispose(converted);
+    dispose(transposed);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub masked_complex_assignment_requires_an_explicit_unsafe_cast(): Bool ->
+    let destination = zeros([2, 3], 3);
+    let mask = from_bools([false, true, false, false, false, false], [2, 3]);
+    let complex = from_complex([2.0], [1.0], [], 13);
+    copyto_where(destination, complex, mask, CastingRule.UNSAFE);
+    let valid = to_floats_cast(destination) == [0.0, 2.0, 0.0, 0.0, 0.0, 0.0];
+    dispose(complex);
+    dispose(mask);
+    dispose(destination);
+    valid and live_count() == 0.
+
+@test
+pub copyto_broadcasts_scalars_masks_and_unsafe_casts(): Bool ->
+    let destination = zeros([2, 3], 11);
+    let initial = from_floats([2.5], []);
+    copyto(destination, initial);
+    let replacement = from_floats([4.5], []);
+    let mask = from_bools([false, true, false], [3]);
+    copyto_where(destination, replacement, mask, CastingRule.SAME_KIND);
+    let integers = from_ints_as([0, 0, 0, 0], [4], 6);
+    let fractional = from_floats([1.5], []);
+    copyto_with_casting(integers, fractional, CastingRule.UNSAFE);
+    let valid = to_floats_cast(destination) == [2.5, 4.5, 2.5, 2.5, 4.5, 2.5]
+        and to_ints_cast(integers) == [1, 1, 1, 1];
+    dispose(fractional);
+    dispose(integers);
+    dispose(mask);
+    dispose(replacement);
+    dispose(initial);
+    dispose(destination);
+    valid and live_count() == 0.
+
+@test
+pub one_element_arrays_convert_to_language_scalars(): Bool ->
+    let false_array = from_bools([false], [1]);
+    let true_array = from_ints_as([42], [1, 1], 2);
+    let float_array = from_floats([-4.75], []);
+    let positive_array = positive(float_array);
+    let valid = not item_bool(false_array)
+        and item_bool(true_array)
+        and item_int(true_array) == 42
+        and item_int(float_array) == -4
+        and to_floats_cast(positive_array) == [-4.75];
+    dispose(positive_array);
+    dispose(float_array);
+    dispose(true_array);
+    dispose(false_array);
+    valid and live_count() == 0.

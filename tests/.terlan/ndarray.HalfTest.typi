@@ -1,0 +1,7 @@
+module ndarray.HalfTest.
+
+pub float16_casts_round_to_even_without_float32_intermediates(): Bool.
+
+pub float16_spacing_and_nextafter_follow_binary16_encodings(): Bool.
+
+pub float16_ufuncs_round_results_and_promote_only_when_required(): Bool.

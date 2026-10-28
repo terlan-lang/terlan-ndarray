@@ -1,0 +1,15 @@
+module ndarray.ShapeTest.
+
+pub choice_where_and_putmask_preserve_broadcast_dtype_and_aliasing(): Bool.
+
+pub matrix_axis_flips_are_shared_negative_stride_views(): Bool.
+
+pub rank_adaptation_preserves_values_and_numpy_axis_placement(): Bool.
+
+pub repeat_counts_preserve_numpy_axis_and_flatten_order(): Bool.
+
+pub shape_overloads_and_along_axis_broadcasting_are_public(): Bool.
+
+pub stacking_and_designated_splits_follow_numpy_rank_rules(): Bool.
+
+pub take_modes_and_compress_truncation_match_numpy(): Bool.

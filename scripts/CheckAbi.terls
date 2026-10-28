@@ -1,0 +1,616 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Validates deterministic ndarray C ABI generation and package execution.
+ */
+import std.collections.List.{concat}.
+import std.core.Int.
+import std.core.Option.{None, Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.{String, Unit}.
+import std.crypto.Hash.
+import std.data.Json.
+import std.io.Console.{eprintln, println}.
+import std.io.{Directory, File}.
+import std.system.{Arguments, Environment, Platform, Process}.
+
+import type std.core.{Option, Result}.
+import type std.data.Json.
+import type std.system.Process.{EnvironmentEntry, Output}.
+
+struct Case {
+    name: String,
+    diagnostic: String,
+    mutation: Int,
+}.
+
+struct AbiResult {
+    file_hashes: Json,
+    file_count: Int,
+    native_dependencies: Json,
+}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.abi]: ", message));
+    false.
+
+child(parent: String, relative: String): String ->
+    if {
+        String.ends_with(parent, "/") -> String.append(parent, relative);
+        true -> String.concat([parent, "/", relative])
+    }.
+
+run_command(
+    program: String,
+    arguments: List[String],
+    working_directory: String,
+    environment: List[EnvironmentEntry],
+    expect_success: Bool,
+): Result[Output, String] ->
+    let command = Process.command(program)
+        .with_arguments(arguments)
+        .with_working_directory(working_directory)
+        .with_environment(environment)
+        .with_timeout_ms(1200000)
+        .with_output_limit_bytes(16777216);
+    case Process.run(command) {
+        Err(reason) -> Err(reason.message);
+        Ok(output) ->
+            let diagnostic = String.concat([output.stdout, output.stderr]);
+            if {
+                expect_success and output.status != 0 -> Err(diagnostic);
+                not expect_success and output.status == 0 ->
+                    Err(String.concat(["command unexpectedly passed: ", program, " ", String.join(arguments, " ")]));
+                true -> Ok(output)
+            }
+    }.
+
+create_directory(path: String): Result[Unit, String] ->
+    case Directory.create_all(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+remove_directory(path: String): Result[Unit, String] ->
+    case Directory.remove_all(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+write_file(path: String, contents: String): Result[Unit, String] ->
+    case File.write_text(path, contents) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+copy_file(source: String, destination: String): Result[Unit, String] ->
+    case File.copy(source, destination) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+copy_tree(source: String, destination: String): Result[Unit, String] ->
+    case Directory.copy_tree_excluding(source, destination, [".git", "target", "reports"]) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+list_files(path: String): Result[List[String], String] ->
+    case Directory.files_recursive(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(paths) -> Ok(paths)
+    }.
+
+json_member(value: Json, key: String): Result[Json, String] ->
+    case value.get(key) {
+        Err(_reason) -> Err(String.append("missing JSON member: ", key));
+        Ok(member) -> Ok(member)
+    }.
+
+json_string(value: Json, key: String): Result[String, String] ->
+    let {
+        Ok(member) <- json_member(value, key);
+        Ok(text) <- member.as_string()
+    } else {
+        _ -> Err(String.append("invalid JSON string member: ", key))
+    };
+    Ok(text).
+
+read_manifest(path: String): Result[Json, String] ->
+    let {
+        Ok(source) <- File.read_text(path);
+        Ok(value) <- Json.parse(source)
+    } else {
+        _ -> Err(String.append("cannot parse manifest: ", path))
+    };
+    Ok(value).
+
+render_json(value: Json): Result[String, String] ->
+    case Json.stringify_pretty(value) {
+        Err(reason) -> Err(reason.message);
+        Ok(rendered) -> Ok(rendered)
+    }.
+
+find_object_index(values: Json, field_name: String, expected: String, index: Int): Option[Int] ->
+    case values.length() {
+        Err(_reason) -> None;
+        Ok(length) -> if {
+            index >= length -> None;
+            true -> case values.at(index) {
+                Err(_reason) -> None;
+                Ok(value) -> case json_string(value, field_name) {
+                    Ok(actual) where actual == expected -> Some(index);
+                    _ -> find_object_index(values, field_name, expected, index + 1)
+                }
+            }
+        }
+    }.
+
+replace_symbol(manifest: Json, index: Int, symbol: Json): Result[Json, String] ->
+    let {
+        Ok(metadata) <- json_member(manifest, "c_metadata");
+        Ok(symbols) <- json_member(metadata, "symbols")
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    let _symbols = symbols.set(index, symbol);
+    let _metadata = metadata.put("symbols", symbols);
+    Ok(manifest.put("c_metadata", metadata)).
+
+mutate_parameter(
+    manifest: Json,
+    symbol_id: String,
+    parameter_name: String,
+    field_name: String,
+    field_value: String,
+): Result[Json, String] ->
+    let {
+        Ok(metadata) <- json_member(manifest, "c_metadata");
+        Ok(symbols) <- json_member(metadata, "symbols");
+        Some(symbol_index) <- find_object_index(symbols, "id", symbol_id, 0);
+        Ok(symbol) <- symbols.at(symbol_index);
+        Ok(parameters) <- json_member(symbol, "parameters");
+        Some(parameter_index) <- find_object_index(parameters, "name", parameter_name, 0);
+        Ok(parameter) <- parameters.at(parameter_index)
+    } else {
+        _ -> Err("cannot find ABI parameter for mutation")
+    };
+    let _parameter = parameter.put(field_name, Json.string(field_value));
+    let _parameters = parameters.set(parameter_index, parameter);
+    let _symbol = symbol.put("parameters", parameters);
+    replace_symbol(manifest, symbol_index, symbol).
+
+parameters_without(
+    parameters: Json,
+    name: String,
+    index: Int,
+    output: Json,
+): Result[Json, String] ->
+    case parameters.length() {
+        Err(_reason) -> Err("ABI parameters are not an array");
+        Ok(length) -> if {
+            index >= length -> Ok(output);
+            true -> case parameters.at(index) {
+                Err(_reason) -> Err("cannot read ABI parameter");
+                Ok(parameter) -> case json_string(parameter, "name") {
+                    Ok(actual) where actual == name ->
+                        parameters_without(parameters, name, index + 1, output);
+                    Ok(_actual) ->
+                        parameters_without(parameters, name, index + 1, output.push(parameter));
+                    Err(reason) -> Err(reason)
+                }
+            }
+        }
+    }.
+
+remove_parameter(manifest: Json, symbol_id: String, name: String): Result[Json, String] ->
+    let {
+        Ok(metadata) <- json_member(manifest, "c_metadata");
+        Ok(symbols) <- json_member(metadata, "symbols");
+        Some(symbol_index) <- find_object_index(symbols, "id", symbol_id, 0);
+        Ok(symbol) <- symbols.at(symbol_index);
+        Ok(parameters) <- json_member(symbol, "parameters");
+        Ok(filtered) <- parameters_without(parameters, name, 0, Json.array())
+    } else {
+        _ -> Err("cannot remove ABI parameter")
+    };
+    let _symbol = symbol.put("parameters", filtered);
+    replace_symbol(manifest, symbol_index, symbol).
+
+mutate_manifest(manifest: Json, mutation: Int): Result[Json, String] ->
+    if {
+        mutation == 0 -> remove_parameter(manifest, "function.from_floats", "rank");
+        mutation == 1 -> mutate_parameter(
+            manifest,
+            "function.from_ints",
+            "values",
+            "c_type",
+            "int64_t *",
+        );
+        mutation == 2 -> mutate_parameter(
+            manifest,
+            "function.from_ints",
+            "values",
+            "ownership",
+            "transfer_full",
+        );
+        mutation == 3 ->
+            let {
+                Ok(metadata) <- json_member(manifest, "c_metadata");
+                Ok(symbols) <- json_member(metadata, "symbols");
+                Some(index) <- find_object_index(symbols, "id", "record.ndarray", 0);
+                Ok(symbol) <- symbols.at(index)
+            } else {
+                _ -> Err("cannot find ndarray record")
+            };
+            let _symbol = symbol.remove("destructor_symbol");
+            replace_symbol(manifest, index, symbol);
+        mutation == 4 -> mutate_parameter(
+            manifest,
+            "function.from_floats",
+            "values",
+            "c_type",
+            "const float *",
+        );
+        mutation == 5 ->
+            let {
+                Ok(metadata) <- json_member(manifest, "c_metadata");
+                Ok(symbols) <- json_member(metadata, "symbols");
+                Some(index) <- find_object_index(symbols, "id", "function.rank", 0);
+                Ok(symbol) <- symbols.at(index)
+            } else {
+                _ -> Err("cannot find rank symbol")
+            };
+            let _symbols = symbols.push(symbol);
+            let _metadata = metadata.put("symbols", symbols);
+            Ok(manifest.put("c_metadata", metadata));
+        mutation == 6 ->
+            let {
+                Ok(metadata) <- json_member(manifest, "c_metadata")
+            } else {
+                _ -> Err("cannot find C metadata")
+            };
+            let _metadata = metadata.put("abi_version", Json.int(0));
+            Ok(manifest.put("c_metadata", metadata));
+        true -> Err("unknown ABI mutation")
+    }.
+
+cases(): List[Case] ->
+    [
+        Case(name = "missing_length", diagnostic = "native_bindgen.c_input_array_contract", mutation = 0),
+        Case(name = "mutable_borrow", diagnostic = "native_bindgen.c_input_array_contract", mutation = 1),
+        Case(name = "ambiguous_ownership", diagnostic = "native_bindgen.c_input_array_contract", mutation = 2),
+        Case(name = "missing_destructor", diagnostic = "native_bindgen.c_missing_destructor", mutation = 3),
+        Case(name = "unsupported_scalar_width", diagnostic = "native_bindgen.c_input_array_contract", mutation = 4),
+        Case(name = "duplicate_symbol", diagnostic = "duplicate structured C symbol id", mutation = 5),
+        Case(name = "missing_abi_version", diagnostic = "native_bindgen.c_abi_version_missing", mutation = 6),
+    ].
+
+run_adversarial_cases(
+    remaining: List[Case],
+    repository: String,
+    temporary: String,
+    terlc: String,
+): Result[Unit, String] ->
+    case remaining {
+        [] -> Ok(Unit);
+        [test_case | rest] ->
+            let root = child(temporary, test_case.name);
+            let manifest_path = child(root, "ndarray-c.json");
+            let {
+                Ok(Unit) <- copy_tree(child(repository, "bindings"), root);
+                Ok(manifest) <- read_manifest(manifest_path);
+                Ok(mutated) <- mutate_manifest(manifest, test_case.mutation);
+                Ok(rendered) <- render_json(mutated);
+                Ok(Unit) <- write_file(manifest_path, String.append(rendered, "\n"));
+                Ok(output) <- run_command(
+                    terlc,
+                    ["bind", "c", "--manifest", manifest_path, "--out", child(root, "output")],
+                    repository,
+                    [],
+                    false,
+                )
+            } else {
+                Err(reason) -> Err(reason)
+            };
+            let diagnostic = String.concat([output.stdout, output.stderr]);
+            if {
+                not String.contains(diagnostic, test_case.diagnostic) ->
+                    Err(String.concat([test_case.name, " produced wrong diagnostic:\n", diagnostic]));
+                true -> run_adversarial_cases(rest, repository, temporary, terlc)
+            }
+    }.
+
+relative_path(root: String, path: String): String ->
+    case String.split_once(path, String.append(root, "/")) {
+        Some({_prefix, relative}) -> relative;
+        None -> path
+    }.
+
+hash_files(
+    paths: List[String],
+    root: String,
+    output: Json,
+    count: Int,
+    native_dependencies: Json,
+): Result[AbiResult, String] ->
+    case paths {
+        [] -> Ok(AbiResult(
+            file_hashes = output,
+            file_count = count,
+            native_dependencies = native_dependencies,
+        ));
+        [path | rest] -> case Hash.sha256_file(path) {
+            Err(reason) -> Err(reason.message);
+            Ok(digest) ->
+                let _output = output.put(relative_path(root, path), Json.string(digest));
+                hash_files(rest, root, output, count + 1, native_dependencies)
+        }
+    }.
+
+string_array(value: Json, index: Int, output: List[String]): Result[List[String], String] ->
+    case value.length() {
+        Err(_reason) -> Err("expected JSON string array");
+        Ok(length) -> if {
+            index >= length -> Ok(output);
+            true -> case value.at(index) {
+                Err(_reason) -> Err("cannot read JSON array item");
+                Ok(item) -> case item.as_string() {
+                    Err(_reason) -> Err("JSON array item is not a string");
+                    Ok(text) -> string_array(value, index + 1, concat(output, [text]))
+                }
+            }
+        }
+    }.
+
+native_sources(repository: String, manifest: Json): Result[List[String], String] ->
+    let {
+        Ok(metadata) <- json_member(manifest, "c_metadata");
+        Ok(sources) <- json_member(metadata, "sources");
+        Ok(names) <- string_array(sources, 0, [])
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    Ok(prefix_paths(names, child(repository, "bindings"), [])).
+
+prefix_paths(values: List[String], root: String, output: List[String]): List[String] ->
+    case values {
+        [] -> output;
+        [value | rest] -> prefix_paths(rest, root, concat(output, [child(root, value)]))
+    }.
+
+openblas_environment(repository: String): Result[{List[EnvironmentEntry], List[String]}, String] ->
+    let {
+        Ok(lock) <- read_manifest(child(repository, "native-dependencies.json"));
+        Ok(dependencies) <- json_member(lock, "dependencies");
+        Ok(openblas) <- json_member(dependencies, "openblas");
+        Ok(revision) <- json_string(openblas, "revision")
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    let host = Platform.current();
+    let base = case Environment.get("TERLAN_NDARRAY_NATIVE_CACHE") {
+        Some(value) -> value;
+        None -> case Environment.get("HOME") {
+            Some(home) -> child(home, ".cache/terlan/native");
+            None -> ""
+        }
+    };
+    let root = child(
+        child(child(child(base, "openblas"), revision), String.concat([
+            String.lowercase(host.architecture), "-", String.lowercase(host.operating_system),
+        ])),
+        "install",
+    );
+    let pkg = child(root, "lib/pkgconfig");
+    let environment = [
+        Process.environment_entry("PKG_CONFIG_LIBDIR", pkg),
+        Process.environment_entry("PKG_CONFIG_PATH", pkg),
+        Process.environment_entry("OPENBLAS_STATIC", "1"),
+        Process.environment_entry("PKG_CONFIG_ALL_STATIC", "1"),
+        Process.environment_entry("OPENBLAS_NUM_THREADS", "1"),
+    ];
+    case run_command(
+        "pkg-config",
+        ["--static", "--cflags", "--libs", "openblas"],
+        repository,
+        environment,
+        true,
+    ) {
+        Err(reason) -> Err(reason);
+        Ok(output) -> Ok({environment, nonempty_words(String.split(output.stdout, " "), [])})
+    }.
+
+nonempty_words(values: List[String], output: List[String]): List[String] ->
+    case values {
+        [] -> output;
+        [value | rest] -> if {
+            String.trim(value) == "" -> nonempty_words(rest, output);
+            true -> nonempty_words(rest, concat(output, [String.trim(value)]))
+        }
+    }.
+
+native_tests(): List[String] ->
+    [
+        "abi_test.c", "operations_test.c", "operations_property_test.c", "reduction_test.c",
+        "argument_reduction_test.c",
+        "multiarray_reduction_conformance_test.c",
+        "resize_conformance_test.c",
+        "where_conformance_test.c",
+        "methods_conformance_test.c",
+        "inner_vdot_conformance_test.c",
+        "shape_test.c", "shape_extra_test.c", "blas_test.c", "broadcast_test.c",
+        "creation_test.c", "creation_extra_test.c", "completion_test.c", "dtype_test.c",
+        "histogram_numerical_test.c", "indexing_view_test.c", "numeric_ufunc_test.c",
+        "complex_umath_test.c", "half_test.c", "ordering_test.c", "padding_test.c", "statistics_test.c",
+        "unary_test.c",
+    ].
+
+run_native_tests(
+    tests: List[String],
+    sources: List[String],
+    flags: List[String],
+    environment: List[EnvironmentEntry],
+    repository: String,
+    temporary: String,
+): Result[Unit, String] ->
+    case tests {
+        [] -> Ok(Unit);
+        [test | rest] ->
+            let binary = child(temporary, String.append("native-", String.replace(test, ".c", "")));
+            let compiler = case Environment.get("CC") { Some(value) -> value; None -> "cc" };
+            let {
+                Ok(_compiled) <- run_command(
+                    compiler,
+                    concat(
+                        ["-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror"],
+                        concat(sources, concat([child(child(repository, "tests"), test), "-lm"], concat(flags, ["-o", binary]))),
+                    ),
+                    repository,
+                    environment,
+                    true,
+                );
+                Ok(_ran) <- run_command(binary, [], repository, environment, true)
+            } else {
+                Err(reason) -> Err(reason)
+            };
+            run_native_tests(rest, sources, flags, environment, repository, temporary)
+    }.
+
+write_report(path: String, value: Json): Result[Unit, String] ->
+    case render_json(value) {
+        Err(reason) -> Err(reason);
+        Ok(source) -> write_file(path, String.append(source, "\n"))
+    }.
+
+report(result: AbiResult): Json ->
+    let adversarial = Json.array()
+        .push(Json.string("missing_length"))
+        .push(Json.string("mutable_borrow"))
+        .push(Json.string("ambiguous_ownership"))
+        .push(Json.string("missing_destructor"))
+        .push(Json.string("unsupported_scalar_width"))
+        .push(Json.string("duplicate_symbol"))
+        .push(Json.string("missing_abi_version"));
+    let dtypes = Json.array()
+        .push(Json.string("bool8"))
+        .push(Json.string("float64"))
+        .push(Json.string("int64"));
+    Json.object()
+        .put("abi_version", Json.int(1))
+        .put("adversarial_cases", adversarial)
+        .put("dtypes", dtypes)
+        .put("generated_files", result.file_hashes)
+        .put("native_dependencies", result.native_dependencies)
+        .put("package", Json.string("terlan-ndarray"))
+        .put("schema", Json.string("terlan.ndarray.abi-report.v1"))
+        .put("status", Json.string("passed")).
+
+workflow(repository: String, terlc: String, manifest_path: String, temporary: String): Result[AbiResult, String] ->
+    let first = child(temporary, "first");
+    let second = child(temporary, "second");
+    let cargo_target = child(child(repository, "_build"), "rust-target");
+    let {
+        Ok(_first) <- run_command(terlc, ["bind", "c", "--manifest", manifest_path, "--out", first], repository, [], true);
+        Ok(_second) <- run_command(terlc, ["bind", "c", "--manifest", manifest_path, "--out", second], repository, [], true);
+        Ok(first_digest) <- Hash.sha256_tree(first);
+        Ok(second_digest) <- Hash.sha256_tree(second)
+    } else {
+        _ -> Err("deterministic ABI generation failed")
+    };
+    if {
+        first_digest != second_digest -> Err("C ABI generation was not byte-deterministic");
+        true ->
+            let {
+                Ok(native_dependencies) <- read_manifest(child(repository, "native-dependencies.json"));
+                Ok(paths) <- list_files(first);
+                Ok(result) <- hash_files(paths, first, Json.object(), 0, native_dependencies);
+                Ok(Unit) <- run_adversarial_cases(cases(), repository, temporary, terlc);
+                Ok(manifest) <- read_manifest(manifest_path);
+                Ok(sources) <- native_sources(repository, manifest);
+                Ok({provider_environment, provider_flags}) <- openblas_environment(repository);
+                Ok(Unit) <- run_native_tests(native_tests(), sources, provider_flags, provider_environment, repository, temporary);
+                Ok(_fetch) <- run_command(
+                    "cargo",
+                    ["fetch", "--offline", "--manifest-path", child(first, "native/rust/Cargo.toml")],
+                    repository,
+                    [
+                        Process.environment_entry("CARGO_NET_OFFLINE", "true"),
+                        Process.environment_entry("CARGO_TARGET_DIR", cargo_target),
+                    ],
+                    true,
+                );
+                Ok(_cargo_test) <- run_command(
+                    "cargo",
+                    ["test", "--offline", "--manifest-path", child(first, "native/rust/Cargo.toml")],
+                    repository,
+                    concat(provider_environment, [Process.environment_entry("CARGO_TARGET_DIR", cargo_target)]),
+                    true,
+                );
+                Ok(_helper) <- run_command(
+                    "cargo",
+                    ["build", "--offline", "--manifest-path", child(first, "native/rust/Cargo.toml"), "--bin", "native-boundary-helper"],
+                    repository,
+                    concat(provider_environment, [Process.environment_entry("CARGO_TARGET_DIR", cargo_target)]),
+                    true,
+                );
+                Ok(Unit) <- create_directory(child(first, "tests/ndarray"));
+                Ok(Unit) <- copy_file(child(repository, "tests/ndarray/AbiTest.terl"), child(first, "tests/ndarray/AbiTest.terl"));
+                Ok(_terlan_tests) <- run_command(
+                    terlc,
+                    ["test", child(first, "tests"), "--target", "terlan-vm"],
+                    repository,
+                    [Process.environment_entry(
+                        "TERLAN_NDARRAY_NATIVE_BOUNDARY_HELPER_PATH",
+                        child(cargo_target, "debug/native-boundary-helper"),
+                    )],
+                    true,
+                )
+            } else {
+                Err(reason) -> Err(reason)
+            };
+            Ok(result)
+    }.
+
+publish(repository: String, first_report: Json): Result[Unit, String] ->
+    let reports = child(repository, "reports");
+    let {
+        Ok(Unit) <- create_directory(reports);
+        Ok(Unit) <- write_report(child(reports, "ndarray-abi-report.json"), first_report)
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    Ok(Unit).
+
+execute(terlc_argument: String, manifest_argument: String): Bool ->
+    let repository = Environment.current_directory();
+    let terlc = if { String.starts_with(terlc_argument, "/") -> terlc_argument; true -> child(repository, terlc_argument) };
+    let manifest = if { String.starts_with(manifest_argument, "/") -> manifest_argument; true -> child(repository, manifest_argument) };
+    case Directory.create_temporary("terlan_ndarray_abi_") {
+        Err(reason) -> failure(reason.message);
+        Ok(temporary) ->
+            let result = workflow(repository, terlc, manifest, temporary);
+            let cleanup = remove_directory(temporary);
+            case {result, cleanup} {
+                {Err(reason), _} -> failure(reason);
+                {_, Err(reason)} -> failure(reason);
+                {Ok(completed), Ok(Unit)} -> case publish(repository, report(completed)) {
+                    Err(reason) -> failure(reason);
+                    Ok(Unit) ->
+                        let _printed = println(String.concat([
+                            "terlan-ndarray ABI v1 passed: ",
+                            Int.to_string(completed.file_count),
+                            " generated files, 7 adversarial metadata cases",
+                        ]));
+                        true
+                }
+            }
+    }.
+
+entry(): Bool ->
+    case {Arguments.count(), Arguments.get(0), Arguments.get(1), Arguments.get(2), Arguments.get(3)} {
+        {4, Some("--terlc"), Some(terlc), Some("--manifest"), Some(manifest)} -> execute(terlc, manifest);
+        _ -> failure("usage: CheckAbi.terls --terlc PATH --manifest PATH")
+    }.
+
+assert(entry());
+Unit.

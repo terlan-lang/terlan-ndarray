@@ -1,0 +1,28 @@
+{
+  "cases": {
+    "bool": {
+      "argsort": [1, 3, 0, 2],
+      "input": [1, 0, 1, 0],
+      "sorted": [0, 0, 1, 1]
+    },
+    "float": {
+      "argsort": [3, 0, 4, 1, 2],
+      "input": ["-0.0", "inf", "nan", "-inf", "0.0"]
+    },
+    "integer": {
+      "argsort": [1, 3, 2, 0],
+      "counts": [2, 1, 1],
+      "index": [1, 2, 0],
+      "input": [3, 1, 2, 1],
+      "inverse": [2, 0, 1, 0],
+      "sorted": [1, 1, 2, 3],
+      "unique": [1, 2, 3]
+    },
+    "lexsort": {
+      "indices": [2, 0, 3, 1],
+      "keys": [[1, 1, 0, 0], [0, 1, 0, 1]]
+    }
+  },
+  "numpy_version": "1.21.5",
+  "schema": "terlan.ndarray.numpy-fixtures.v1"
+}

@@ -1,0 +1,42 @@
+import type ndarray.Array.{ArrayOrder}.
+
+/** Owns the samples and broadcast-shaped step returned by a linspace call. */
+pub struct LinspaceWithStep {
+    samples: Array,
+    step: Array,
+}.
+
+/** Returns evenly spaced samples together with their broadcast-shaped step. */
+pub linspace_with_step(
+    start: Array,
+    stop: Array,
+    count: Int,
+    endpoint: Int,
+    axis: Int,
+    dtype: Int,
+): LinspaceWithStep ->
+    LinspaceWithStep(
+        samples = linspace_arrays(start, stop, count, endpoint, axis, dtype),
+        step = linspace_steps(start, stop, count, endpoint),
+    ).
+
+/** Creates a diagonal-unit matrix with NumPy-compatible defaults. */
+pub eye(
+    rows: Int,
+    columns: Int = -1,
+    diagonal: Int = 0,
+    dtype: Int = 3,
+    order: ArrayOrder = ArrayOrder.C,
+): Array ->
+    eye_ordered(
+        rows,
+        if { columns == -1 -> rows; true -> columns },
+        diagonal,
+        dtype,
+        case order {
+            ArrayOrder.C -> 0;
+            ArrayOrder.FORTRAN -> 1;
+            ArrayOrder.KEEP -> 2;
+            ArrayOrder.ANY -> 3
+        },
+    ).

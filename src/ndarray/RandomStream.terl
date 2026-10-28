@@ -1,0 +1,761 @@
+/**
+ * Generated bindings for an owned deterministic ndarray random stream.
+ */
+module ndarray.RandomStream.
+
+import ndarray.Array.
+
+/**
+ * Thread-confined ChaCha8 random state advanced explicitly by package operations.
+ */
+pub opaque type RandomStream.
+
+/**
+ * Creates a deterministic ChaCha8 stream at an explicit seed.
+ */
+@compiler.native {ndarray.random_stream.new}
+pub new(seed: Int): RandomStream ->
+    native.
+
+/**
+ * Samples one package-private broadcast distribution family.
+ */
+@compiler.native {ndarray.random_stream.sample_broadcast}
+sample_broadcast(
+    stream: RandomStream,
+    parameter_handles: List[Array],
+    distribution: Int,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while creating uniform floating samples.
+ */
+@compiler.native {ndarray.random_stream.uniform}
+pub uniform(stream: RandomStream, shape: List[Int], low: Float, high: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while atomically filling a C-contiguous floating destination with uniform samples in the half-open interval from zero through one.
+ */
+@compiler.native {ndarray.random_stream.uniform_into}
+pub uniform_into(stream: RandomStream, destination: Array): Unit ->
+    native.
+
+/**
+ * Advances the stream while creating normally distributed floating samples.
+ */
+@compiler.native {ndarray.random_stream.normal}
+pub normal(
+    stream: RandomStream,
+    shape: List[Int],
+    mean: Float,
+    standard_deviation: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a beta distribution.
+ */
+@compiler.native {ndarray.random_stream.beta}
+pub beta(stream: RandomStream, shape: List[Int], alpha: Float, beta: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a gamma distribution.
+ */
+@compiler.native {ndarray.random_stream.gamma}
+pub gamma(
+    stream: RandomStream,
+    shape: List[Int],
+    distribution_shape: Float,
+    scale: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling binomial counts.
+ */
+@compiler.native {ndarray.random_stream.binomial}
+pub binomial(
+    stream: RandomStream,
+    shape: List[Int],
+    trials: Int,
+    probability: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling Poisson counts.
+ */
+@compiler.native {ndarray.random_stream.poisson}
+pub poisson(stream: RandomStream, shape: List[Int], lambda: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a standard normal distribution.
+ */
+@compiler.native {ndarray.random_stream.standard_normal}
+pub standard_normal(stream: RandomStream, shape: List[Int], dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while atomically filling a C-contiguous floating destination with standard normal samples.
+ */
+@compiler.native {ndarray.random_stream.standard_normal_into}
+pub standard_normal_into(stream: RandomStream, destination: Array): Unit ->
+    native.
+
+/**
+ * Advances the stream while sampling a chi-square distribution.
+ */
+@compiler.native {ndarray.random_stream.chisquare}
+pub chisquare(stream: RandomStream, shape: List[Int], degrees_of_freedom: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a Fisher F distribution.
+ */
+@compiler.native {ndarray.random_stream.f}
+pub f(
+    stream: RandomStream,
+    shape: List[Int],
+    numerator_degrees: Float,
+    denominator_degrees: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a Gumbel distribution.
+ */
+@compiler.native {ndarray.random_stream.gumbel}
+pub gumbel(stream: RandomStream, shape: List[Int], location: Float, scale: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a log-normal distribution.
+ */
+@compiler.native {ndarray.random_stream.lognormal}
+pub lognormal(stream: RandomStream, shape: List[Int], mean: Float, sigma: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling NumPy's zero-based Pareto distribution.
+ */
+@compiler.native {ndarray.random_stream.pareto}
+pub pareto(stream: RandomStream, shape: List[Int], distribution_shape: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling NumPy's power distribution.
+ */
+@compiler.native {ndarray.random_stream.power}
+pub power(stream: RandomStream, shape: List[Int], distribution_shape: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling an exponential distribution parameterized by scale.
+ */
+@compiler.native {ndarray.random_stream.exponential}
+pub exponential(stream: RandomStream, shape: List[Int], scale: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a unit-scale exponential distribution.
+ */
+@compiler.native {ndarray.random_stream.standard_exponential}
+pub standard_exponential(stream: RandomStream, shape: List[Int], dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while atomically filling a C-contiguous floating destination with unit-scale exponential samples.
+ */
+@compiler.native {ndarray.random_stream.standard_exponential_into}
+pub standard_exponential_into(stream: RandomStream, destination: Array): Unit ->
+    native.
+
+/**
+ * Advances the stream while sampling a unit-scale gamma distribution.
+ */
+@compiler.native {ndarray.random_stream.standard_gamma}
+pub standard_gamma(
+    stream: RandomStream,
+    shape: List[Int],
+    distribution_shape: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while atomically filling a C-contiguous floating destination with unit-scale gamma samples using broadcast distribution-shape parameters.
+ */
+@compiler.native {ndarray.random_stream.standard_gamma_into}
+pub standard_gamma_into(stream: RandomStream, destination: Array, distribution_shapes: Array): Unit ->
+    native.
+
+/**
+ * Advances the stream while sampling a standard Student t distribution.
+ */
+@compiler.native {ndarray.random_stream.standard_t}
+pub standard_t(stream: RandomStream, shape: List[Int], degrees_of_freedom: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a bounded triangular distribution.
+ */
+@compiler.native {ndarray.random_stream.triangular}
+pub triangular(
+    stream: RandomStream,
+    shape: List[Int],
+    left: Float,
+    mode: Float,
+    right: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling NumPy's unit-scale Weibull distribution.
+ */
+@compiler.native {ndarray.random_stream.weibull}
+pub weibull(stream: RandomStream, shape: List[Int], distribution_shape: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling one-based geometric trial counts.
+ */
+@compiler.native {ndarray.random_stream.geometric}
+pub geometric(stream: RandomStream, shape: List[Int], probability: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling hypergeometric success counts.
+ */
+@compiler.native {ndarray.random_stream.hypergeometric}
+pub hypergeometric(
+    stream: RandomStream,
+    shape: List[Int],
+    good: Int,
+    bad: Int,
+    samples: Int,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling Zipf counts through a zeta distribution.
+ */
+@compiler.native {ndarray.random_stream.zipf}
+pub zipf(stream: RandomStream, shape: List[Int], exponent: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a standard Cauchy distribution.
+ */
+@compiler.native {ndarray.random_stream.standard_cauchy}
+pub standard_cauchy(stream: RandomStream, shape: List[Int], dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a Laplace distribution.
+ */
+@compiler.native {ndarray.random_stream.laplace}
+pub laplace(
+    stream: RandomStream,
+    shape: List[Int],
+    location: Float,
+    scale: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a logistic distribution.
+ */
+@compiler.native {ndarray.random_stream.logistic}
+pub logistic(
+    stream: RandomStream,
+    shape: List[Int],
+    location: Float,
+    scale: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling negative-binomial failure counts.
+ */
+@compiler.native {ndarray.random_stream.negative_binomial}
+pub negative_binomial(
+    stream: RandomStream,
+    shape: List[Int],
+    successes: Float,
+    probability: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a noncentral chi-square distribution.
+ */
+@compiler.native {ndarray.random_stream.noncentral_chisquare}
+pub noncentral_chisquare(
+    stream: RandomStream,
+    shape: List[Int],
+    degrees_of_freedom: Float,
+    noncentrality: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a noncentral Fisher F distribution.
+ */
+@compiler.native {ndarray.random_stream.noncentral_f}
+pub noncentral_f(
+    stream: RandomStream,
+    shape: List[Int],
+    numerator_degrees: Float,
+    denominator_degrees: Float,
+    noncentrality: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a Rayleigh distribution.
+ */
+@compiler.native {ndarray.random_stream.rayleigh}
+pub rayleigh(stream: RandomStream, shape: List[Int], scale: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling a Wald distribution.
+ */
+@compiler.native {ndarray.random_stream.wald}
+pub wald(stream: RandomStream, shape: List[Int], mean: Float, scale: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling positive logarithmic-series counts.
+ */
+@compiler.native {ndarray.random_stream.logseries}
+pub logseries(stream: RandomStream, shape: List[Int], probability: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while sampling circular von Mises values.
+ */
+@compiler.native {ndarray.random_stream.vonmises}
+pub vonmises(
+    stream: RandomStream,
+    shape: List[Int],
+    mean: Float,
+    concentration: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Samples rank-one source values with weighted replacement policy.
+ */
+@compiler.native {ndarray.random_stream.choice}
+pub choice(
+    stream: RandomStream,
+    source: Array,
+    shape: List[Int],
+    probabilities: Array,
+    replacement: Bool,
+): Array ->
+    native.
+
+/**
+ * Samples source values along one axis with explicit output-order policy.
+ */
+@compiler.native {ndarray.random_stream.choice_axis}
+sample_choice_axis(
+    stream: RandomStream,
+    source: Array,
+    shape: List[Int],
+    probabilities: Array,
+    replacement: Bool,
+    axis: Int,
+    shuffle: Bool,
+): Array ->
+    native.
+
+/**
+ * Samples uniformly along one source axis without a probability array.
+ */
+@compiler.native {ndarray.random_stream.choice_uniform_axis}
+sample_choice_uniform_axis(
+    stream: RandomStream,
+    source: Array,
+    shape: List[Int],
+    replacement: Bool,
+    axis: Int,
+    shuffle: Bool,
+): Array ->
+    native.
+
+/**
+ * Samples simplex vectors parameterized by rank-one positive concentrations.
+ */
+@compiler.native {ndarray.random_stream.dirichlet}
+pub dirichlet(stream: RandomStream, alpha: Array, shape: List[Int], dtype: Int): Array ->
+    native.
+
+/**
+ * Samples category counts whose final axis sums to the trial count.
+ */
+@compiler.native {ndarray.random_stream.multinomial}
+pub multinomial(
+    stream: RandomStream,
+    trials: Int,
+    probabilities: Array,
+    shape: List[Int],
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Samples category counts without replacement from a finite population.
+ */
+@compiler.native {ndarray.random_stream.multivariate_hypergeometric}
+pub multivariate_hypergeometric(
+    stream: RandomStream,
+    colors: Array,
+    samples: Int,
+    shape: List[Int],
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Samples correlated vectors from a positive-definite covariance matrix.
+ */
+@compiler.native {ndarray.random_stream.multivariate_normal}
+pub multivariate_normal(
+    stream: RandomStream,
+    mean: Array,
+    covariance: Array,
+    shape: List[Int],
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Advances the stream while creating bounded integer samples.
+ */
+@compiler.native {ndarray.random_stream.integers}
+pub integers(stream: RandomStream, shape: List[Int], low: Int, high: Int, dtype: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while creating Bernoulli samples.
+ */
+@compiler.native {ndarray.random_stream.bernoulli}
+pub bernoulli(stream: RandomStream, shape: List[Int], probability: Float): Array ->
+    native.
+
+/**
+ * Advances the stream while creating a permutation of consecutive integers.
+ */
+@compiler.native {ndarray.random_stream.permutation}
+pub permutation(stream: RandomStream, length: Int): Array ->
+    native.
+
+/**
+ * Advances the stream while returning an independently owned shuffled array.
+ */
+@compiler.native {ndarray.random_stream.shuffle}
+pub shuffle(stream: RandomStream, array: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Disposes an owned stream exactly once.
+ */
+@compiler.native {ndarray.random_stream.dispose}
+pub dispose(stream: RandomStream): Unit ->
+    native.
+
+/**
+ * Samples uniform values in the half-open unit interval.
+ */
+pub random(stream: RandomStream, shape: List[Int] = [], dtype: Int = 3): Array ->
+    uniform(stream, shape, 0.0, 1.0, dtype).
+
+/**
+ * Samples a broadcast-compatible uniform distribution from array parameters.
+ */
+pub uniform(stream: RandomStream, low: Array, high: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [low, high], 0, dtype).
+
+/**
+ * Samples source values along one axis and replaces that axis with the requested shape.
+ */
+pub choice(
+    stream: RandomStream,
+    source: Array,
+    shape: List[Int],
+    probabilities: Array,
+    replacement: Bool,
+    axis: Int,
+    shuffle: Bool,
+): Array ->
+    sample_choice_axis(stream, source, shape, probabilities, replacement, axis, shuffle).
+
+/**
+ * Samples source values uniformly along one axis.
+ */
+pub choice(
+    stream: RandomStream,
+    source: Array,
+    shape: List[Int],
+    replacement: Bool,
+    axis: Int,
+    shuffle: Bool,
+): Array ->
+    sample_choice_uniform_axis(stream, source, shape, replacement, axis, shuffle).
+
+/**
+ * Samples uniformly from the integer population starting at zero.
+ */
+pub choice(stream: RandomStream, population: Int, shape: List[Int], replacement: Bool): Array ->
+    let source = arange(population);
+    let output = sample_choice_uniform_axis(stream, source, shape, replacement, 0, true);
+    ndarray.Array.dispose(source);
+    output.
+
+/**
+ * Samples a broadcast-compatible normal distribution from array parameters.
+ */
+pub normal(stream: RandomStream, mean: Array, standard_deviation: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [mean, standard_deviation], 1, dtype).
+
+/**
+ * Samples a broadcast-compatible beta distribution from array parameters.
+ */
+pub beta(stream: RandomStream, alpha: Array, beta: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [alpha, beta], 2, dtype).
+
+/**
+ * Samples a broadcast-compatible gamma distribution from array parameters.
+ */
+pub gamma(stream: RandomStream, distribution_shape: Array, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [distribution_shape, scale], 3, dtype).
+
+/**
+ * Samples a broadcast-compatible NumPy power distribution from an array parameter.
+ */
+pub power(stream: RandomStream, distribution_shape: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [distribution_shape], 4, dtype).
+
+/**
+ * Samples a broadcast-compatible triangular distribution from array parameters.
+ */
+pub triangular(stream: RandomStream, left: Array, mode: Array, right: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [left, mode, right], 5, dtype).
+
+/**
+ * Samples a broadcast-compatible chi-square distribution from array parameters.
+ */
+pub chisquare(stream: RandomStream, degrees_of_freedom: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [degrees_of_freedom], 6, dtype).
+
+/**
+ * Samples a broadcast-compatible Fisher F distribution from array parameters.
+ */
+pub f(
+    stream: RandomStream,
+    numerator_degrees: Array,
+    denominator_degrees: Array,
+    dtype: Int = 3,
+): Array ->
+    sample_broadcast(stream, [numerator_degrees, denominator_degrees], 7, dtype).
+
+/**
+ * Samples a broadcast-compatible Gumbel distribution from array parameters.
+ */
+pub gumbel(stream: RandomStream, location: Array, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [location, scale], 8, dtype).
+
+/**
+ * Samples a broadcast-compatible log-normal distribution from array parameters.
+ */
+pub lognormal(stream: RandomStream, mean: Array, sigma: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [mean, sigma], 9, dtype).
+
+/**
+ * Samples a broadcast-compatible zero-based Pareto distribution from an array parameter.
+ */
+pub pareto(stream: RandomStream, distribution_shape: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [distribution_shape], 10, dtype).
+
+/**
+ * Samples a broadcast-compatible exponential distribution from an array parameter.
+ */
+pub exponential(stream: RandomStream, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [scale], 11, dtype).
+
+/**
+ * Samples a broadcast-compatible unit-scale gamma distribution from an array parameter.
+ */
+pub standard_gamma(stream: RandomStream, distribution_shape: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [distribution_shape], 12, dtype).
+
+/**
+ * Samples a broadcast-compatible standard Student t distribution from an array parameter.
+ */
+pub standard_t(stream: RandomStream, degrees_of_freedom: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [degrees_of_freedom], 13, dtype).
+
+/**
+ * Samples a broadcast-compatible unit-scale Weibull distribution from an array parameter.
+ */
+pub weibull(stream: RandomStream, distribution_shape: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [distribution_shape], 14, dtype).
+
+/**
+ * Samples a broadcast-compatible Laplace distribution from array parameters.
+ */
+pub laplace(stream: RandomStream, location: Array, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [location, scale], 15, dtype).
+
+/**
+ * Samples a broadcast-compatible logistic distribution from array parameters.
+ */
+pub logistic(stream: RandomStream, location: Array, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [location, scale], 16, dtype).
+
+/**
+ * Samples a broadcast-compatible noncentral chi-square distribution from array parameters.
+ */
+pub noncentral_chisquare(
+    stream: RandomStream,
+    degrees_of_freedom: Array,
+    noncentrality: Array,
+    dtype: Int = 3,
+): Array ->
+    sample_broadcast(stream, [degrees_of_freedom, noncentrality], 17, dtype).
+
+/**
+ * Samples a broadcast-compatible noncentral Fisher F distribution from array parameters.
+ */
+pub noncentral_f(
+    stream: RandomStream,
+    numerator_degrees: Array,
+    denominator_degrees: Array,
+    noncentrality: Array,
+    dtype: Int = 3,
+): Array ->
+    sample_broadcast(stream, [numerator_degrees, denominator_degrees, noncentrality], 18, dtype).
+
+/**
+ * Samples a broadcast-compatible Rayleigh distribution from an array parameter.
+ */
+pub rayleigh(stream: RandomStream, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [scale], 19, dtype).
+
+/**
+ * Samples a broadcast-compatible Wald distribution from array parameters.
+ */
+pub wald(stream: RandomStream, mean: Array, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [mean, scale], 20, dtype).
+
+/**
+ * Samples a broadcast-compatible von Mises distribution from array parameters.
+ */
+pub vonmises(stream: RandomStream, mean: Array, concentration: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [mean, concentration], 21, dtype).
+
+/**
+ * Samples broadcast-compatible binomial counts from array parameters.
+ */
+pub binomial(stream: RandomStream, trials: Array, probability: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [trials, probability], 22, dtype).
+
+/**
+ * Samples broadcast-compatible geometric trial counts from an array parameter.
+ */
+pub geometric(stream: RandomStream, probability: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [probability], 23, dtype).
+
+/**
+ * Samples broadcast-compatible hypergeometric counts from array parameters.
+ */
+pub hypergeometric(
+    stream: RandomStream,
+    good: Array,
+    bad: Array,
+    samples: Array,
+    dtype: Int = 2,
+): Array ->
+    sample_broadcast(stream, [good, bad, samples], 24, dtype).
+
+/**
+ * Samples broadcast-compatible Poisson counts from an array parameter.
+ */
+pub poisson(stream: RandomStream, lambda: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [lambda], 25, dtype).
+
+/**
+ * Samples broadcast-compatible Zipf counts from an array parameter.
+ */
+pub zipf(stream: RandomStream, exponent: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [exponent], 26, dtype).
+
+/**
+ * Samples broadcast-compatible negative-binomial counts from array parameters.
+ */
+pub negative_binomial(
+    stream: RandomStream,
+    successes: Array,
+    probability: Array,
+    dtype: Int = 2,
+): Array ->
+    sample_broadcast(stream, [successes, probability], 27, dtype).
+
+/**
+ * Samples broadcast-compatible logarithmic-series counts from an array parameter.
+ */
+pub logseries(stream: RandomStream, probability: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [probability], 28, dtype).
+
+/**
+ * Samples broadcast-compatible bounded integers with optional inclusive upper bounds.
+ */
+pub integers(
+    stream: RandomStream,
+    low: Array,
+    high: Array,
+    dtype: Int = 2,
+    endpoint: Bool = false,
+): Array ->
+    if {
+        endpoint -> sample_broadcast(stream, [low, high], 30, dtype);
+        true -> sample_broadcast(stream, [low, high], 29, dtype)
+    }.
+
+/**
+ * Samples one requested shape of bounded integers with optional inclusive upper bounds.
+ */
+pub integers(
+    stream: RandomStream,
+    shape: List[Int],
+    low: Int,
+    high: Int,
+    dtype: Int,
+    endpoint: Bool,
+): Array ->
+    let lows = full_int(shape, low, 2);
+    let highs = full_int(shape, high, 2);
+    let output = integers(stream, lows, highs, dtype, endpoint);
+    ndarray.Array.dispose(highs);
+    ndarray.Array.dispose(lows);
+    output.

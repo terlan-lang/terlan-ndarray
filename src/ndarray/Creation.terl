@@ -1,0 +1,213 @@
+/**
+ * NumPy-compatible array creation and triangular matrix operations.
+ */
+module ndarray.Creation.
+
+import ndarray.Array.{Array, ArrayOrder}.
+
+import type ndarray.Array.{ArrayOrder}.
+
+/**
+ * Broadcasts numerical endpoint arrays and inserts evenly spaced samples at the requested axis.
+ */
+@compiler.native {ndarray.creation.linspace_arrays}
+pub linspace_arrays(
+    start: Array,
+    stop: Array,
+    count: Int,
+    endpoint: Int,
+    axis: Int,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Returns the broadcast-shaped spacing for array endpoints, including NaN for an undefined spacing.
+ */
+@compiler.native {ndarray.creation.linspace_steps}
+pub linspace_steps(start: Array, stop: Array, count: Int, endpoint: Int): Array ->
+    native.
+
+/**
+ * Creates a rectangular diagonal-unit matrix with explicit C or Fortran storage order.
+ */
+@compiler.native {ndarray.creation.eye_ordered}
+pub eye_ordered(rows: Int, columns: Int, diagonal: Int, dtype: Int, order: Int): Array ->
+    native.
+
+/**
+ * Allocates an uninitialized array with the source shape and dtype.
+ */
+@compiler.native {ndarray.creation.empty_like}
+pub empty_like(array: Array): Array ->
+    native.
+
+/**
+ * Allocates a zero-filled array with the source shape and dtype.
+ */
+@compiler.native {ndarray.creation.zeros_like}
+pub zeros_like(array: Array): Array ->
+    native.
+
+/**
+ * Allocates a one-filled array with the source shape and dtype.
+ */
+@compiler.native {ndarray.creation.ones_like}
+pub ones_like(array: Array): Array ->
+    native.
+
+/**
+ * Fills a new source-shaped and source-typed array with an integer scalar.
+ */
+@compiler.native {ndarray.creation.full_like_int}
+pub full_like_int(array: Array, value: Int): Array ->
+    native.
+
+/**
+ * Fills a new source-shaped and source-typed array with a floating scalar.
+ */
+@compiler.native {ndarray.creation.full_like_float}
+pub full_like_float(array: Array, value: Float): Array ->
+    native.
+
+/**
+ * Returns powers of a positive base with evenly spaced exponents.
+ */
+@compiler.native {ndarray.creation.logspace}
+pub logspace(start: Float, stop: Float, count: Int, endpoint: Int, base: Float, dtype: Int): Array ->
+    native.
+
+/**
+ * Returns evenly spaced values on a same-sign geometric progression.
+ */
+@compiler.native {ndarray.creation.geomspace}
+pub geomspace(start: Float, stop: Float, count: Int, endpoint: Int, dtype: Int): Array ->
+    native.
+
+/**
+ * Broadcasts exponent arrays and inserts powers of a positive base at the requested axis.
+ */
+@compiler.native {ndarray.creation.logspace_arrays}
+pub logspace_arrays(
+    start: Array,
+    stop: Array,
+    count: Int,
+    endpoint: Int,
+    axis: Int,
+    base: Float,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Broadcasts nonzero endpoints and inserts geometrically spaced samples at the requested axis.
+ */
+@compiler.native {ndarray.creation.geomspace_arrays}
+pub geomspace_arrays(
+    start: Array,
+    stop: Array,
+    count: Int,
+    endpoint: Int,
+    axis: Int,
+    dtype: Int,
+): Array ->
+    native.
+
+/**
+ * Creates a matrix with ones at and below an indexed diagonal.
+ */
+@compiler.native {ndarray.creation.tri}
+pub tri(rows: Int, columns: Int = -1, diagonal: Int = 0, dtype: Int = 3): Array ->
+    native.
+
+/**
+ * Copies an array while zeroing entries above an indexed diagonal in every matrix plane.
+ */
+@compiler.native {ndarray.creation.tril}
+pub tril(array: Array, diagonal: Int = 0): Array ->
+    native.
+
+/**
+ * Copies an array while zeroing entries below an indexed diagonal in every matrix plane.
+ */
+@compiler.native {ndarray.creation.triu}
+pub triu(array: Array, diagonal: Int = 0): Array ->
+    native.
+
+/**
+ * Flattens an array and places its values on an indexed diagonal of a new square matrix.
+ */
+@compiler.native {ndarray.creation.diagflat}
+pub diagflat(array: Array, diagonal: Int): Array ->
+    native.
+
+/**
+ * Returns one dense numeric coordinate grid for every dimension of a shape.
+ */
+@compiler.native {ndarray.creation.indices}
+pub indices(shape: List[Int], dtype: Int): Array ->
+    native.
+
+/**
+ * Returns one sparse numeric coordinate grid per dimension, with singleton dimensions elsewhere.
+ */
+@compiler.native {ndarray.creation.indices_sparse}
+pub indices_sparse(shape: List[Int], dtype: Int): List[Array] ->
+    native.
+
+/**
+ * Builds a Vandermonde matrix with explicit column count and exponent order.
+ */
+@compiler.native {ndarray.creation.vander}
+pub vander(array: Array, columns: Int, increasing: Int): Array ->
+    native.
+
+/**
+ * Owns the samples and broadcast-shaped step returned by a linspace call.
+ */
+pub struct LinspaceWithStep {
+    samples: Array,
+    step: Array,
+}.
+
+/**
+ * Returns evenly spaced samples together with their broadcast-shaped step.
+ */
+pub linspace_with_step(
+    start: Array,
+    stop: Array,
+    count: Int,
+    endpoint: Int,
+    axis: Int,
+    dtype: Int,
+): LinspaceWithStep ->
+    LinspaceWithStep(
+        samples = linspace_arrays(start, stop, count, endpoint, axis, dtype),
+        step = linspace_steps(start, stop, count, endpoint),
+    ).
+
+/**
+ * Creates a diagonal-unit matrix with NumPy-compatible defaults.
+ */
+pub eye(
+    rows: Int,
+    columns: Int = -1,
+    diagonal: Int = 0,
+    dtype: Int = 3,
+    order: ArrayOrder = ArrayOrder.C,
+): Array ->
+    eye_ordered(
+        rows,
+        if {
+            columns == -1 -> rows;
+            true -> columns
+        },
+        diagonal,
+        dtype,
+        case order {
+            ArrayOrder.C -> 0;
+            ArrayOrder.FORTRAN -> 1;
+            ArrayOrder.KEEP -> 2;
+            ArrayOrder.ANY -> 3
+        },
+    ).

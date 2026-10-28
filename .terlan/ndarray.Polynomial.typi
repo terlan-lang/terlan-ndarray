@@ -1,0 +1,127 @@
+//! Polynomial evaluation, fitting, arithmetic, roots, calculus, and basis conversion.
+
+module ndarray.Polynomial.
+
+/// Adds two low-to-high polynomial coefficient vectors.
+
+pub polyadd(lhs: Array, rhs: Array): Array.
+
+/// Returns the power-basis companion matrix used for root finding.
+
+pub polycompanion(coefficients: Array): Array.
+
+/// Converts coefficients among power, Chebyshev, and Legendre bases over a finite domain and window.
+
+pub polyconvert(coefficients: Array, source_basis: Int, target_basis: Int, domain_minimum: Float, domain_maximum: Float, window_minimum: Float, window_maximum: Float): Array.
+
+/// Differentiates low-to-high polynomial coefficients by a nonnegative order.
+
+pub polyder(coefficients: Array, order: Int): Array.
+
+/// Differentiates tensor coefficients along one axis with linear-variable scaling.
+
+pub polyder_axis(coefficients: Array, order: Int, scale: Float, axis: Int): Array.
+
+/// Returns polynomial quotient and remainder as two owned arrays.
+
+pub polydiv_all(lhs: Array, rhs: Array): List[Array].
+
+/// Fits low-to-high power-basis coefficients by finite SVD least squares.
+
+pub polyfit(coordinates: Array, values: Array, degree: Int): Array.
+
+/// Fits contiguous power degrees and returns coefficients plus scaled or unscaled covariance.
+
+pub polyfit_covariance(coordinates: Array, values: Array, degree: Int, scale_covariance: Bool): List[Array].
+
+/// Fits selected power-basis degrees to vector or matrix observations.
+
+pub polyfit_degrees(coordinates: Array, values: Array, degrees: Array): Array.
+
+/// Fits weighted contiguous power degrees and returns coefficients plus scaled or unscaled covariance.
+
+pub polyfit_weighted_covariance(coordinates: Array, values: Array, degree: Int, weights: Array, scale_covariance: Bool): List[Array].
+
+/// Fits selected power-basis degrees with one weight per observation.
+
+pub polyfit_weighted_degrees(coordinates: Array, values: Array, degrees: Array, weights: Array): Array.
+
+/// Returns low-to-high coefficients for a monic polynomial with the supplied roots.
+
+pub polyfromroots(roots: Array): Array.
+
+/// Evaluates a two-dimensional coefficient grid over a Cartesian product.
+
+pub polygrid2d(x: Array, y: Array, coefficients: Array): Array.
+
+/// Evaluates a three-dimensional coefficient grid over a Cartesian product.
+
+pub polygrid3d(x: Array, y: Array, z: Array, coefficients: Array): Array.
+
+/// Integrates low-to-high polynomial coefficients with a repeated constant.
+
+pub polyint(coefficients: Array, order: Int, constant: Float): Array.
+
+/// Integrates tensor coefficients along one axis with per-order constants, a lower bound, and scaling.
+
+pub polyint_axis(coefficients: Array, order: Int, constants: Array, lower_bound: Float, scale: Float, axis: Int): Array.
+
+/// Returns coefficients for offset plus scale times x.
+
+pub polyline(offset: Float, scale: Float): Array.
+
+/// Multiplies two low-to-high polynomial coefficient vectors.
+
+pub polymul(lhs: Array, rhs: Array): Array.
+
+/// Multiplies a coefficient vector by x.
+
+pub polymulx(coefficients: Array): Array.
+
+/// Raises a coefficient vector to a nonnegative integer power.
+
+pub polypow(coefficients: Array, exponent: Int): Array.
+
+/// Returns all complex roots of a finite nonconstant power-basis polynomial.
+
+pub polyroots(coefficients: Array): Array.
+
+/// Subtracts two low-to-high polynomial coefficient vectors.
+
+pub polysub(lhs: Array, rhs: Array): Array.
+
+/// Removes redundant leading coefficients under a tolerance.
+
+pub polytrim(coefficients: Array, tolerance: Float): Array.
+
+/// Evaluates low-to-high power-basis coefficients at every coordinate.
+
+pub polyval(coordinates: Array, coefficients: Array): Array.
+
+/// Evaluates a two-dimensional coefficient grid over broadcast coordinates.
+
+pub polyval2d(x: Array, y: Array, coefficients: Array): Array.
+
+/// Evaluates a three-dimensional coefficient grid over broadcast coordinates.
+
+pub polyval3d(x: Array, y: Array, z: Array, coefficients: Array): Array.
+
+/// Evaluates a monic polynomial directly from roots.
+
+pub polyvalfromroots(coordinates: Array, roots: Array): Array.
+
+/// Evaluates root-defined polynomial tensors in Cartesian or broadcast mode.
+
+pub polyvalfromroots_tensor(coordinates: Array, roots: Array, tensor: Bool): Array.
+
+/// Builds a power Vandermonde matrix with columns from degree zero upward.
+
+pub polyvander(coordinates: Array, degree: Int): Array.
+
+/// Builds a two-dimensional broadcast power Vandermonde matrix.
+
+pub polyvander2d(x: Array, y: Array, x_degree: Int, y_degree: Int): Array.
+
+/// Builds a three-dimensional broadcast power Vandermonde matrix.
+
+pub polyvander3d(x: Array, y: Array, z: Array, x_degree: Int, y_degree: Int, z_degree: Int): Array.

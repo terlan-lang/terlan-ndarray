@@ -1,0 +1,27 @@
+module ndarray.HalfUfuncTest.
+
+import ndarray.Array.{add, dispose, dtype_code, from_floats_as, live_count, power, to_floats_cast, true_divide}.
+
+@test
+pub float16_ufuncs_round_results_and_promote_only_when_required(): Bool ->
+    let lhs = from_floats_as([0.0, 1.0, 2.0, 4.0, 2.0], [5], 14);
+    let rhs = from_floats_as([-2.0, 5.0, 1.0, 4.0, 3.0], [5], 14);
+    let added = add(lhs, rhs);
+    let divided = true_divide(lhs, rhs);
+    let half_power = power(lhs, rhs);
+    let single = from_floats_as([2.0], [1], 11);
+    let promoted = power(lhs, single);
+    let valid = dtype_code(added) == 14
+        and dtype_code(divided) == 14
+        and dtype_code(half_power) == 14
+        and dtype_code(promoted) == 11
+        and to_floats_cast(added) == [-2.0, 6.0, 3.0, 8.0, 5.0]
+        and to_floats_cast(divided) == [-0.0, 0.199951171875, 2.0, 1.0, 0.66650390625];
+    dispose(promoted);
+    dispose(single);
+    dispose(half_power);
+    dispose(divided);
+    dispose(added);
+    dispose(rhs);
+    dispose(lhs);
+    valid and live_count() == 0.

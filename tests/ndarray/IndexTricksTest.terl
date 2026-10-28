@@ -1,0 +1,76 @@
+module ndarray.IndexTricksTest.
+
+import ndarray.Array.{ArrayOrder, dispose, from_bools, from_ints, live_count, shape, to_ints}.
+import ndarray.Numpy.{RavelMode, diag_indices, diag_indices_from, fill_diagonal, ix_, ravel_multi_index, unravel_index}.
+
+@test
+pub multidimensional_indexes_preserve_modes_order_and_result_shape(): Bool ->
+    let coordinates = from_ints([3, 6, 6, 4, 5, 1], [2, 3]);
+    let c_order = ravel_multi_index(coordinates, [7, 6]);
+    let f_order = ravel_multi_index(
+        coordinates,
+        [7, 6],
+        [RavelMode.RAISE],
+        ArrayOrder.FORTRAN,
+    );
+    let mixed = ravel_multi_index(
+        coordinates,
+        [4, 4],
+        [RavelMode.CLIP, RavelMode.WRAP],
+    );
+    let [rows, columns] = unravel_index(f_order, [7, 6], ArrayOrder.FORTRAN);
+    let valid =
+        to_ints(c_order) == [22, 41, 37]
+            and to_ints(f_order) == [31, 41, 13]
+            and to_ints(mixed) == [12, 13, 13]
+            and shape(rows) == [3]
+            and to_ints(rows) == [3, 6, 6]
+            and to_ints(columns) == [4, 5, 1];
+    dispose(columns);
+    dispose(rows);
+    dispose(mixed);
+    dispose(f_order);
+    dispose(c_order);
+    dispose(coordinates);
+    valid and live_count() == 0.
+
+@test
+pub open_mesh_and_diagonal_helpers_match_numpy_mutation_rules(): Bool ->
+    let mask = from_bools([true, false, true, true], [4]);
+    let [selected] = ix_(mask, []);
+    let tall = from_ints([
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ], [10, 3]);
+    fill_diagonal(tall, 5.0, true);
+    let cube = from_ints([
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0,
+    ], [3, 3, 3]);
+    fill_diagonal(cube, 4.0);
+    let explicit = diag_indices(3, 3);
+    let inferred = diag_indices_from(cube);
+    let valid =
+        to_ints(selected) == [0, 2, 3]
+            and shape(selected) == [3]
+            and to_ints(tall) == [
+                5, 0, 0, 0, 5, 0, 0, 0, 5, 0,
+                0, 0, 5, 0, 0, 0, 5, 0, 0, 0,
+                5, 0, 0, 0, 5, 0, 0, 0, 5, 0,
+            ]
+            and to_ints(cube) == [
+                4, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 4, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 4,
+            ]
+            and to_ints(explicit) == [0, 1, 2, 0, 1, 2, 0, 1, 2]
+            and to_ints(inferred) == [0, 1, 2, 0, 1, 2, 0, 1, 2];
+    dispose(inferred);
+    dispose(explicit);
+    dispose(cube);
+    dispose(tall);
+    dispose(selected);
+    dispose(mask);
+    valid and live_count() == 0.

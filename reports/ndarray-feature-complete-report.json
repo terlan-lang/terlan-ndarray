@@ -1,0 +1,46 @@
+{
+  "api_matrix": {
+    "contiguous_cpu": "passed",
+    "non_contiguous_cpu": "passed",
+    "public_functions_with_complete_evidence": 513
+  },
+  "cuda": {
+    "compute_capabilities": [
+      86
+    ],
+    "ndarray_round_trip": "passed",
+    "pytorch_round_trip": "passed",
+    "pytorch_stream_ownership": "opaque-generation-tagged-package-resource"
+  },
+  "independence": {
+    "compiler_special_case": false,
+    "cpu_install_requires_cuda": false,
+    "package_neutral_broker": true
+  },
+  "interop": {
+    "ndarray_to_pytorch": "passed",
+    "polars_to_ndarray_to_pytorch": "passed",
+    "polars_to_pytorch": "passed"
+  },
+  "opencv_cuda": {
+    "admitted": false,
+    "device_native_exchange": "typed_skip",
+    "reason": "admitted OpenCV build has WITH_CUDA=OFF"
+  },
+  "package_content": {
+    "ndarray": {
+      "content_sha256": "04f7fa1b7c8a9a403567c64dd12ee161f6cf7567317840adba01509055cbe672",
+      "version": "0.0.7"
+    },
+    "polars": {
+      "content_sha256": "9e52cea4c8cee2f95abb6ea59d709bbe5b8d842c66216387573af07b4fb10c59",
+      "version": "0.1.0-dev"
+    },
+    "pytorch": {
+      "content_sha256": "e19fa26abc13f06b451b344124b74f5c676a97bb5bb42f98142d4b24a13f651b",
+      "version": "0.0.7"
+    }
+  },
+  "schema": "terlan.ndarray.feature-complete-report.v1",
+  "status": "passed"
+}

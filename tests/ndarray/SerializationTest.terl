@@ -1,0 +1,34 @@
+module ndarray.SerializationTest.
+
+import ndarray.Array.{ArrayOrder, copy_with_order, dispose, flush, from_floats, from_npy, is_c_contiguous, is_fortran_contiguous, live_count, load_npy, mmap_npy, save_npy, set_float, to_floats_cast, to_npy}.
+import std.io.File.{delete}.
+
+@test
+pub numpy_bytes_files_and_mmaps_preserve_values_and_fortran_order(): Bool ->
+    let path = "/tmp/terlan-ndarray-public-serialization.npy";
+    let source = from_floats([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [2, 3]);
+    let fortran = copy_with_order(source, ArrayOrder.FORTRAN);
+    let bytes = to_npy(fortran);
+    let decoded = from_npy(bytes, 1048576);
+    save_npy(fortran, path);
+    let loaded = load_npy(path, 1048576);
+    let mapped = mmap_npy(path, true, 1048576);
+    set_float(mapped, [1, 0], 40.0);
+    flush(mapped);
+    dispose(mapped);
+    let persisted = load_npy(path, 1048576);
+    let valid =
+        not is_c_contiguous(decoded)
+            and is_fortran_contiguous(decoded)
+            and not is_c_contiguous(loaded)
+            and is_fortran_contiguous(loaded)
+            and to_floats_cast(decoded) == [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+            and to_floats_cast(loaded) == [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+            and to_floats_cast(persisted) == [1.0, 2.0, 3.0, 40.0, 5.0, 6.0];
+    dispose(persisted);
+    dispose(loaded);
+    dispose(decoded);
+    dispose(fortran);
+    dispose(source);
+    let _deleted = delete(path);
+    valid and live_count() == 0.

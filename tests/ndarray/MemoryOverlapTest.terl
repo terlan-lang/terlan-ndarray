@@ -1,0 +1,75 @@
+module ndarray.MemoryOverlapTest.
+
+import ndarray.Array.{dispose, from_ints, live_count, slice_axis}.
+import ndarray.Indexing.{add_at_coordinates}.
+import ndarray.Numpy.{
+    add_into,
+    add_reduceat,
+    add_reduceat_into,
+    as_strided,
+    internal_overlap,
+    may_share_memory,
+    may_share_memory_with_work,
+    shares_memory,
+    shares_memory_with_work,
+    invert_at
+}.
+
+@test
+pub overlap_queries_distinguish_bounds_exactness_and_internal_aliases(): Bool ->
+    let source = from_ints([0, 1, 2, 3, 4, 5], [6]);
+    let even = slice_axis(source, 0, 0, 6, 2);
+    let odd = slice_axis(source, 0, 1, 6, 2);
+    let repeated = as_strided(source, [3, 2], [0, 1]);
+    let valid = may_share_memory(even, odd)
+        and not shares_memory(even, odd)
+        and not may_share_memory_with_work(even, odd, -1)
+        and not shares_memory_with_work(even, odd, -1)
+        and internal_overlap(repeated)
+        and not internal_overlap(source);
+    dispose(repeated);
+    dispose(odd);
+    dispose(even);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub coordinate_add_at_accumulates_repeated_multidimensional_indexes(): Bool ->
+    let matrix = from_ints([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], [3, 4]);
+    let coordinates = from_ints([1, 0, 1, 0, 2, 2, 0, 3], [4, 2]);
+    let additions = from_ints([50, 50, 30, 16], [4]);
+    add_at_coordinates(matrix, coordinates, additions);
+    let valid = ndarray.Array.to_ints(matrix)
+        == [0, 1, 2, 19, 104, 5, 6, 7, 8, 9, 40, 11];
+    dispose(additions);
+    dispose(coordinates);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub ufunc_destinations_and_indexed_updates_stage_overlapping_inputs(): Bool ->
+    let source = from_ints([0, 1, 2, 3, 4, 5], [6]);
+    let lhs = slice_axis(source, 0, 0, 5, 1);
+    let rhs = slice_axis(source, 0, 0, 5, 1);
+    let destination = slice_axis(source, 0, 1, 6, 1);
+    add_into(destination, lhs, rhs);
+    let indexes = from_ints([0, 2, 4], [3]);
+    let reduced = add_reduceat(source, indexes, 0);
+    let reduced_destination = slice_axis(source, 0, 0, 3, 1);
+    add_reduceat_into(reduced_destination, source, indexes, 0);
+    let inverted = from_ints([0, 1, 2], [3]);
+    let inverted_indexes = slice_axis(inverted, 0, 0, 3, 1);
+    invert_at(inverted, inverted_indexes);
+    let valid = ndarray.Array.to_ints(reduced) == [0, 6, 14]
+        and ndarray.Array.to_ints(source) == [0, 6, 14, 4, 6, 8]
+        and ndarray.Array.to_ints(inverted) == [-1, -2, -3];
+    dispose(inverted_indexes);
+    dispose(inverted);
+    dispose(reduced_destination);
+    dispose(reduced);
+    dispose(indexes);
+    dispose(destination);
+    dispose(rhs);
+    dispose(lhs);
+    dispose(source);
+    valid and live_count() == 0.

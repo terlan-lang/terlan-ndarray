@@ -1,0 +1,42 @@
+module ndarray.TriangularTest.
+
+import ndarray.Array.{dispose, dtype_code, from_ints, live_count, shape, to_floats, to_ints_cast}.
+import ndarray.Creation.{tri, tril, triu}.
+
+@test
+pub triangular_defaults_and_numeric_dtypes_match_numpy(): Bool ->
+    let standard = tri(3);
+    let boolean = tri(3, dtype = 1);
+    let integers = from_ints([1, 1, 1, 1], [2, 2]);
+    let lower = tril(integers);
+    let upper = triu(integers);
+    let valid = shape(standard) == [3, 3]
+        and dtype_code(standard) == 3
+        and to_floats(standard) == [1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0]
+        and dtype_code(boolean) == 1
+        and to_ints_cast(boolean) == [1, 0, 0, 1, 1, 0, 1, 1, 1]
+        and to_ints_cast(lower) == [1, 0, 1, 1]
+        and to_ints_cast(upper) == [1, 1, 0, 1]
+        and to_ints_cast(integers) == [1, 1, 1, 1];
+    dispose(upper);
+    dispose(lower);
+    dispose(integers);
+    dispose(boolean);
+    dispose(standard);
+    valid and live_count() == 0.
+
+@test
+pub triangular_rank_three_offsets_and_immutability_match_numpy(): Bool ->
+    let cube = from_ints([1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0], [3, 2, 2]);
+    let cube_lower = tril(cube);
+    let cube_upper = triu(cube);
+    let shifted = tril(cube, -1);
+    let valid = to_ints_cast(cube_lower) == [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0]
+        and to_ints_cast(cube_upper) == [1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0]
+        and to_ints_cast(shifted) == [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+        and to_ints_cast(cube) == [1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0];
+    dispose(shifted);
+    dispose(cube_upper);
+    dispose(cube_lower);
+    dispose(cube);
+    valid and live_count() == 0.

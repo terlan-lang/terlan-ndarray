@@ -1,0 +1,8 @@
+module=ndarray.MethodOutputTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=7463453833053486101
+interface_hash=10918286665299110623
+interface_doc_hash=16945203711659273585
+deps=0

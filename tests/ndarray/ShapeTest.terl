@@ -1,0 +1,387 @@
+module ndarray.ShapeTest.
+
+import ndarray.Array.{choose, compress, compress_flat, dispose, dtype_code, expand_dims, flip, from_bools, from_floats, from_ints, from_ints_as, live_count, put_along_axis, repeat_counts, repeat_flat, resize, resize_in_place, select_where, set_int, shape, slice_axis, strides, take_along_axis, take_mode, to_bools, to_floats, to_floats_cast, to_ints}.
+import ndarray.Indexing.{compress_flat_into, compress_into}.
+import ndarray.Numpy.{column_stack, dsplit, dstack, hsplit, hstack, meshgrid, putmask, vsplit, vstack}.
+import ndarray.Shape.{atleast_1d, atleast_2d, atleast_3d, concatenate_flat, concatenate_flat_into, concatenate_flat_with_dtype, concatenate_into, concatenate_with_dtype, flip_all, fliplr, flipud, rot90}.
+
+import type ndarray.Numpy.{MeshIndexing}.
+
+@test
+pub rank_adaptation_preserves_values_and_numpy_axis_placement(): Bool ->
+    let scalar = from_ints([7], []);
+    let vector = from_ints([1, 2], [2]);
+    let matrix = from_ints([1, 2, 3, 4], [2, 2]);
+    let scalar_1d = atleast_1d(scalar);
+    let scalar_2d = atleast_2d(scalar);
+    let scalar_3d = atleast_3d(scalar);
+    let vector_2d = atleast_2d(vector);
+    let vector_3d = atleast_3d(vector);
+    let matrix_3d = atleast_3d(matrix);
+    let valid =
+        shape(scalar_1d) == [1]
+            and shape(scalar_2d) == [1, 1]
+            and shape(scalar_3d) == [1, 1, 1]
+            and shape(vector_2d) == [1, 2]
+            and shape(vector_3d) == [1, 2, 1]
+            and shape(matrix_3d) == [2, 2, 1]
+            and to_ints(scalar_3d) == [7]
+            and to_ints(vector_3d) == [1, 2]
+            and to_ints(matrix_3d) == [1, 2, 3, 4];
+    dispose(matrix_3d);
+    dispose(vector_3d);
+    dispose(vector_2d);
+    dispose(scalar_3d);
+    dispose(scalar_2d);
+    dispose(scalar_1d);
+    dispose(matrix);
+    dispose(vector);
+    dispose(scalar);
+    valid and live_count() == 0.
+
+@test
+pub stacking_and_designated_splits_follow_numpy_rank_rules(): Bool ->
+    let scalar_a = from_ints([1], []);
+    let scalar_b = from_ints([2], []);
+    let vector_a = from_ints([1, 2], [2]);
+    let vector_b = from_ints([3, 4], [2]);
+    let scalar_horizontal = hstack([scalar_a, scalar_b]);
+    let horizontal = hstack([vector_a, vector_b]);
+    let vertical = vstack([vector_a, vector_b]);
+    let depth = dstack([vector_a, vector_b]);
+    let columns = column_stack([vector_a, vector_b]);
+    let split_vector = from_ints([0, 1, 2, 3], [4]);
+    let [low, high] = hsplit(split_vector, 2);
+    let split_matrix = from_ints([0, 1, 2, 3, 4, 5, 6, 7], [2, 4]);
+    let [left, right] = hsplit(split_matrix, 2);
+    let [top, bottom] = vsplit(split_matrix, 2);
+    let split_cube = from_ints([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], [2, 2, 4]);
+    let [front, back] = dsplit(split_cube, 2);
+    let valid =
+        shape(scalar_horizontal) == [2]
+            and to_ints(scalar_horizontal) == [1, 2]
+            and shape(horizontal) == [4]
+            and to_ints(horizontal) == [1, 2, 3, 4]
+            and shape(vertical) == [2, 2]
+            and shape(depth) == [1, 2, 2]
+            and shape(columns) == [2, 2]
+            and to_ints(columns) == [1, 3, 2, 4]
+            and to_ints(low) == [0, 1]
+            and to_ints(high) == [2, 3]
+            and shape(left) == [2, 2]
+            and to_ints(right) == [2, 3, 6, 7]
+            and shape(top) == [1, 4]
+            and shape(bottom) == [1, 4]
+            and shape(front) == [2, 2, 2]
+            and shape(back) == [2, 2, 2];
+    dispose(back);
+    dispose(front);
+    dispose(split_cube);
+    dispose(bottom);
+    dispose(top);
+    dispose(right);
+    dispose(left);
+    dispose(split_matrix);
+    dispose(high);
+    dispose(low);
+    dispose(split_vector);
+    dispose(columns);
+    dispose(depth);
+    dispose(vertical);
+    dispose(horizontal);
+    dispose(scalar_horizontal);
+    dispose(vector_b);
+    dispose(vector_a);
+    dispose(scalar_b);
+    dispose(scalar_a);
+    valid and live_count() == 0.
+
+@test
+pub matrix_axis_flips_are_shared_negative_stride_views(): Bool ->
+    let source = from_ints([0, 1, 2, 3, 4, 5], [2, 3]);
+    let left_right = fliplr(source);
+    let up_down = flipud(source);
+    let initial =
+        shape(left_right) == [2, 3]
+            and strides(left_right) == [3, -1]
+            and to_ints(left_right) == [2, 1, 0, 5, 4, 3]
+            and shape(up_down) == [2, 3]
+            and strides(up_down) == [-3, 1]
+            and to_ints(up_down) == [3, 4, 5, 0, 1, 2];
+    set_int(left_right, [0, 0], 9);
+    set_int(up_down, [0, 1], 8);
+    let shared =
+        to_ints(source) == [0, 1, 9, 3, 8, 5]
+            and to_ints(left_right) == [9, 1, 0, 5, 8, 3]
+            and to_ints(up_down) == [3, 8, 5, 0, 1, 9];
+    (dispose(up_down); dispose(left_right); dispose(source); initial and shared and live_count() == 0).
+
+@test
+pub flips_and_rotations_cover_numpy_axis_semantics(): Bool ->
+    let source = from_ints([0, 1, 2, 3, 4, 5, 6, 7], [2, 2, 2]);
+    let unchanged = flip(source, []);
+    let all_axes = flip_all(source);
+    let outer_last = flip(source, [0, 2]);
+    let last_plane = rot90(source, 1, 1, 2);
+    let zero_turn = rot90(source, 4, 0, 1);
+    let initial =
+        to_ints(unchanged) == [0, 1, 2, 3, 4, 5, 6, 7]
+            and to_ints(all_axes) == [7, 6, 5, 4, 3, 2, 1, 0]
+            and to_ints(outer_last) == [5, 4, 7, 6, 1, 0, 3, 2]
+            and to_ints(last_plane) == [1, 3, 0, 2, 5, 7, 4, 6];
+    set_int(zero_turn, [0, 0, 0], 9);
+    let shared = to_ints(source) == [9, 1, 2, 3, 4, 5, 6, 7];
+    dispose(zero_turn);
+    dispose(last_plane);
+    dispose(outer_last);
+    dispose(all_axes);
+    dispose(unchanged);
+    dispose(source);
+    initial and shared and live_count() == 0.
+
+@test
+pub resize_repeats_values_and_fills_empty_sources(): Bool ->
+    let matrix = from_ints([1, 2, 3, 4], [2, 2]);
+    let empty = from_ints([], [0]);
+    let wide = resize(matrix, [2, 4]);
+    let uneven = resize(matrix, [4, 3]);
+    let zero = resize(matrix, [2, 0]);
+    let filled = resize(empty, [2, 1]);
+    let valid =
+        shape(wide) == [2, 4]
+            and to_ints(wide) == [1, 2, 3, 4, 1, 2, 3, 4]
+            and shape(uneven) == [4, 3]
+            and to_ints(uneven) == [1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4]
+            and shape(zero) == [2, 0]
+            and shape(filled) == [2, 1]
+            and to_ints(filled) == [0, 0];
+    dispose(filled);
+    dispose(zero);
+    dispose(uneven);
+    dispose(wide);
+    dispose(empty);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub mutating_resize_preserves_prefix_and_zero_initializes_growth(): Bool ->
+    let array = from_ints([1, 2, 3, 4], [2, 2]);
+    resize_in_place(array, [3, 2]);
+    let grown = shape(array) == [3, 2] and to_ints(array) == [1, 2, 3, 4, 0, 0];
+    resize_in_place(array, []);
+    let scalar = shape(array) == [] and to_ints(array) == [1];
+    dispose(array);
+    grown and scalar and live_count() == 0.
+
+@test
+pub meshgrid_preserves_numpy_indexing_sparse_copy_and_empty_semantics(): Bool ->
+    let x = from_ints([1, 2], [2]);
+    let y = from_ints([10, 20, 30], [3]);
+    let z = from_ints([5, 6], [2]);
+    let [xy_x, xy_y] = meshgrid(x, [y]);
+    let [ij_x, ij_y] = meshgrid(x, [y], MeshIndexing.IJ);
+    let [sparse_x, sparse_y] = meshgrid(x, [y], MeshIndexing.XY, true);
+    let [cube_x, cube_y, cube_z] = meshgrid(x, [y, z], MeshIndexing.IJ);
+    let no_grids = meshgrid();
+    let initial =
+        no_grids == []
+            and shape(xy_x) == [3, 2]
+            and to_ints(xy_x) == [1, 2, 1, 2, 1, 2]
+            and to_ints(xy_y) == [10, 10, 20, 20, 30, 30]
+            and shape(ij_x) == [2, 3]
+            and to_ints(ij_x) == [1, 1, 1, 2, 2, 2]
+            and to_ints(ij_y) == [10, 20, 30, 10, 20, 30]
+            and shape(sparse_x) == [1, 2]
+            and shape(sparse_y) == [3, 1]
+            and shape(cube_x) == [2, 3, 2]
+            and shape(cube_y) == [2, 3, 2]
+            and shape(cube_z) == [2, 3, 2];
+    set_int(xy_x, [0, 0], 9);
+    let copied =
+        to_ints(x) == [1, 2]
+            and to_ints(xy_x) == [9, 2, 1, 2, 1, 2];
+    dispose(cube_z);
+    dispose(cube_y);
+    dispose(cube_x);
+    dispose(sparse_y);
+    dispose(sparse_x);
+    dispose(ij_y);
+    dispose(ij_x);
+    dispose(xy_y);
+    dispose(xy_x);
+    dispose(z);
+    dispose(y);
+    dispose(x);
+    initial and copied and live_count() == 0.
+
+@test
+pub shape_overloads_and_along_axis_broadcasting_are_public(): Bool ->
+    let source = from_ints([0, 1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 23], [3, 4, 1]);
+    let indices = from_ints([0, 1, 2, 3, 0, 3, 2, 1, 0, 3], [1, 2, 5]);
+    let expanded_once = expand_dims(source, 0);
+    let expanded_many = expand_dims(source, [0, -1, -2]);
+    let selected = take_along_axis(source, indices, 1);
+    let target = from_ints([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [3, 4, 1]);
+    let replacement = from_ints([20], [1]);
+    put_along_axis(target, indices, replacement, 1);
+    let valid =
+        shape(expanded_once) == [1, 3, 4, 1]
+            and shape(expanded_many) == [1, 3, 4, 1, 1, 1]
+            and shape(selected) == [3, 2, 5]
+            and to_ints(selected) == [
+    0,
+    1,
+    2,
+    3,
+    0,
+    3,
+    2,
+    1,
+    0,
+    3,
+    10,
+    11,
+    12,
+    13,
+    10,
+    13,
+    12,
+    11,
+    10,
+    13,
+    20,
+    21,
+    22,
+    23,
+    20,
+    23,
+    22,
+    21,
+    20,
+    23,
+]
+            and to_ints(target) == [20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20];
+    (dispose(replacement); dispose(target); dispose(selected); dispose(expanded_many); dispose(expanded_once); dispose(indices); dispose(source); valid and live_count() == 0).
+
+@test
+pub repeat_counts_preserve_numpy_axis_and_flatten_order(): Bool ->
+    let source = from_ints([1, 2, 3, 4, 5, 6], [2, 3]);
+    let rows = repeat_counts(source, [2, 1], 0);
+    let columns = repeat_counts(source, [1, 3, 2], 1);
+    let flattened = repeat_flat(source, [1, 3, 2, 1, 1, 2]);
+    let broadcast = repeat_counts(source, [2], 1);
+    let valid =
+        shape(rows) == [3, 3]
+            and to_ints(rows) == [1, 2, 3, 1, 2, 3, 4, 5, 6]
+            and shape(columns) == [2, 6]
+            and to_ints(columns) == [1, 2, 2, 2, 3, 3, 4, 5, 5, 5, 6, 6]
+            and shape(flattened) == [10]
+            and to_ints(flattened) == [1, 2, 2, 2, 3, 3, 4, 5, 6, 6]
+            and shape(broadcast) == [2, 6]
+            and to_ints(broadcast) == [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6];
+    dispose(broadcast);
+    dispose(flattened);
+    dispose(columns);
+    dispose(rows);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub concatenate_supports_flatten_dtype_and_exact_output_paths(): Bool ->
+    let matrix = from_ints([1, 2, 3, 4], [2, 2]);
+    let vector = from_ints([5, 6], [2]);
+    let flat = concatenate_flat([matrix, vector]);
+    let converted = concatenate_flat_with_dtype([matrix, vector], 11, 3);
+    let rows = from_ints([7, 8], [1, 2]);
+    let joined = concatenate_with_dtype([matrix, rows], 0, 3, 3);
+    let flat_destination = from_ints_as([0, 0, 0, 0, 0, 0], [6], 2);
+    let row_destination = from_ints_as([0, 0, 0, 0, 0, 0], [3, 2], 2);
+    concatenate_flat_into([matrix, vector], flat_destination, 2);
+    concatenate_into([matrix, rows], 0, row_destination, 2);
+    let valid =
+        shape(flat) == [6]
+            and to_ints(flat) == [1, 2, 3, 4, 5, 6]
+            and dtype_code(converted) == 11
+            and to_floats_cast(converted) == [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+            and dtype_code(joined) == 3
+            and shape(joined) == [3, 2]
+            and to_floats(joined) == [1.0, 2.0, 3.0, 4.0, 7.0, 8.0]
+            and to_ints(flat_destination) == [1, 2, 3, 4, 5, 6]
+            and to_ints(row_destination) == [1, 2, 3, 4, 7, 8];
+    dispose(row_destination);
+    dispose(flat_destination);
+    dispose(joined);
+    dispose(rows);
+    dispose(converted);
+    dispose(flat);
+    dispose(vector);
+    dispose(matrix);
+    valid and live_count() == 0.
+
+@test
+pub take_modes_and_compress_truncation_match_numpy(): Bool ->
+    let source = from_ints([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [2, 5]);
+    let wrapped = take_mode(source, [-1, 2], 0, 1);
+    let clipped = take_mode(source, [-1, 2], 0, 2);
+    let short_mask = from_bools([false, true], [2]);
+    let axis_selected = compress(source, short_mask, 1);
+    let flat_selected = compress_flat(source, short_mask);
+    let axis_destination = from_ints([0, 0], [2, 1]);
+    let flat_destination = from_ints([0], [1]);
+    compress_into(axis_destination, source, short_mask, 1);
+    compress_flat_into(flat_destination, source, short_mask);
+    let valid =
+        shape(wrapped) == [2, 5]
+            and to_ints(wrapped) == [6, 7, 8, 9, 10, 1, 2, 3, 4, 5]
+            and shape(clipped) == [2, 5]
+            and to_ints(clipped) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            and shape(axis_selected) == [2, 1]
+            and to_ints(axis_selected) == [2, 7]
+            and shape(flat_selected) == [1]
+            and to_ints(flat_selected) == [2]
+            and to_ints(axis_destination) == [2, 7]
+            and to_ints(flat_destination) == [2];
+    dispose(flat_destination);
+    dispose(axis_destination);
+    dispose(flat_selected);
+    dispose(axis_selected);
+    dispose(short_mask);
+    dispose(clipped);
+    dispose(wrapped);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub choice_where_and_putmask_preserve_broadcast_dtype_and_aliasing(): Bool ->
+    let indexes = from_ints([0, 0, 1], [3]);
+    let integer_choice = from_ints([2, 2, 2], [3]);
+    let float_choice = from_floats([3.5, 3.5, 3.5], [3]);
+    let chosen = choose(indexes, [integer_choice, float_choice], 0);
+    let condition = from_bools([true, false], [2, 1]);
+    let selected = from_ints([1, 2, 3], [1, 3]);
+    let rejected = from_floats([0.5], []);
+    let conditional = select_where(condition, selected, rejected);
+    let mutation = from_bools([true, false, true, false], [4]);
+    let destination = slice_axis(mutation, 0, 1, 4, 1);
+    let values = slice_axis(mutation, 0, 0, 3, 1);
+    let mask = from_bools([true, true, true], [3]);
+    putmask(destination, mask, values);
+    let valid =
+        shape(chosen) == [3]
+            and to_floats(chosen) == [2.0, 2.0, 3.5]
+            and shape(conditional) == [2, 3]
+            and to_floats(conditional) == [1.0, 2.0, 3.0, 0.5, 0.5, 0.5]
+            and to_bools(mutation) == [true, true, false, true];
+    dispose(mask);
+    dispose(values);
+    dispose(destination);
+    dispose(mutation);
+    dispose(conditional);
+    dispose(rejected);
+    dispose(selected);
+    dispose(condition);
+    dispose(chosen);
+    dispose(float_choice);
+    dispose(integer_choice);
+    dispose(indexes);
+    valid and live_count() == 0.

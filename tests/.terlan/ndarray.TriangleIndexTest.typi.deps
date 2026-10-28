@@ -1,0 +1,8 @@
+module=ndarray.TriangleIndexTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=12621036447083139166
+interface_hash=14636449777166894753
+interface_doc_hash=18286321412366711834
+deps=0

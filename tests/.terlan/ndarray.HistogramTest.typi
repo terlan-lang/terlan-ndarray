@@ -1,0 +1,11 @@
+module ndarray.HistogramTest.
+
+pub histogram2d_asymmetric_density_ranges_and_outliers_match_numpy(): Bool.
+
+pub histogram2d_defaults_edges_empty_and_mixed_bins_match_numpy(): Bool.
+
+pub histogram_counts_edges_density_and_weights_match_numpy(): Bool.
+
+pub histogram_estimators_empty_constants_small_inputs_and_ranges_match_numpy(): Bool.
+
+pub histogramdd_lists_ranges_edges_weights_and_density_match_numpy(): Bool.

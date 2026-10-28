@@ -1,0 +1,138 @@
+module ndarray.SortingTest.
+
+import ndarray.Array.{
+    argpartition, argpartition_flat, argsort, argsort_flat, complex_imags,
+    complex_reals, dispose, from_complex, from_ints, from_ints_as, live_count,
+    partition, partition_flat, partition_inplace, searchsorted,
+    searchsorted_with_sorter, shape, slice_axis, sort, sort_flat, sort_inplace,
+    to_ints, to_ints_cast
+}.
+import ndarray.Numpy.{lexsort}.
+
+@test
+pub sorting_defaults_axes_flattening_and_inplace_match_numpy(): Bool ->
+    let array = from_ints([3, 2, 1, 0], [2, 2]);
+    let default_sorted = sort(array);
+    let first_axis = sort(array, 0);
+    let order = argsort(array);
+    let flattened = sort_flat(array);
+    let flat_order = argsort_flat(array);
+    let inplace = from_ints([3, 2, 1, 0], [2, 2]);
+    sort_inplace(inplace);
+    let valid = to_ints(array) == [3, 2, 1, 0]
+        and to_ints(default_sorted) == [2, 3, 0, 1]
+        and to_ints(first_axis) == [1, 0, 3, 2]
+        and to_ints(order) == [1, 0, 1, 0]
+        and shape(flattened) == [4]
+        and to_ints(flattened) == [0, 1, 2, 3]
+        and to_ints(flat_order) == [3, 2, 1, 0]
+        and to_ints(inplace) == [2, 3, 0, 1];
+    dispose(inplace);
+    dispose(flat_order);
+    dispose(flattened);
+    dispose(order);
+    dispose(first_axis);
+    dispose(default_sorted);
+    dispose(array);
+    valid and live_count() == 0.
+
+@test
+pub sorting_preserves_empty_shapes_and_orders_complex_values(): Bool ->
+    let empty = from_ints([], [3, 2, 1, 0]);
+    let empty_sorted = sort(empty);
+    let empty_flat = sort_flat(empty);
+    let complex = from_complex([1.0, 0.0, 1.0, 0.0], [1.0, 1.0, 0.0, 0.0], [4], 13);
+    let complex_sorted = sort(complex);
+    let valid = shape(empty_sorted) == [3, 2, 1, 0]
+        and shape(empty_flat) == [0]
+        and complex_reals(complex_sorted) == [0.0, 0.0, 1.0, 1.0]
+        and complex_imags(complex_sorted) == [0.0, 1.0, 0.0, 1.0];
+    dispose(complex_sorted);
+    dispose(complex);
+    dispose(empty_flat);
+    dispose(empty_sorted);
+    dispose(empty);
+    valid and live_count() == 0.
+
+@test
+pub partition_scalar_sequence_flattening_and_mutation_match_numpy(): Bool ->
+    let array = from_ints([6, 1, 5, 2, 4, 3], [2, 3]);
+    let kth_storage = from_ints_as([0, 99, -1, 99, 1, 99], [6], 5);
+    let kths = slice_axis(kth_storage, 0, 0, 6, 2);
+    let selected = partition(array, kths);
+    let selected_order = argpartition(array, kths);
+    let flat = partition_flat(array, -2);
+    let flat_order = argpartition_flat(array, kths);
+    let inplace = from_ints([6, 1, 5, 2, 4, 3], [2, 3]);
+    partition_inplace(inplace, kths);
+    let valid = to_ints(array) == [6, 1, 5, 2, 4, 3]
+        and to_ints_cast(kths) == [0, -1, 1]
+        and to_ints(selected) == [1, 5, 6, 2, 3, 4]
+        and to_ints(selected_order) == [1, 2, 0, 0, 2, 1]
+        and shape(flat) == [6]
+        and to_ints(flat) == [1, 2, 3, 4, 5, 6]
+        and to_ints(flat_order) == [1, 3, 5, 4, 2, 0]
+        and to_ints(inplace) == [1, 5, 6, 2, 3, 4];
+    dispose(inplace);
+    dispose(flat_order);
+    dispose(flat);
+    dispose(selected_order);
+    dispose(selected);
+    dispose(kths);
+    dispose(kth_storage);
+    dispose(array);
+    valid and live_count() == 0.
+
+@test
+pub searchsorted_supports_strided_integer_sorters_and_empty_inputs(): Bool ->
+    let array = from_ints([30, 10, 20], [3]);
+    let sorter_storage = from_ints_as([1, 99, 2, 99, 0, 99], [6], 5);
+    let sorter = slice_axis(sorter_storage, 0, 0, 6, 2);
+    let queries = from_ints([10, 20, 30], [3]);
+    let left = searchsorted_with_sorter(array, queries, sorter, false);
+    let right = searchsorted_with_sorter(array, queries, sorter, true);
+    let empty = from_ints([], [0]);
+    let empty_queries = from_ints([0, 1, 2], [3]);
+    let empty_result = searchsorted(empty, empty_queries, false);
+    let valid = to_ints(left) == [0, 1, 2]
+        and to_ints(right) == [1, 2, 3]
+        and to_ints(empty_result) == [0, 0, 0];
+    dispose(empty_result);
+    dispose(empty_queries);
+    dispose(empty);
+    dispose(right);
+    dispose(left);
+    dispose(queries);
+    dispose(sorter);
+    dispose(sorter_storage);
+    dispose(array);
+    valid and live_count() == 0.
+
+@test
+pub lexsort_normalizes_axes_for_stacked_multidimensional_keys(): Bool ->
+    let keys = from_ints([1, 2, 1, 3, 1, 2, 0, 0, 0, 1, 0, 1], [2, 2, 3]);
+    let rows = lexsort(keys, -1);
+    let columns = lexsort(keys, 0);
+    let valid = shape(rows) == [2, 3]
+        and to_ints(rows) == [0, 2, 1, 1, 2, 0]
+        and to_ints(columns) == [0, 1, 0, 1, 0, 1];
+    dispose(columns);
+    dispose(rows);
+    dispose(keys);
+    valid and live_count() == 0.
+
+@test
+pub lexsort_preserves_zero_length_axis_shapes(): Bool ->
+    let empty_rows = from_ints([], [1, 0, 2]);
+    let row_order = lexsort(empty_rows, 0);
+    let empty_columns = from_ints([], [1, 2, 0]);
+    let column_order = lexsort(empty_columns, 0);
+    let valid = shape(row_order) == [0, 2]
+        and shape(column_order) == [2, 0]
+        and to_ints(row_order) == []
+        and to_ints(column_order) == [];
+    dispose(column_order);
+    dispose(empty_columns);
+    dispose(row_order);
+    dispose(empty_rows);
+    valid and live_count() == 0.

@@ -1,0 +1,10 @@
+module=ndarray.Numpy
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=10527531353956865624
+interface_hash=3108866319260109717
+interface_doc_hash=14711411250535793721
+deps=2
+ndarray.Array=14540436248669504260
+std.collections.List=5599785960849014878

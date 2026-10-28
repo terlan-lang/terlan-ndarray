@@ -1,0 +1,251 @@
+/**
+ * Chebyshev polynomial algebra and numerical methods.
+ */
+module ndarray.Chebyshev.
+
+import ndarray.Array.
+
+/**
+ * Converts coefficients to the power basis.
+ */
+@compiler.native {ndarray.array.cheb2poly}
+pub cheb2poly(coefficients: Array): Array ->
+    native.
+
+/**
+ * Converts power coefficients to the cheb basis.
+ */
+@compiler.native {ndarray.array.poly2cheb}
+pub poly2cheb(coefficients: Array): Array ->
+    native.
+
+/**
+ * Adds coefficient vectors.
+ */
+@compiler.native {ndarray.array.chebadd}
+pub chebadd(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Subtracts coefficient vectors.
+ */
+@compiler.native {ndarray.array.chebsub}
+pub chebsub(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Multiplies coefficient vectors.
+ */
+@compiler.native {ndarray.array.chebmul}
+pub chebmul(lhs: Array, rhs: Array): Array ->
+    native.
+
+/**
+ * Returns quotient and remainder.
+ */
+@compiler.native {ndarray.array.chebdiv}
+pub chebdiv(lhs: Array, rhs: Array): List[Array] ->
+    native.
+
+/**
+ * Multiplies coefficients by x.
+ */
+@compiler.native {ndarray.array.chebmulx}
+pub chebmulx(coefficients: Array): Array ->
+    native.
+
+/**
+ * Raises coefficients to a nonnegative power.
+ */
+@compiler.native {ndarray.array.chebpow}
+pub chebpow(coefficients: Array, exponent: Int): Array ->
+    native.
+
+/**
+ * Differentiates coefficients.
+ */
+@compiler.native {ndarray.array.chebder}
+pub chebder(coefficients: Array, order: Int): Array ->
+    native.
+
+/**
+ * Integrates coefficients.
+ */
+@compiler.native {ndarray.array.chebint}
+pub chebint(coefficients: Array, order: Int, constant: Float): Array ->
+    native.
+
+/**
+ * Fits coefficients to samples.
+ */
+@compiler.native {ndarray.array.chebfit}
+pub chebfit(coordinates: Array, values: Array, degree: Int): Array ->
+    native.
+
+/**
+ * Builds coefficients from roots.
+ */
+@compiler.native {ndarray.array.chebfromroots}
+pub chebfromroots(roots: Array): Array ->
+    native.
+
+/**
+ * Builds a companion matrix.
+ */
+@compiler.native {ndarray.array.chebcompanion}
+pub chebcompanion(coefficients: Array): Array ->
+    native.
+
+/**
+ * Returns polynomial roots.
+ */
+@compiler.native {ndarray.array.chebroots}
+pub chebroots(coefficients: Array): Array ->
+    native.
+
+/**
+ * Removes insignificant high-order coefficients.
+ */
+@compiler.native {ndarray.array.chebtrim}
+pub chebtrim(coefficients: Array, tolerance: Float): Array ->
+    native.
+
+/**
+ * Builds coefficients for offset plus scale times x.
+ */
+@compiler.native {ndarray.array.chebline}
+pub chebline(offset: Float, scale: Float): Array ->
+    native.
+
+/**
+ * Evaluates coefficients.
+ */
+@compiler.native {ndarray.array.chebval}
+pub chebval(coordinates: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Evaluates a two-dimensional coefficient tensor.
+ */
+@compiler.native {ndarray.array.chebval2d}
+pub chebval2d(x: Array, y: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Evaluates a three-dimensional coefficient tensor.
+ */
+@compiler.native {ndarray.array.chebval3d}
+pub chebval3d(x: Array, y: Array, z: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Evaluates over a two-dimensional Cartesian grid.
+ */
+@compiler.native {ndarray.array.chebgrid2d}
+pub chebgrid2d(x: Array, y: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Evaluates over a three-dimensional Cartesian grid.
+ */
+@compiler.native {ndarray.array.chebgrid3d}
+pub chebgrid3d(x: Array, y: Array, z: Array, coefficients: Array): Array ->
+    native.
+
+/**
+ * Builds a Vandermonde matrix.
+ */
+@compiler.native {ndarray.array.chebvander}
+pub chebvander(coordinates: Array, degree: Int): Array ->
+    native.
+
+/**
+ * Builds a two-dimensional Vandermonde matrix.
+ */
+@compiler.native {ndarray.array.chebvander2d}
+pub chebvander2d(x: Array, y: Array, x_degree: Int, y_degree: Int): Array ->
+    native.
+
+/**
+ * Builds a three-dimensional Vandermonde matrix.
+ */
+@compiler.native {ndarray.array.chebvander3d}
+pub chebvander3d(x: Array, y: Array, z: Array, x_degree: Int, y_degree: Int, z_degree: Int): Array ->
+    native.
+
+/**
+ * Returns Gaussian quadrature nodes and weights.
+ */
+@compiler.native {ndarray.array.chebgauss}
+pub chebgauss(degree: Int): Array ->
+    native.
+
+/**
+ * Evaluates the orthogonality weight function.
+ */
+@compiler.native {ndarray.array.chebweight}
+pub chebweight(coordinates: Array): Array ->
+    native.
+
+/**
+ * Returns first-kind Chebyshev points.
+ */
+@compiler.native {ndarray.array.chebpts1}
+pub chebpts1(count: Int): Array ->
+    native.
+
+/**
+ * Returns second-kind Chebyshev points.
+ */
+@compiler.native {ndarray.array.chebpts2}
+pub chebpts2(count: Int): Array ->
+    native.
+
+/**
+ * Interpolates sampled values in the Chebyshev basis.
+ */
+@compiler.native {ndarray.array.chebinterpolate}
+pub chebinterpolate(values: Array): Array ->
+    native.
+
+/**
+ * Differentiates Chebyshev coefficient lanes along an axis with derivative scaling.
+ */
+@compiler.native {ndarray.array.chebder_axis}
+pub chebder(coefficients: Array, order: Int, scale: Float, axis: Int): Array ->
+    native.
+
+/**
+ * Integrates Chebyshev coefficient lanes along an axis with constants, a lower bound, and scaling.
+ */
+@compiler.native {ndarray.array.chebint_axis}
+pub chebint(
+    coefficients: Array,
+    order: Int,
+    constants: Array,
+    lower_bound: Float,
+    scale: Float,
+    axis: Int,
+): Array ->
+    native.
+
+/**
+ * Evaluates Chebyshev coefficient tensors with Cartesian or broadcast semantics.
+ */
+@compiler.native {ndarray.array.chebval_tensor}
+pub chebval(coordinates: Array, coefficients: Array, tensor: Bool): Array ->
+    native.
+
+/**
+ * Fits selected Chebyshev degrees to scalar or matrix-valued samples.
+ */
+@compiler.native {ndarray.array.chebfit_degrees}
+pub chebfit(coordinates: Array, values: Array, degrees: Array): Array ->
+    native.
+
+/**
+ * Fits selected Chebyshev degrees using sample weights.
+ */
+@compiler.native {ndarray.array.chebfit_weighted_degrees}
+pub chebfit(coordinates: Array, values: Array, degrees: Array, weights: Array): Array ->
+    native.

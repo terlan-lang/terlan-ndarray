@@ -1,0 +1,95 @@
+module ndarray.FftTest.
+
+import ndarray.Array.{complex_imags, complex_reals, dispose, dtype_code, fft, fftfreq, fftn, fftshift, from_floats, from_floats_as, hfft, ifft, ifftn, ifftshift, ihfft, irfft, live_count, rfft, rfftfreq, shape, to_floats_cast}.
+import ndarray.Numpy.{allclose}.
+
+@test
+pub transforms_promote_to_numpy_fft_dtypes_and_round_trip(): Bool ->
+    let source = from_floats_as([1.0, 0.0, 0.0, 0.0], [4], 11);
+    let spectrum = fft(source, -1, 0);
+    let restored = ifft(spectrum, -1, 0);
+    let real_spectrum = rfft(source, -1, 0);
+    let real_restored = irfft(real_spectrum, 4, -1, 0);
+    let valid =
+        dtype_code(spectrum) == 13
+            and dtype_code(restored) == 13
+            and dtype_code(real_spectrum) == 13
+            and dtype_code(real_restored) == 3
+            and complex_reals(spectrum) == [1.0, 1.0, 1.0, 1.0]
+            and complex_imags(spectrum) == [0.0, 0.0, 0.0, 0.0]
+            and complex_reals(restored) == [1.0, 0.0, 0.0, 0.0]
+            and to_floats_cast(real_restored) == [1.0, 0.0, 0.0, 0.0];
+    dispose(real_restored);
+    dispose(real_spectrum);
+    dispose(restored);
+    dispose(spectrum);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub multidimensional_transforms_respect_explicit_axis_order(): Bool ->
+    let source = from_floats([1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [2, 2, 2]);
+    let spectrum = fftn(source, [2, 0, 1], 1);
+    let restored = ifftn(spectrum, [2, 0, 1], 1);
+    let valid = shape(spectrum) == [2, 2, 2] and allclose(restored, source, 1e-12, 1e-12, false);
+    dispose(restored);
+    dispose(spectrum);
+    dispose(source);
+    valid and live_count() == 0.
+
+@test
+pub frequency_and_shift_helpers_match_numpy_even_and_odd_layouts(): Bool ->
+    let even = fftfreq(4, 0.5);
+    let odd_real = rfftfreq(5, 2.0);
+    let source = from_floats([0.0, 1.0, 2.0, 3.0, 4.0], [5]);
+    let shifted = fftshift(source, [0]);
+    let restored = ifftshift(shifted, [0]);
+    let valid =
+        to_floats_cast(even) == [0.0, 0.5, -1.0, -0.5]
+            and to_floats_cast(odd_real) == [0.0, 0.1, 0.2]
+            and to_floats_cast(shifted) == [3.0, 4.0, 0.0, 1.0, 2.0]
+            and to_floats_cast(restored) == [0.0, 1.0, 2.0, 3.0, 4.0];
+    dispose(restored);
+    dispose(shifted);
+    dispose(source);
+    dispose(odd_real);
+    dispose(even);
+    valid and live_count() == 0.
+
+@test
+pub sized_transforms_pad_truncate_and_round_trip(): Bool ->
+    let source = from_floats([1.0, 2.0, 3.0, 4.0], [4]);
+    let padded = from_floats([1.0, 2.0, 3.0, 4.0, 0.0, 0.0], [6]);
+    let truncated = from_floats([1.0, 2.0], [2]);
+    let padded_spectrum = fft(source, 6, -1, 1);
+    let padded_restored = ifft(padded_spectrum, 6, -1, 1);
+    let truncated_spectrum = fft(source, 2, -1, 2);
+    let truncated_restored = ifft(truncated_spectrum, 2, -1, 2);
+    let real_spectrum = rfft(source, 6, -1, 0);
+    let real_restored = irfft(real_spectrum, 6, -1, 0);
+    let hermitian = ihfft(source, 6, -1, 0);
+    let hermitian_restored = hfft(hermitian, 6, -1, 0);
+    let valid =
+        shape(padded_spectrum) == [6]
+            and shape(truncated_spectrum) == [2]
+            and shape(real_spectrum) == [4]
+            and shape(hermitian) == [4]
+            and dtype_code(padded_spectrum) == 13
+            and dtype_code(real_spectrum) == 13
+            and dtype_code(real_restored) == 3
+            and allclose(padded_restored, padded, 1e-12, 1e-12, false)
+            and allclose(truncated_restored, truncated, 1e-12, 1e-12, false)
+            and allclose(real_restored, padded, 1e-12, 1e-12, false)
+            and allclose(hermitian_restored, padded, 1e-12, 1e-12, false);
+    dispose(hermitian_restored);
+    dispose(hermitian);
+    dispose(real_restored);
+    dispose(real_spectrum);
+    dispose(truncated_restored);
+    dispose(truncated_spectrum);
+    dispose(padded_restored);
+    dispose(padded_spectrum);
+    dispose(truncated);
+    dispose(padded);
+    dispose(source);
+    valid and live_count() == 0.

@@ -1,0 +1,230 @@
+/**
+ * Compositional basic indexing and shape transforms.
+ */
+module ndarray.Indexing.
+
+import ndarray.Array.
+
+/**
+ * Builds one shared basic-indexing view; Int minimum denotes an omitted bound and ellipsis_index expands omitted source axes.
+ */
+@compiler.native {ndarray.shape.basic_slice}
+pub basic_slice(
+    array: Array,
+    starts: List[Int],
+    stops: List[Int],
+    steps: List[Int],
+    ellipsis_index: Int,
+    squeeze_axes: List[Int],
+    new_axes: List[Int],
+): Array ->
+    native.
+
+/**
+ * Takes an integer index Array while preserving every index dimension in the output shape.
+ */
+@compiler.native {ndarray.indexing.take_indices}
+pub take_indices(array: Array, indices: Array, axis: Int): Array ->
+    native.
+
+/**
+ * Takes an integer index Array using raise, wrap, or clip normalization while preserving index dimensions.
+ */
+@compiler.native {ndarray.indexing.take_indices_mode}
+pub take_indices_mode(array: Array, indices: Array, axis: Int, mode: Int): Array ->
+    native.
+
+/**
+ * Atomically writes an Array-indexed take result into an exactly shaped destination, including overlapping source views.
+ */
+@compiler.native {ndarray.indexing.take_indices_into}
+pub take_indices_into(destination: Array, array: Array, indices: Array, axis: Int, mode: Int): Unit ->
+    native.
+
+/**
+ * Atomically writes an axis-compressed result into an exact same-dtype destination.
+ */
+@compiler.native {ndarray.indexing.compress_into}
+pub compress_into(destination: Array, array: Array, mask: Array, axis: Int): Unit ->
+    native.
+
+/**
+ * Atomically writes a flattened compressed result into an exact same-dtype destination.
+ */
+@compiler.native {ndarray.indexing.compress_flat_into}
+pub compress_flat_into(destination: Array, array: Array, mask: Array): Unit ->
+    native.
+
+/**
+ * Applies sequential unbuffered addition at coordinate rows while staging aliases and committing atomically.
+ */
+@compiler.native {ndarray.indexing.add_at_coordinates}
+pub add_at_coordinates(array: Array, coordinates: Array, values: Array): Unit ->
+    native.
+
+/**
+ * Pads each axis with explicit leading and trailing constants.
+ */
+@compiler.native {ndarray.shape.pad_constant}
+pub pad_constant(
+    array: Array,
+    leading: List[Int],
+    trailing: List[Int],
+    leading_values: List[Float] = [0.0],
+    trailing_values: List[Float] = [0.0],
+): Array ->
+    native.
+
+/**
+ * Pads each axis by repeating its nearest edge value.
+ */
+@compiler.native {ndarray.shape.pad_edge}
+pub pad_edge(array: Array, leading: List[Int], trailing: List[Int]): Array ->
+    native.
+
+/**
+ * Pads each axis with a reflection that excludes the edge value.
+ */
+@compiler.native {ndarray.shape.pad_reflect}
+pub pad_reflect(array: Array, leading: List[Int], trailing: List[Int]): Array ->
+    native.
+
+/**
+ * Pads each axis with a reflection that includes the edge value.
+ */
+@compiler.native {ndarray.shape.pad_symmetric}
+pub pad_symmetric(array: Array, leading: List[Int], trailing: List[Int]): Array ->
+    native.
+
+/**
+ * Pads each axis by wrapping values from its opposite end.
+ */
+@compiler.native {ndarray.shape.pad_wrap}
+pub pad_wrap(array: Array, leading: List[Int], trailing: List[Int]): Array ->
+    native.
+
+/**
+ * Pads each axis with odd reflection excluding the edge value.
+ */
+@compiler.native {ndarray.shape.pad_reflect_odd}
+pub pad_reflect_odd(array: Array, leading: List[Int], trailing: List[Int]): Array ->
+    native.
+
+/**
+ * Pads each axis with odd reflection including the edge value.
+ */
+@compiler.native {ndarray.shape.pad_symmetric_odd}
+pub pad_symmetric_odd(array: Array, leading: List[Int], trailing: List[Int]): Array ->
+    native.
+
+/**
+ * Pads each axis with linear ramps from explicit end values to source edges.
+ */
+@compiler.native {ndarray.shape.pad_linear_ramp}
+pub pad_linear_ramp(
+    array: Array,
+    leading: List[Int],
+    trailing: List[Int],
+    leading_values: List[Float] = [0.0],
+    trailing_values: List[Float] = [0.0],
+): Array ->
+    native.
+
+/**
+ * Allocates padded regions without exposing uninitialized memory and preserves source values.
+ */
+@compiler.native {ndarray.shape.pad_empty}
+pub pad_empty(array: Array, leading: List[Int], trailing: List[Int]): Array ->
+    native.
+
+/**
+ * Pads with edge minimums over optional clipped statistic lengths.
+ */
+@compiler.native {ndarray.shape.pad_minimum}
+pub pad_minimum(
+    array: Array,
+    leading: List[Int],
+    trailing: List[Int],
+    leading_lengths: List[Int] = [],
+    trailing_lengths: List[Int] = [],
+): Array ->
+    native.
+
+/**
+ * Pads with edge maximums over optional clipped statistic lengths.
+ */
+@compiler.native {ndarray.shape.pad_maximum}
+pub pad_maximum(
+    array: Array,
+    leading: List[Int],
+    trailing: List[Int],
+    leading_lengths: List[Int] = [],
+    trailing_lengths: List[Int] = [],
+): Array ->
+    native.
+
+/**
+ * Pads with edge means over optional clipped statistic lengths.
+ */
+@compiler.native {ndarray.shape.pad_mean}
+pub pad_mean(
+    array: Array,
+    leading: List[Int],
+    trailing: List[Int],
+    leading_lengths: List[Int] = [],
+    trailing_lengths: List[Int] = [],
+): Array ->
+    native.
+
+/**
+ * Pads with edge medians over optional clipped statistic lengths.
+ */
+@compiler.native {ndarray.shape.pad_median}
+pub pad_median(
+    array: Array,
+    leading: List[Int],
+    trailing: List[Int],
+    leading_lengths: List[Int] = [],
+    trailing_lengths: List[Int] = [],
+): Array ->
+    native.
+
+/**
+ * Pads each axis with exact numerical values supplied by scalar or rank-sized arrays.
+ */
+@compiler.native {ndarray.shape.pad_constant_values}
+pub pad_constant_values(
+    array: Array,
+    leading: List[Int],
+    trailing: List[Int],
+    leading_values: Array,
+    trailing_values: Array,
+): Array ->
+    native.
+
+/**
+ * Pads each axis with linear ramps using exact numerical endpoints from scalar or rank-sized arrays.
+ */
+@compiler.native {ndarray.shape.pad_linear_ramp_values}
+pub pad_linear_ramp_values(
+    array: Array,
+    leading: List[Int],
+    trailing: List[Int],
+    leading_values: Array,
+    trailing_values: Array,
+): Array ->
+    native.
+
+/**
+ * Pads with minimum, maximum, mean, or median values selected by mode 0 through 3 over explicit edge lengths.
+ */
+@compiler.native {ndarray.shape.pad_statistical}
+pub pad_statistical(
+    array: Array,
+    leading: List[Int],
+    trailing: List[Int],
+    leading_lengths: List[Int],
+    trailing_lengths: List[Int],
+    mode: Int,
+): Array ->
+    native.

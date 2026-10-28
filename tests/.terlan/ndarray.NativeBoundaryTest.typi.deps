@@ -1,0 +1,8 @@
+module=ndarray.NativeBoundaryTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=5444936438618920955
+interface_hash=4787110443032069719
+interface_doc_hash=5441479803850775399
+deps=0

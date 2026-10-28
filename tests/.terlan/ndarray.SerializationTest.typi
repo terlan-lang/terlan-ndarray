@@ -1,0 +1,3 @@
+module ndarray.SerializationTest.
+
+pub numpy_bytes_files_and_mmaps_preserve_values_and_fortran_order(): Bool.

@@ -1,0 +1,183 @@
+/** Samples uniform values in the half-open unit interval. */
+pub random(stream: RandomStream, shape: List[Int] = [], dtype: Int = 3): Array ->
+    uniform(stream, shape, 0.0, 1.0, dtype).
+
+/** Samples a broadcast-compatible uniform distribution from array parameters. */
+pub uniform(stream: RandomStream, low: Array, high: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [low, high], 0, dtype).
+
+/** Samples source values along one axis and replaces that axis with the requested shape. */
+pub choice(
+    stream: RandomStream,
+    source: Array,
+    shape: List[Int],
+    probabilities: Array,
+    replacement: Bool,
+    axis: Int,
+    shuffle: Bool,
+): Array ->
+    sample_choice_axis(stream, source, shape, probabilities, replacement, axis, shuffle).
+
+/** Samples source values uniformly along one axis. */
+pub choice(
+    stream: RandomStream,
+    source: Array,
+    shape: List[Int],
+    replacement: Bool,
+    axis: Int,
+    shuffle: Bool,
+): Array ->
+    sample_choice_uniform_axis(stream, source, shape, replacement, axis, shuffle).
+
+/** Samples uniformly from the integer population starting at zero. */
+pub choice(
+    stream: RandomStream,
+    population: Int,
+    shape: List[Int],
+    replacement: Bool,
+): Array ->
+    let source = arange(population);
+    let output = sample_choice_uniform_axis(stream, source, shape, replacement, 0, true);
+    ndarray.Array.dispose(source);
+    output.
+
+/** Samples a broadcast-compatible normal distribution from array parameters. */
+pub normal(stream: RandomStream, mean: Array, standard_deviation: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [mean, standard_deviation], 1, dtype).
+
+/** Samples a broadcast-compatible beta distribution from array parameters. */
+pub beta(stream: RandomStream, alpha: Array, beta: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [alpha, beta], 2, dtype).
+
+/** Samples a broadcast-compatible gamma distribution from array parameters. */
+pub gamma(stream: RandomStream, distribution_shape: Array, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [distribution_shape, scale], 3, dtype).
+
+/** Samples a broadcast-compatible NumPy power distribution from an array parameter. */
+pub power(stream: RandomStream, distribution_shape: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [distribution_shape], 4, dtype).
+
+/** Samples a broadcast-compatible triangular distribution from array parameters. */
+pub triangular(stream: RandomStream, left: Array, mode: Array, right: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [left, mode, right], 5, dtype).
+
+/** Samples a broadcast-compatible chi-square distribution from array parameters. */
+pub chisquare(stream: RandomStream, degrees_of_freedom: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [degrees_of_freedom], 6, dtype).
+
+/** Samples a broadcast-compatible Fisher F distribution from array parameters. */
+pub f(stream: RandomStream, numerator_degrees: Array, denominator_degrees: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [numerator_degrees, denominator_degrees], 7, dtype).
+
+/** Samples a broadcast-compatible Gumbel distribution from array parameters. */
+pub gumbel(stream: RandomStream, location: Array, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [location, scale], 8, dtype).
+
+/** Samples a broadcast-compatible log-normal distribution from array parameters. */
+pub lognormal(stream: RandomStream, mean: Array, sigma: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [mean, sigma], 9, dtype).
+
+/** Samples a broadcast-compatible zero-based Pareto distribution from an array parameter. */
+pub pareto(stream: RandomStream, distribution_shape: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [distribution_shape], 10, dtype).
+
+/** Samples a broadcast-compatible exponential distribution from an array parameter. */
+pub exponential(stream: RandomStream, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [scale], 11, dtype).
+
+/** Samples a broadcast-compatible unit-scale gamma distribution from an array parameter. */
+pub standard_gamma(stream: RandomStream, distribution_shape: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [distribution_shape], 12, dtype).
+
+/** Samples a broadcast-compatible standard Student t distribution from an array parameter. */
+pub standard_t(stream: RandomStream, degrees_of_freedom: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [degrees_of_freedom], 13, dtype).
+
+/** Samples a broadcast-compatible unit-scale Weibull distribution from an array parameter. */
+pub weibull(stream: RandomStream, distribution_shape: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [distribution_shape], 14, dtype).
+
+/** Samples a broadcast-compatible Laplace distribution from array parameters. */
+pub laplace(stream: RandomStream, location: Array, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [location, scale], 15, dtype).
+
+/** Samples a broadcast-compatible logistic distribution from array parameters. */
+pub logistic(stream: RandomStream, location: Array, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [location, scale], 16, dtype).
+
+/** Samples a broadcast-compatible noncentral chi-square distribution from array parameters. */
+pub noncentral_chisquare(stream: RandomStream, degrees_of_freedom: Array, noncentrality: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [degrees_of_freedom, noncentrality], 17, dtype).
+
+/** Samples a broadcast-compatible noncentral Fisher F distribution from array parameters. */
+pub noncentral_f(stream: RandomStream, numerator_degrees: Array, denominator_degrees: Array, noncentrality: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [numerator_degrees, denominator_degrees, noncentrality], 18, dtype).
+
+/** Samples a broadcast-compatible Rayleigh distribution from an array parameter. */
+pub rayleigh(stream: RandomStream, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [scale], 19, dtype).
+
+/** Samples a broadcast-compatible Wald distribution from array parameters. */
+pub wald(stream: RandomStream, mean: Array, scale: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [mean, scale], 20, dtype).
+
+/** Samples a broadcast-compatible von Mises distribution from array parameters. */
+pub vonmises(stream: RandomStream, mean: Array, concentration: Array, dtype: Int = 3): Array ->
+    sample_broadcast(stream, [mean, concentration], 21, dtype).
+
+/** Samples broadcast-compatible binomial counts from array parameters. */
+pub binomial(stream: RandomStream, trials: Array, probability: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [trials, probability], 22, dtype).
+
+/** Samples broadcast-compatible geometric trial counts from an array parameter. */
+pub geometric(stream: RandomStream, probability: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [probability], 23, dtype).
+
+/** Samples broadcast-compatible hypergeometric counts from array parameters. */
+pub hypergeometric(stream: RandomStream, good: Array, bad: Array, samples: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [good, bad, samples], 24, dtype).
+
+/** Samples broadcast-compatible Poisson counts from an array parameter. */
+pub poisson(stream: RandomStream, lambda: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [lambda], 25, dtype).
+
+/** Samples broadcast-compatible Zipf counts from an array parameter. */
+pub zipf(stream: RandomStream, exponent: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [exponent], 26, dtype).
+
+/** Samples broadcast-compatible negative-binomial counts from array parameters. */
+pub negative_binomial(stream: RandomStream, successes: Array, probability: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [successes, probability], 27, dtype).
+
+/** Samples broadcast-compatible logarithmic-series counts from an array parameter. */
+pub logseries(stream: RandomStream, probability: Array, dtype: Int = 2): Array ->
+    sample_broadcast(stream, [probability], 28, dtype).
+
+/** Samples broadcast-compatible bounded integers with optional inclusive upper bounds. */
+pub integers(
+    stream: RandomStream,
+    low: Array,
+    high: Array,
+    dtype: Int = 2,
+    endpoint: Bool = false,
+): Array ->
+    if {
+        endpoint -> sample_broadcast(stream, [low, high], 30, dtype);
+        true -> sample_broadcast(stream, [low, high], 29, dtype)
+    }.
+
+/** Samples one requested shape of bounded integers with optional inclusive upper bounds. */
+pub integers(
+    stream: RandomStream,
+    shape: List[Int],
+    low: Int,
+    high: Int,
+    dtype: Int,
+    endpoint: Bool,
+): Array ->
+    let lows = full_int(shape, low, 2);
+    let highs = full_int(shape, high, 2);
+    let output = integers(stream, lows, highs, dtype, endpoint);
+    ndarray.Array.dispose(highs);
+    ndarray.Array.dispose(lows);
+    output.

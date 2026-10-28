@@ -1,0 +1,9 @@
+module ndarray.FftTest.
+
+pub frequency_and_shift_helpers_match_numpy_even_and_odd_layouts(): Bool.
+
+pub multidimensional_transforms_respect_explicit_axis_order(): Bool.
+
+pub sized_transforms_pad_truncate_and_round_trip(): Bool.
+
+pub transforms_promote_to_numpy_fft_dtypes_and_round_trip(): Bool.

@@ -1,0 +1,307 @@
+module ndarray.RandomBroadcastTest.
+
+import ndarray.Array.{Array, dispose, dtype_code, from_floats, from_ints, live_count, shape, to_floats_cast, to_ints_cast}.
+import ndarray.RandomStream.{beta, gamma, new, normal, power, triangular, uniform}.
+
+/** Returns whether every numerical value lies inside one inclusive interval. */
+bounded(values: List[Float], low: Float, high: Float): Bool ->
+    case values {
+        [] -> true;
+        [value | rest] -> value >= low and value <= high and bounded(rest, low, high)
+    }.
+
+/** Returns whether every array has one expected shape. */
+shaped(arrays: List[Array], expected: List[Int]): Bool ->
+    case arrays {
+        [] -> true;
+        [array | rest] -> shape(array) == expected and shaped(rest, expected)
+    }.
+
+/** Disposes every array in an owned test list. */
+dispose_all(arrays: List[Array]): Unit ->
+    case arrays {
+        [] -> Unit;
+        [array | rest] -> let _disposed = dispose(array);
+        dispose_all(rest)
+    }.
+
+/** Returns whether one integer list starts with zero. */
+starts_with_zero(values: List[Int]): Bool ->
+    case values {
+        [0 | _rest] -> true;
+        _ -> false
+    }.
+
+/** Returns whether broadcast probability-one columns produced zero failures. */
+probability_one_columns_are_zero(values: List[Int]): Bool ->
+    case values {
+        [_first, _second, 0, _fourth, _fifth, 0] -> true;
+        _ -> false
+    }.
+
+@test
+pub random_parameters_broadcast_across_one_two_and_three_parameter_families(): Bool ->
+    let stream = new(1201);
+    let low = from_floats([0.0, 10.0], [2, 1]);
+    let high = from_floats([20.0, 30.0, 40.0], [1, 3]);
+    let uniform_sample = uniform(stream, low, high, 11);
+    let mean = from_floats([-3.0, 8.0], [2, 1]);
+    let deviation = from_floats([0.0, 0.0, 0.0], [1, 3]);
+    let normal_sample = normal(stream, mean, deviation, 14);
+    let alpha = from_floats([1.0, 2.0], [2, 1]);
+    let second_parameter = from_floats([1.0, 3.0, 5.0], [1, 3]);
+    let beta_sample = beta(stream, alpha, second_parameter);
+    let gamma_sample = gamma(stream, alpha, second_parameter);
+    let left = from_floats([0.0, 10.0], [2, 1]);
+    let mode = from_floats([10.0, 11.0, 15.0], [1, 3]);
+    let right = from_floats([11.0, 12.0, 20.0], [1, 3]);
+    let triangular_sample = triangular(stream, left, mode, right);
+    let exponent = from_floats([1.0, 2.0, 3.0], [1, 3]);
+    let power_sample = power(stream, exponent);
+    let valid =
+        shape(uniform_sample) == [2, 3]
+            and dtype_code(uniform_sample) == 11
+            and bounded(to_floats_cast(uniform_sample), 0.0, 40.0)
+            and shape(normal_sample) == [2, 3]
+            and dtype_code(normal_sample) == 14
+            and to_floats_cast(normal_sample) == [-3.0, -3.0, -3.0, 8.0, 8.0, 8.0]
+            and shape(beta_sample) == [2, 3]
+            and bounded(to_floats_cast(beta_sample), 0.0, 1.0)
+            and shape(gamma_sample) == [2, 3]
+            and bounded(to_floats_cast(gamma_sample), 0.0, 1000000.0)
+            and shape(triangular_sample) == [2, 3]
+            and bounded(to_floats_cast(triangular_sample), 0.0, 20.0)
+            and shape(power_sample) == [1, 3]
+            and bounded(to_floats_cast(power_sample), 0.0, 1.0);
+    dispose(power_sample);
+    dispose(exponent);
+    dispose(triangular_sample);
+    dispose(right);
+    dispose(mode);
+    dispose(left);
+    dispose(gamma_sample);
+    dispose(beta_sample);
+    dispose(second_parameter);
+    dispose(alpha);
+    dispose(normal_sample);
+    dispose(deviation);
+    dispose(mean);
+    dispose(uniform_sample);
+    dispose(high);
+    dispose(low);
+    ndarray.RandomStream.dispose(stream);
+    valid and live_count() == 0.
+
+@test
+pub equal_uniform_bounds_and_scalar_array_parameters_match_numpy(): Bool ->
+    let stream = new(1202);
+    let bound = from_floats([5.0], []);
+    let constant = uniform(stream, bound, bound);
+    let exponent = from_floats([2.0], []);
+    let scalar_power = power(stream, exponent, 3);
+    let valid = shape(constant) == []
+        and to_floats_cast(constant) == [5.0]
+        and shape(scalar_power) == []
+        and bounded(to_floats_cast(scalar_power), 0.0, 1.0);
+    dispose(scalar_power);
+    dispose(exponent);
+    dispose(constant);
+    dispose(bound);
+    ndarray.RandomStream.dispose(stream);
+    valid and live_count() == 0.
+
+@test
+pub remaining_continuous_array_parameters_dispatch_through_the_shared_sampler(): Bool ->
+    let stream = new(1203);
+    let rows = from_floats([1.0, 2.0], [2, 1]);
+    let columns = from_floats([1.0, 2.0, 3.0], [1, 3]);
+    let locations = from_floats([-2.0, 4.0], [2, 1]);
+    let scales = from_floats([0.5, 1.0, 2.0], [1, 3]);
+    let noncentrality = from_floats([0.0, 1.0, 2.0], [1, 3]);
+    let one_parameter = [
+        ndarray.RandomStream.chisquare(stream, rows),
+        ndarray.RandomStream.pareto(stream, rows),
+        ndarray.RandomStream.exponential(stream, rows),
+        ndarray.RandomStream.standard_gamma(stream, rows),
+        ndarray.RandomStream.standard_t(stream, rows),
+        ndarray.RandomStream.weibull(stream, rows),
+        ndarray.RandomStream.rayleigh(stream, rows),
+    ];
+    let noncentral_chisquare_sample = ndarray.RandomStream.noncentral_chisquare(
+        stream,
+        rows,
+        noncentrality,
+    );
+    let noncentral_f_sample = ndarray.RandomStream.noncentral_f(
+        stream,
+        rows,
+        columns,
+        noncentrality,
+    );
+    let two_parameters = [
+        ndarray.RandomStream.f(stream, rows, columns),
+        ndarray.RandomStream.gumbel(stream, locations, scales),
+        ndarray.RandomStream.lognormal(stream, locations, scales),
+        ndarray.RandomStream.laplace(stream, locations, scales),
+        ndarray.RandomStream.logistic(stream, locations, scales),
+        noncentral_chisquare_sample,
+        ndarray.RandomStream.wald(stream, rows, columns),
+        ndarray.RandomStream.vonmises(stream, locations, scales),
+    ];
+    let three_parameters = [noncentral_f_sample];
+    let valid = shaped(one_parameter, [2, 1])
+        and shaped(two_parameters, [2, 3])
+        and shaped(three_parameters, [2, 3])
+        and bounded(to_floats_cast(noncentral_chisquare_sample), 0.0, 1000000.0)
+        and bounded(to_floats_cast(noncentral_f_sample), 0.0, 1000000.0);
+    dispose_all(three_parameters);
+    dispose_all(two_parameters);
+    dispose_all(one_parameter);
+    dispose(noncentrality);
+    dispose(scales);
+    dispose(locations);
+    dispose(columns);
+    dispose(rows);
+    ndarray.RandomStream.dispose(stream);
+    valid and live_count() == 0.
+
+@test
+pub integer_array_parameters_preserve_broadcast_shapes_and_integer_dtypes(): Bool ->
+    let stream = new(1204);
+    let rows = from_floats([5.0, 10.0], [2, 1]);
+    let probabilities = from_floats([0.25, 0.5, 1.0], [1, 3]);
+    let good = from_floats([10.0, 20.0], [2, 1]);
+    let bad = from_floats([5.0, 10.0, 15.0], [1, 3]);
+    let draws = from_floats([3.0], []);
+    let rates = from_floats([0.0, 4.0], [2, 1]);
+    let exponents = from_floats([2.0, 3.0], [2, 1]);
+    let log_probability = from_floats([0.2, 0.8], [2, 1]);
+    let binomial_sample = ndarray.RandomStream.binomial(stream, rows, probabilities, 4);
+    let geometric_sample = ndarray.RandomStream.geometric(stream, probabilities);
+    let hypergeometric_sample = ndarray.RandomStream.hypergeometric(stream, good, bad, draws);
+    let poisson_sample = ndarray.RandomStream.poisson(stream, rates);
+    let zipf_sample = ndarray.RandomStream.zipf(stream, exponents);
+    let negative_binomial_sample = ndarray.RandomStream.negative_binomial(stream, rows, probabilities);
+    let logseries_sample = ndarray.RandomStream.logseries(stream, log_probability);
+    let valid = shape(binomial_sample) == [2, 3]
+        and dtype_code(binomial_sample) == 4
+        and shape(geometric_sample) == [1, 3]
+        and shape(hypergeometric_sample) == [2, 3]
+        and shape(poisson_sample) == [2, 1]
+        and starts_with_zero(to_ints_cast(poisson_sample))
+        and shape(zipf_sample) == [2, 1]
+        and shape(negative_binomial_sample) == [2, 3]
+        and probability_one_columns_are_zero(to_ints_cast(negative_binomial_sample))
+        and shape(logseries_sample) == [2, 1];
+    dispose(logseries_sample);
+    dispose(negative_binomial_sample);
+    dispose(zipf_sample);
+    dispose(poisson_sample);
+    dispose(hypergeometric_sample);
+    dispose(geometric_sample);
+    dispose(binomial_sample);
+    dispose(log_probability);
+    dispose(exponents);
+    dispose(rates);
+    dispose(draws);
+    dispose(bad);
+    dispose(good);
+    dispose(probabilities);
+    dispose(rows);
+    ndarray.RandomStream.dispose(stream);
+    valid and live_count() == 0.
+
+@test
+pub bounded_integer_arrays_preserve_endpoint_shape_and_dtype_semantics(): Bool ->
+    let stream = new(1205);
+    let low = from_ints([-128, 0], [2, 1]);
+    let high = from_ints([1, 2, 128], [1, 3]);
+    let open = ndarray.RandomStream.integers(stream, low, high, 4, false);
+    let singleton = from_ints([9223372036854775807], []);
+    let closed = ndarray.RandomStream.integers(stream, singleton, singleton, 2, true);
+    let shaped_open = ndarray.RandomStream.integers(stream, [2, 2], -5, 5, 2, false);
+    let shaped_closed = ndarray.RandomStream.integers(
+        stream,
+        [2],
+        9223372036854775807,
+        9223372036854775807,
+        2,
+        true,
+    );
+    let scalar_unit = ndarray.RandomStream.random(stream);
+    let unit = ndarray.RandomStream.random(stream, [2, 3], 11);
+    let valid = shape(open) == [2, 3]
+        and dtype_code(open) == 4
+        and bounded(to_floats_cast(open), -128.0, 127.0)
+        and shape(closed) == []
+        and to_ints_cast(closed) == [9223372036854775807]
+        and shape(shaped_open) == [2, 2]
+        and bounded(to_floats_cast(shaped_open), -5.0, 4.0)
+        and to_ints_cast(shaped_closed) == [9223372036854775807, 9223372036854775807]
+        and shape(scalar_unit) == []
+        and bounded(to_floats_cast(scalar_unit), 0.0, 1.0)
+        and shape(unit) == [2, 3]
+        and dtype_code(unit) == 11
+        and bounded(to_floats_cast(unit), 0.0, 1.0);
+    dispose(unit);
+    dispose(scalar_unit);
+    dispose(shaped_closed);
+    dispose(shaped_open);
+    dispose(closed);
+    dispose(singleton);
+    dispose(open);
+    dispose(high);
+    dispose(low);
+    ndarray.RandomStream.dispose(stream);
+    valid and live_count() == 0.
+
+@test
+pub choice_replaces_multidimensional_axes_with_the_requested_sample_shape(): Bool ->
+    let stream = new(1206);
+    let source = from_ints([0, 1, 2, 3, 4, 5, 6, 7], [4, 2]);
+    let row_probabilities = from_floats([0.1, 0.2, 0.3, 0.4], [4]);
+    let column_probabilities = from_floats([0.5, 0.5], [2]);
+    let rows = ndarray.RandomStream.choice(
+        stream,
+        source,
+        [3],
+        row_probabilities,
+        true,
+    );
+    let columns = ndarray.RandomStream.choice(
+        stream,
+        source,
+        [2, 2],
+        column_probabilities,
+        true,
+        -1,
+        true,
+    );
+    let ordered = ndarray.RandomStream.choice(
+        stream,
+        source,
+        [2],
+        column_probabilities,
+        false,
+        1,
+        false,
+    );
+    let uniform_columns = ndarray.RandomStream.choice(stream, source, [3], true, 1, true);
+    let population = ndarray.RandomStream.choice(stream, 4, [4], false);
+    let valid = shape(rows) == [3, 2]
+        and shape(columns) == [4, 2, 2]
+        and shape(ordered) == [4, 2]
+        and to_ints_cast(ordered) == [0, 1, 2, 3, 4, 5, 6, 7]
+        and shape(uniform_columns) == [4, 3]
+        and shape(population) == [4]
+        and bounded(to_floats_cast(population), 0.0, 3.0);
+    dispose(population);
+    dispose(uniform_columns);
+    dispose(ordered);
+    dispose(columns);
+    dispose(rows);
+    dispose(column_probabilities);
+    dispose(row_probabilities);
+    dispose(source);
+    ndarray.RandomStream.dispose(stream);
+    valid and live_count() == 0.

@@ -1,0 +1,74 @@
+module ndarray.ChebyshevTest.
+
+import ndarray.Array.{dispose, from_floats, from_ints, live_count, shape}.
+import ndarray.Chebyshev.{chebder, chebfit, chebint, chebval}.
+import ndarray.Numpy.{allclose}.
+
+@test
+pub calculus_matches_numpy_axis_scaling_and_bound_semantics(): Bool ->
+    let coefficients = from_floats(
+        [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0],
+        [3, 4],
+    );
+    let constants = from_floats([3.0], [1]);
+    let derivative = chebder(coefficients, 1, 0.5, 1);
+    let integral = chebint(coefficients, 1, constants, -1.0, 2.0, -1);
+    let expected_derivative = from_floats(
+        [7.0, 6.0, 12.0, 15.0, 14.0, 24.0, 23.0, 22.0, 36.0],
+        [3, 3],
+    );
+    let expected_integral = from_floats(
+        [3.0, -1.0, -1.0, 1.0, 1.0, 7.333333333333333, 3.0, -1.0, 2.333333333333333, 2.0, 11.666666666666666, 7.0, -1.0, 3.666666666666667, 3.0],
+        [3, 5],
+    );
+    let valid = shape(derivative) == [3, 3]
+        and shape(integral) == [3, 5]
+        and allclose(derivative, expected_derivative, 1e-10, 1e-10, false)
+        and allclose(integral, expected_integral, 1e-10, 1e-10, false);
+    dispose(expected_integral);
+    dispose(expected_derivative);
+    dispose(integral);
+    dispose(derivative);
+    dispose(constants);
+    dispose(coefficients);
+    valid and live_count() == 0.
+
+@test
+pub tensor_evaluation_and_selected_weighted_fitting_match_numpy(): Bool ->
+    let evaluation_coordinates = from_floats([0.0, 0.5], [2]);
+    let evaluation_coefficients = from_floats([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [3, 2]);
+    let tensor = chebval(evaluation_coordinates, evaluation_coefficients, true);
+    let broadcast = chebval(evaluation_coordinates, evaluation_coefficients, false);
+    let expected_tensor = from_floats([-4.0, 0.0, -4.0, 1.0], [2, 2]);
+    let expected_broadcast = from_floats([-4.0, 1.0], [2]);
+    let coordinates = from_floats([-1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0], [9]);
+    let values = from_floats([3.0, 1.87890625, 1.3125, 1.06640625, 1.0, 1.06640625, 1.3125, 1.87890625, 3.0], [9]);
+    let selected_degrees = from_ints([4, 2, 0], [3]);
+    let selected = chebfit(coordinates, values, selected_degrees);
+    let expected_selected = from_floats([1.875, 0.0, 1.0, 0.0, 0.125], [5]);
+    let cubic_values = from_floats([-6.0, -3.609375, -1.875, -0.703125, 0.0, 0.328125, 0.375, 0.234375, 0.0], [9]);
+    let all_degrees = from_ints([0, 1, 2, 3], [4]);
+    let weights = from_floats([0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0], [9]);
+    let weighted = chebfit(coordinates, cubic_values, all_degrees, weights);
+    let expected_weighted = from_floats([-1.5, 2.75, -1.5, 0.25], [4]);
+    let valid = allclose(tensor, expected_tensor, 1e-12, 1e-12, false)
+        and allclose(broadcast, expected_broadcast, 1e-12, 1e-12, false)
+        and allclose(selected, expected_selected, 1e-9, 1e-9, false)
+        and allclose(weighted, expected_weighted, 1e-9, 1e-9, false);
+    dispose(expected_weighted);
+    dispose(weighted);
+    dispose(weights);
+    dispose(all_degrees);
+    dispose(cubic_values);
+    dispose(expected_selected);
+    dispose(selected);
+    dispose(selected_degrees);
+    dispose(values);
+    dispose(coordinates);
+    dispose(expected_broadcast);
+    dispose(expected_tensor);
+    dispose(broadcast);
+    dispose(tensor);
+    dispose(evaluation_coefficients);
+    dispose(evaluation_coordinates);
+    valid and live_count() == 0.

@@ -1,0 +1,5 @@
+module ndarray.ConversionTest.
+
+pub astype_and_copy_preserve_numpy_order_and_ownership_semantics(): Bool.
+
+pub copyto_broadcasts_scalars_masks_and_unsafe_casts(): Bool.

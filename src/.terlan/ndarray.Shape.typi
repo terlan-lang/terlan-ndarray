@@ -1,0 +1,83 @@
+//! NumPy-compatible rank adaptation, flattening, axis movement, and geometric views.
+
+module ndarray.Shape.
+
+/// Returns a view with at least one dimension.
+
+pub atleast_1d(array: Array): Array.
+
+/// Returns a view with at least two dimensions, promoting vectors to rows.
+
+pub atleast_2d(array: Array): Array.
+
+/// Returns a view with at least three dimensions using NumPy rank-promotion rules.
+
+pub atleast_3d(array: Array): Array.
+
+/// Flattens every input in logical C order and concatenates the resulting vectors.
+
+pub concatenate_flat(arrays: List[Array]): Array.
+
+/// Flattens and concatenates arrays into an exact-shape destination.
+
+pub concatenate_flat_into(arrays: List[Array], destination: Array, casting: Int): Unit.
+
+/// Flattens and concatenates arrays before explicit dtype conversion.
+
+pub concatenate_flat_with_dtype(arrays: List[Array], dtype: Int, casting: Int): Array.
+
+/// Concatenates arrays into an exact-shape destination under an explicit casting policy.
+
+pub concatenate_into(arrays: List[Array], axis: Int, destination: Array, casting: Int): Unit.
+
+/// Concatenates arrays and converts the result under an explicit dtype and casting policy.
+
+pub concatenate_with_dtype(arrays: List[Array], axis: Int, dtype: Int, casting: Int): Array.
+
+/// Returns an independent rank-one copy in logical row-major order.
+
+pub flatten(array: Array): Array.
+
+/// Flattens into an independent copy using explicit C, Fortran, input-compatible, or physical traversal order.
+
+pub flatten(array: Array, order: Int): Array.
+
+/// Flattens with explicit C, Fortran, input-compatible, or physical traversal order.
+
+pub flatten_with_order(array: Array, order: ndarray.Array.ArrayOrder): Array.
+
+/// Returns a shared negative-stride view with every axis reversed.
+
+pub flip_all(array: Array): Array.
+
+/// Returns a shared view reversed along axis one.
+
+pub fliplr(array: Array): Array.
+
+/// Returns a shared view reversed along axis zero.
+
+pub flipud(array: Array): Array.
+
+/// Moves distinct source axes to distinct destinations while preserving all other axis order.
+
+pub moveaxis(array: Array, sources: List[Int], destinations: List[Int]): Array.
+
+/// Returns a contiguous rank-one view or materialization in logical row-major order.
+
+pub ravel(array: Array): Array.
+
+/// Ravels using explicit C, Fortran, input-compatible, or physical traversal order.
+
+pub ravel(array: Array, order: Int): Array.
+
+/// Ravels with explicit C, Fortran, input-compatible, or physical traversal order.
+
+pub ravel_with_order(array: Array, order: ndarray.Array.ArrayOrder): Array.
+
+/// Rolls one axis backward to an insertion position.
+
+pub rollaxis(array: Array, axis: Int, start: Int): Array.
+
+/// Rotates matrix planes counterclockwise by a multiple of 90 degrees.
+
+pub rot90(array: Array, rotations: Int, axis_a: Int, axis_b: Int): Array.

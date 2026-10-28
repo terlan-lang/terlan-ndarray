@@ -1,6 +1,8 @@
 /_build/
 /generated/
 /target/
+.terlan/native-aot/
+**/target/
 *.log
 *.pyc
 __pycache__/

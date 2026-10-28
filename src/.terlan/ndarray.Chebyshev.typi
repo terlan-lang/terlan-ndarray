@@ -1,0 +1,139 @@
+//! Chebyshev polynomial algebra and numerical methods.
+
+module ndarray.Chebyshev.
+
+/// Converts coefficients to the power basis.
+
+pub cheb2poly(coefficients: Array): Array.
+
+/// Adds coefficient vectors.
+
+pub chebadd(lhs: Array, rhs: Array): Array.
+
+/// Builds a companion matrix.
+
+pub chebcompanion(coefficients: Array): Array.
+
+/// Differentiates coefficients.
+
+pub chebder(coefficients: Array, order: Int): Array.
+
+/// Differentiates Chebyshev coefficient lanes along an axis with derivative scaling.
+
+pub chebder(coefficients: Array, order: Int, scale: Float, axis: Int): Array.
+
+/// Returns quotient and remainder.
+
+pub chebdiv(lhs: Array, rhs: Array): List[Array].
+
+/// Fits coefficients to samples.
+
+pub chebfit(coordinates: Array, values: Array, degree: Int): Array.
+
+/// Fits selected Chebyshev degrees to scalar or matrix-valued samples.
+
+pub chebfit(coordinates: Array, values: Array, degrees: Array): Array.
+
+/// Fits selected Chebyshev degrees using sample weights.
+
+pub chebfit(coordinates: Array, values: Array, degrees: Array, weights: Array): Array.
+
+/// Builds coefficients from roots.
+
+pub chebfromroots(roots: Array): Array.
+
+/// Returns Gaussian quadrature nodes and weights.
+
+pub chebgauss(degree: Int): Array.
+
+/// Evaluates over a two-dimensional Cartesian grid.
+
+pub chebgrid2d(x: Array, y: Array, coefficients: Array): Array.
+
+/// Evaluates over a three-dimensional Cartesian grid.
+
+pub chebgrid3d(x: Array, y: Array, z: Array, coefficients: Array): Array.
+
+/// Integrates coefficients.
+
+pub chebint(coefficients: Array, order: Int, constant: Float): Array.
+
+/// Integrates Chebyshev coefficient lanes along an axis with constants, a lower bound, and scaling.
+
+pub chebint(coefficients: Array, order: Int, constants: Array, lower_bound: Float, scale: Float, axis: Int): Array.
+
+/// Interpolates sampled values in the Chebyshev basis.
+
+pub chebinterpolate(values: Array): Array.
+
+/// Builds coefficients for offset plus scale times x.
+
+pub chebline(offset: Float, scale: Float): Array.
+
+/// Multiplies coefficient vectors.
+
+pub chebmul(lhs: Array, rhs: Array): Array.
+
+/// Multiplies coefficients by x.
+
+pub chebmulx(coefficients: Array): Array.
+
+/// Raises coefficients to a nonnegative power.
+
+pub chebpow(coefficients: Array, exponent: Int): Array.
+
+/// Returns first-kind Chebyshev points.
+
+pub chebpts1(count: Int): Array.
+
+/// Returns second-kind Chebyshev points.
+
+pub chebpts2(count: Int): Array.
+
+/// Returns polynomial roots.
+
+pub chebroots(coefficients: Array): Array.
+
+/// Subtracts coefficient vectors.
+
+pub chebsub(lhs: Array, rhs: Array): Array.
+
+/// Removes insignificant high-order coefficients.
+
+pub chebtrim(coefficients: Array, tolerance: Float): Array.
+
+/// Evaluates coefficients.
+
+pub chebval(coordinates: Array, coefficients: Array): Array.
+
+/// Evaluates Chebyshev coefficient tensors with Cartesian or broadcast semantics.
+
+pub chebval(coordinates: Array, coefficients: Array, tensor: Bool): Array.
+
+/// Evaluates a two-dimensional coefficient tensor.
+
+pub chebval2d(x: Array, y: Array, coefficients: Array): Array.
+
+/// Evaluates a three-dimensional coefficient tensor.
+
+pub chebval3d(x: Array, y: Array, z: Array, coefficients: Array): Array.
+
+/// Builds a Vandermonde matrix.
+
+pub chebvander(coordinates: Array, degree: Int): Array.
+
+/// Builds a two-dimensional Vandermonde matrix.
+
+pub chebvander2d(x: Array, y: Array, x_degree: Int, y_degree: Int): Array.
+
+/// Builds a three-dimensional Vandermonde matrix.
+
+pub chebvander3d(x: Array, y: Array, z: Array, x_degree: Int, y_degree: Int, z_degree: Int): Array.
+
+/// Evaluates the orthogonality weight function.
+
+pub chebweight(coordinates: Array): Array.
+
+/// Converts power coefficients to the cheb basis.
+
+pub poly2cheb(coefficients: Array): Array.

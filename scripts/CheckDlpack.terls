@@ -1,0 +1,633 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Validates live ndarray DLPack exchange through isolated generated packages.
+ */
+import std.collections.List.{concat}.
+import std.core.Option.{Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.{String, Unit}.
+import std.data.Json.
+import std.io.Console.{eprintln, println}.
+import std.io.{Directory, File}.
+import std.system.{Arguments, Environment, Platform, Process}.
+
+import type std.core.Result.
+import type std.data.Json.
+import type std.system.Process.{EnvironmentEntry, Output}.
+
+struct WorkflowResult {
+    ndarray_revision: String,
+    tensor_sink_revision: String,
+}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.dlpack]: ", message));
+    false.
+
+child(parent: String, relative: String): String ->
+    if {
+        String.ends_with(parent, "/") -> String.append(parent, relative);
+        true -> String.concat([parent, "/", relative])
+    }.
+
+create_directory(path: String): Result[Unit, String] ->
+    case Directory.create_all(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+remove_directory(path: String): Result[Unit, String] ->
+    case Directory.remove_all(path) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+copy_directory(source: String, destination: String): Result[Unit, String] ->
+    case Directory.copy_tree_excluding(
+        source,
+        destination,
+        [".git", "__pycache__", "generated", "reports", "target"],
+    ) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+write_file(path: String, contents: String): Result[Unit, String] ->
+    case File.write_text(path, contents) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) -> Ok(Unit)
+    }.
+
+diagnostic(output: Output): String ->
+    String.concat([output.stdout, output.stderr]).
+
+command_error(program: String, arguments: List[String], detail: String): String ->
+    String.concat([
+        "command failed: ",
+        program,
+        " ",
+        String.join(arguments, " "),
+        "\n",
+        detail,
+    ]).
+
+run_command(
+    program: String,
+    arguments: List[String],
+    working_directory: String,
+    environment: List[EnvironmentEntry],
+    expect_success: Bool,
+): Result[Output, String] ->
+    let command = Process.command(program)
+        .with_arguments(arguments)
+        .with_working_directory(working_directory)
+        .with_environment(environment)
+        .with_timeout_ms(1200000)
+        .with_output_limit_bytes(16777216);
+    case Process.run(command) {
+        Err(reason) -> Err(command_error(program, arguments, reason.message));
+        Ok(output) -> if {
+            expect_success and output.status != 0 ->
+                Err(command_error(program, arguments, diagnostic(output)));
+            not expect_success and output.status == 0 ->
+                Err(String.concat(["command unexpectedly passed: ", program, " ", String.join(arguments, " ")]));
+            true -> Ok(output)
+        }
+    }.
+
+nonempty_words(values: List[String], output: List[String]): List[String] ->
+    case values {
+        [] -> output;
+        [value | rest] -> if {
+            String.trim(value) == "" -> nonempty_words(rest, output);
+            true -> nonempty_words(rest, concat(output, [String.trim(value)]))
+        }
+    }.
+
+json_string_member(value: Json, key: String): Result[String, String] ->
+    let {
+        Ok(member) <- value.get(key);
+        Ok(text) <- Json.as_string(member)
+    } else {
+        _ -> Err(String.append("missing JSON string member: ", key))
+    };
+    Ok(text).
+
+openblas_revision(repository: String): Result[String, String] ->
+    let {
+        Ok(source) <- File.read_text(child(repository, "native-dependencies.json"));
+        Ok(document) <- Json.parse(source);
+        Ok(dependencies) <- document.get("dependencies");
+        Ok(openblas) <- dependencies.get("openblas");
+        Ok(revision) <- json_string_member(openblas, "revision")
+    } else {
+        _ -> Err("cannot read pinned OpenBLAS dependency revision")
+    };
+    Ok(revision).
+
+openblas_environment(repository: String): Result[List[EnvironmentEntry], String] ->
+    let {
+        Ok(revision) <- openblas_revision(repository)
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    let host = Platform.current();
+    let base = case Environment.get("TERLAN_NDARRAY_NATIVE_CACHE") {
+        Some(value) -> value;
+        _ -> case Environment.get("HOME") {
+            Some(home) -> child(home, ".cache/terlan/native");
+            _ -> ""
+        }
+    };
+    let root = child(
+        child(child(child(base, "openblas"), revision), String.concat([
+            String.lowercase(host.architecture),
+            "-",
+            String.lowercase(host.operating_system),
+        ])),
+        "install",
+    );
+    let pkg_config = child(root, "lib/pkgconfig");
+    if {
+        base == "" -> Err("HOME or TERLAN_NDARRAY_NATIVE_CACHE is required");
+        not File.exists(child(pkg_config, "openblas.pc")) ->
+            Err(String.append("pinned OpenBLAS cache is missing: ", pkg_config));
+        true -> Ok([
+            Process.environment_entry("PKG_CONFIG_LIBDIR", pkg_config),
+            Process.environment_entry("PKG_CONFIG_PATH", pkg_config),
+            Process.environment_entry("OPENBLAS_STATIC", "1"),
+            Process.environment_entry("PKG_CONFIG_ALL_STATIC", "1"),
+            Process.environment_entry("TERLAN_NDARRAY_OPENBLAS_ROOT", root),
+        ])
+    }.
+
+openblas_flags(
+    repository: String,
+    environment: List[EnvironmentEntry],
+): Result[List[String], String] ->
+    case run_command(
+        "pkg-config",
+        ["--static", "--cflags", "--libs", "openblas"],
+        repository,
+        environment,
+        true,
+    ) {
+        Err(reason) -> Err(reason);
+        Ok(output) -> Ok(nonempty_words(String.split(output.stdout, " "), []))
+    }.
+
+native_sources(repository: String): List[String] ->
+    [
+        child(repository, "bindings/terlan_ndarray.c"),
+        child(repository, "bindings/terlan_ndarray_dtype.c"),
+        child(repository, "bindings/terlan_ndarray_creation.c"),
+        child(repository, "bindings/terlan_ndarray_elementwise.c"),
+        child(repository, "bindings/terlan_ndarray_unary.c"),
+        child(repository, "bindings/terlan_ndarray_indexing.c"),
+        child(repository, "bindings/terlan_ndarray_shape.c"),
+        child(repository, "bindings/terlan_ndarray_ordering.c"),
+        child(repository, "bindings/terlan_ndarray_operations.c"),
+        child(repository, "bindings/terlan_ndarray_linear_algebra.c"),
+        child(repository, "bindings/terlan_ndarray_reductions.c"),
+        child(repository, "bindings/terlan_ndarray_dlpack.c"),
+        child(repository, "tests/dlpack_test.c"),
+    ].
+
+native_audit(
+    repository: String,
+    temporary: String,
+    environment: List[EnvironmentEntry],
+): Result[Unit, String] ->
+    let binary = child(temporary, "dlpack-native-audit");
+    let compiler = case Environment.get("CC") {
+        Some(value) -> value;
+        _ -> "cc"
+    };
+    let {
+        Ok(flags) <- openblas_flags(repository, environment);
+        Ok(_built) <- run_command(
+            compiler,
+            concat(
+                ["-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror"],
+                concat(native_sources(repository), concat(["-lm"], concat(flags, ["-o", binary]))),
+            ),
+            repository,
+            environment,
+            true,
+        );
+        Ok(_ran) <- run_command(binary, [], repository, environment, true)
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    Ok(Unit).
+
+build_helper(
+    package: String,
+    target: String,
+    repository: String,
+    environment: List[EnvironmentEntry],
+): Result[String, String] ->
+    let manifest = child(package, "native/rust/Cargo.toml");
+    let build_environment = concat(
+        environment,
+        [Process.environment_entry("CARGO_TARGET_DIR", target)],
+    );
+    case run_command(
+        "cargo",
+        [
+            "build",
+            "--offline",
+            "--quiet",
+            "--manifest-path",
+            manifest,
+            "--bin",
+            "native-boundary-helper",
+        ],
+        repository,
+        build_environment,
+        true,
+    ) {
+        Err(reason) -> Err(reason);
+        Ok(_output) -> Ok(child(target, "debug/native-boundary-helper"))
+    }.
+
+commit_package(
+    source: String,
+    destination: String,
+    name: String,
+): Result[String, String] ->
+    let deterministic_git = [
+        Process.environment_entry("GIT_AUTHOR_DATE", "2000-01-01T00:00:00Z"),
+        Process.environment_entry("GIT_COMMITTER_DATE", "2000-01-01T00:00:00Z"),
+    ];
+    let {
+        Ok(Unit) <- copy_directory(source, destination);
+        Ok(_init) <- run_command("git", ["init", "--quiet"], destination, [], true);
+        Ok(_email) <- run_command(
+            "git",
+            ["config", "user.email", "terlan-ndarray-tests@example.invalid"],
+            destination,
+            [],
+            true,
+        );
+        Ok(_name) <- run_command(
+            "git",
+            ["config", "user.name", "Terlan NdArray Tests"],
+            destination,
+            [],
+            true,
+        );
+        Ok(_add) <- run_command("git", ["add", "."], destination, [], true);
+        Ok(_commit) <- run_command(
+            "git",
+            ["commit", "--quiet", "-m", name],
+            destination,
+            deterministic_git,
+            true,
+        );
+        Ok(revision) <- run_command("git", ["rev-parse", "HEAD"], destination, [], true)
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    Ok(String.trim(revision.stdout)).
+
+main_source(body: String): String ->
+    String.concat([
+        "module ndarray_dlpack_consumer.Main.\n\n",
+        "import ndarray.Array.{dispose, export_tensor_packet, from_ints}.\n",
+        "import tensor_sink.Consumer.{consume, consume_pair, crash, reject}.\n",
+        "import std.io.Console.{println}.\n\n",
+        "pub main(): Unit ->\n",
+        body,
+    ]).
+
+write_main(consumer: String, body: String): Result[Unit, String] ->
+    let directory = child(consumer, "src/ndarray_dlpack_consumer");
+    let path = child(directory, "Main.terl");
+    let {
+        Ok(Unit) <- create_directory(directory);
+        Ok(Unit) <- write_file(path, main_source(body))
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    Ok(Unit).
+
+run_case(
+    terlc: String,
+    consumer: String,
+    temporary: String,
+    environment: List[EnvironmentEntry],
+    name: String,
+    body: String,
+    expected: String,
+    success: Bool,
+): Result[Unit, String] ->
+    let {
+        Ok(Unit) <- write_main(consumer, body);
+        Ok(output) <- run_command(
+            terlc,
+            [
+                "run",
+                consumer,
+                "--target",
+                "terlan-vm",
+                "--out-dir",
+                child(temporary, String.append("run-", name)),
+            ],
+            temporary,
+            environment,
+            success,
+        )
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    if {
+        String.contains(diagnostic(output), expected) -> Ok(Unit);
+        true -> Err(String.concat([
+            "DLPack interop case `",
+            name,
+            "` did not report `",
+            expected,
+            "`:\n",
+            diagnostic(output),
+        ]))
+    }.
+
+consumer_manifest(
+    ndarray_package: String,
+    ndarray_revision: String,
+    sink_package: String,
+    sink_revision: String,
+): String ->
+    String.concat([
+        "[package]\n",
+        "name = \"terlan-ndarray-dlpack-consumer\"\n",
+        "version = \"0.0.0\"\n",
+        "namespace = \"ndarray_dlpack_consumer\"\n\n",
+        "[build]\n",
+        "source_roots = [\"src\"]\n",
+        "artifact = \"terlan-vm\"\n\n",
+        "[dependencies]\n",
+        "ndarray = { git = \"",
+        ndarray_package,
+        "\", rev = \"",
+        ndarray_revision,
+        "\" }\n",
+        "tensor_sink = { git = \"",
+        sink_package,
+        "\", rev = \"",
+        sink_revision,
+        "\" }\n",
+    ]).
+
+interop_cases(
+    terlc: String,
+    consumer: String,
+    temporary: String,
+    environment: List[EnvironmentEntry],
+): Result[Unit, String] ->
+    let {
+        Ok(Unit) <- run_case(
+            terlc,
+            consumer,
+            temporary,
+            environment,
+            "round-trip",
+            "    let source = from_ints([1, 2, 3, 4, 5, 6], [2, 3]);\n    let token = export_tensor_packet(source, \"tensor_sink\");\n    let total = consume(token);\n    dispose(source);\n    if {\n        total == 21 -> println(\"NDARRAY_DLPACK_INTEROP_OK\");\n        true -> println(\"NDARRAY_DLPACK_INTEROP_FAILED\")\n    }.\n",
+            "NDARRAY_DLPACK_INTEROP_OK",
+            true,
+        );
+        Ok(Unit) <- run_case(
+            terlc,
+            consumer,
+            temporary,
+            environment,
+            "second-claim",
+            "    let source = from_ints([1, 2, 3, 4], [2, 2]);\n    let token = export_tensor_packet(source, \"tensor_sink\");\n    let total = consume_pair(token, token);\n    dispose(source);\n    println(\"UNREACHABLE_SECOND_CLAIM\").\n",
+            "native_exchange.already_claimed",
+            false,
+        );
+        Ok(Unit) <- run_case(
+            terlc,
+            consumer,
+            temporary,
+            environment,
+            "wrong-consumer",
+            "    let source = from_ints([1, 2], [2]);\n    let token = export_tensor_packet(source, \"other_sink\");\n    let total = consume(token);\n    dispose(source);\n    println(\"UNREACHABLE_WRONG_CONSUMER\").\n",
+            "native_exchange.consumer_mismatch",
+            false,
+        );
+        Ok(Unit) <- run_case(
+            terlc,
+            consumer,
+            temporary,
+            environment,
+            "consumer-rejection",
+            "    let source = from_ints([1, 2, 3, 4, 5, 6], [2, 3]);\n    let token = export_tensor_packet(source, \"tensor_sink\");\n    let total = reject(token);\n    dispose(source);\n    println(\"UNREACHABLE_REJECTION\").\n",
+            "c_abi_status_201",
+            false,
+        );
+        Ok(Unit) <- run_case(
+            terlc,
+            consumer,
+            temporary,
+            environment,
+            "helper-crash",
+            "    let source = from_ints([1, 2, 3, 4, 5, 6], [2, 3]);\n    let token = export_tensor_packet(source, \"tensor_sink\");\n    let total = crash(token);\n    dispose(source);\n    println(\"UNREACHABLE_CRASH\").\n",
+            "native_helper_io",
+            false,
+        );
+        Ok(Unit) <- run_case(
+            terlc,
+            consumer,
+            temporary,
+            environment,
+            "abandoned",
+            "    let source = from_ints([9, 8], [2]);\n    let token = export_tensor_packet(source, \"tensor_sink\");\n    dispose(source);\n    println(\"NDARRAY_DLPACK_ABANDONED_CLEAN\").\n",
+            "NDARRAY_DLPACK_ABANDONED_CLEAN",
+            true,
+        )
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    Ok(Unit).
+
+workflow(repository: String, terlc: String, temporary: String): Result[WorkflowResult, String] ->
+    let {
+        Ok(provider_environment) <- openblas_environment(repository)
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    let environment = concat([
+        Process.environment_entry("CARGO_NET_OFFLINE", "true"),
+        Process.environment_entry("OPENBLAS_NUM_THREADS", "1"),
+    ], provider_environment);
+    let generated = child(repository, "generated");
+    let sink_generated = child(temporary, "tensor-sink-generated");
+    let ndarray_package = child(temporary, "ndarray-package");
+    let sink_package = child(temporary, "tensor-sink-package");
+    let consumer = child(temporary, "consumer");
+    let {
+        Ok(Unit) <- native_audit(repository, temporary, environment);
+        Ok(_bound) <- run_command(
+            terlc,
+            [
+                "bind",
+                "c",
+                "--manifest",
+                child(repository, "tests/interop/tensor_sink/tensor-sink-c.json"),
+                "--out",
+                sink_generated,
+            ],
+            repository,
+            environment,
+            true,
+        );
+        Ok(producer_helper) <- build_helper(
+            generated,
+            child(temporary, "producer-target"),
+            repository,
+            environment,
+        );
+        Ok(consumer_helper) <- build_helper(
+            sink_generated,
+            child(temporary, "consumer-target"),
+            repository,
+            environment,
+        );
+        Ok(ndarray_revision) <- commit_package(
+            generated,
+            ndarray_package,
+            "generated ndarray producer",
+        );
+        Ok(sink_revision) <- commit_package(
+            sink_generated,
+            sink_package,
+            "generated tensor consumer",
+        );
+        Ok(Unit) <- create_directory(consumer);
+        Ok(Unit) <- write_file(
+            child(consumer, "terlan.toml"),
+            consumer_manifest(ndarray_package, ndarray_revision, sink_package, sink_revision),
+        );
+        Ok(Unit) <- write_main(consumer, "    println(\"NDARRAY_DLPACK_FETCH_READY\").\n");
+        Ok(_fetched) <- run_command(
+            terlc,
+            ["package", "fetch", consumer],
+            temporary,
+            environment,
+            true,
+        )
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    if {
+        not File.exists(child(consumer, "terlan.lock")) ->
+            Err("DLPack consumer did not lock both package revisions");
+        true ->
+            let {
+                Ok(Unit) <- remove_directory(ndarray_package);
+                Ok(Unit) <- remove_directory(sink_package);
+                Ok(Unit) <- interop_cases(
+                    terlc,
+                    consumer,
+                    temporary,
+                    concat(
+                        environment,
+                        [
+                            Process.environment_entry(
+                                "CARGO_TARGET_DIR",
+                                child(temporary, "runtime-target"),
+                            ),
+                            Process.environment_entry(
+                                "TERLAN_NDARRAY_NATIVE_BOUNDARY_HELPER_PATH",
+                                producer_helper,
+                            ),
+                            Process.environment_entry(
+                                "TERLAN_TENSOR_SINK_NATIVE_BOUNDARY_HELPER_PATH",
+                                consumer_helper,
+                            ),
+                        ],
+                    ),
+                )
+            } else {
+                Err(reason) -> Err(reason)
+            };
+            Ok(WorkflowResult(
+                ndarray_revision = ndarray_revision,
+                tensor_sink_revision = sink_revision,
+            ))
+    }.
+
+passed_case(diagnostic: String): Json ->
+    Json.object()
+        .put("diagnostic", Json.string(diagnostic))
+        .put("status", Json.string("passed")).
+
+report(result: WorkflowResult): Json ->
+    let cases = Json.object()
+        .put("round_trip", passed_case("NDARRAY_DLPACK_INTEROP_OK"))
+        .put("second_claim", passed_case("native_exchange.already_claimed"))
+        .put("wrong_consumer", passed_case("native_exchange.consumer_mismatch"))
+        .put("consumer_rejection", passed_case("c_abi_status_201"))
+        .put("helper_crash", passed_case("native_helper_io"))
+        .put("abandoned", passed_case("NDARRAY_DLPACK_ABANDONED_CLEAN"));
+    let broker = Json.object()
+        .put("broker_tests", Json.int(6))
+        .put("flow", Json.string("producer-helper -> terlan-vm -> consumer-helper"))
+        .put("package_neutral", Json.bool(true))
+        .put("pointer_serialization", Json.bool(false))
+        .put("status", Json.string("passed"));
+    let audit = Json.object()
+        .put("deleter_cardinality", Json.string("exactly_once"))
+        .put("malformed_metadata", Json.string("rejected_before_read"))
+        .put("status", Json.string("passed"));
+    let revisions = Json.object()
+        .put("ndarray", Json.string(result.ndarray_revision))
+        .put("tensor_sink", Json.string(result.tensor_sink_revision));
+    Json.object()
+        .put("broker", broker)
+        .put("cases", cases)
+        .put("native_audit", audit)
+        .put("package_revisions", revisions)
+        .put("schema", Json.string("terlan.ndarray.dlpack-report.v1"))
+        .put("status", Json.string("passed")).
+
+execute(terlc: String): Bool ->
+    let repository = Environment.current_directory();
+    let compiler = if {
+        String.starts_with(terlc, "/") -> terlc;
+        true -> child(repository, terlc)
+    };
+    case Directory.create_temporary("terlan_ndarray_dlpack_") {
+        Err(reason) -> failure(reason.message);
+        Ok(temporary) ->
+            let result = workflow(repository, compiler, temporary);
+            let removed = Directory.remove_all(temporary);
+            case {result, removed} {
+                {Err(reason), _cleanup} -> failure(reason);
+                {_workflow, Err(reason)} -> failure(reason.message);
+                {Ok(completed), Ok(Unit)} ->
+                    case Json.stringify_pretty(report(completed)) {
+                        Err(reason) -> failure(reason.message);
+                        Ok(source) -> case File.write_text(
+                            child(repository, "reports/ndarray-dlpack-report.json"),
+                            String.append(source, "\n"),
+                        ) {
+                            Err(reason) -> failure(reason.message);
+                            Ok(Unit) ->
+                                let _printed = println("terlan-ndarray DLPack interop passed");
+                                true
+                        }
+                    }
+            }
+    }.
+
+entry(): Bool ->
+    case {Arguments.count(), Arguments.get(0), Arguments.get(1)} {
+        {2, Some("--terlc"), Some(terlc)} -> execute(terlc);
+        _ -> failure("expected --terlc <path>")
+    }.
+
+assert(entry());
+Unit.

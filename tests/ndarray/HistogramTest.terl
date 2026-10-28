@@ -1,0 +1,303 @@
+module ndarray.HistogramTest.
+
+import ndarray.Array.{complex_imags, complex_reals, dispose, from_complex, from_floats, from_ints, live_count, shape, to_floats, to_ints}.
+import ndarray.Numpy.{allclose, histogram, histogram_bin_edges, histogram_edges, histogram_estimator, histogram_estimator_range, histogram_range, histogram_weighted_edges, histogram2d, histogram2d_edges, histogram2d_range, histogram2d_x_edges, histogram2d_y_edges, histogramdd_bins, histogramdd_edges, histogramdd_range, histogramdd_weighted_bins}.
+
+import type ndarray.Numpy.{HistogramEstimator}.
+
+@test
+pub histogram_counts_edges_density_and_weights_match_numpy(): Bool ->
+    let values = from_floats([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0], [10]);
+    let [counts, inferred_edges] = histogram(values, bins = 5);
+    let edges = from_floats([0.0, 1.0, 3.0, 6.0, 10.0], [5]);
+    let [density, returned_edges] = histogram_edges(values, edges, density = true);
+    let weights = from_floats([2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], [10]);
+    let [weighted, weighted_edges] = histogram_weighted_edges(values, weights, edges, density = true);
+    let complex_weights = from_complex(
+        [1.0, -1.0, 2.0],
+        [2.0, 1.0, 2.0],
+        [3],
+        13,
+    );
+    let complex_values = from_floats([1.3, 2.5, 2.3], [3]);
+    let complex_edges = from_floats([0.0, 2.0, 3.0], [3]);
+    let [complex_counts, returned_complex_edges] = histogram_weighted_edges(
+        complex_values,
+        complex_weights,
+        complex_edges,
+    );
+    let direct_edges = histogram_bin_edges(values, bins = 5);
+    let expected_density = from_floats([0.1, 0.1, 0.1, 0.1], [4]);
+    let expected_weighted = from_floats([0.18181818181818182, 0.09090909090909091, 0.09090909090909091, 0.09090909090909091], [4]);
+    let valid = to_ints(counts) == [2, 2, 2, 2, 2]
+        and to_floats(inferred_edges) == to_floats(direct_edges)
+        and allclose(density, expected_density, 0.000000000001, 0.000000000001, false)
+        and allclose(weighted, expected_weighted, 0.000000000001, 0.000000000001, false)
+        and complex_reals(complex_counts) == [1.0, 1.0]
+        and complex_imags(complex_counts) == [2.0, 3.0]
+        and to_floats(returned_edges) == [0.0, 1.0, 3.0, 6.0, 10.0]
+        and to_floats(weighted_edges) == [0.0, 1.0, 3.0, 6.0, 10.0]
+        and to_floats(returned_complex_edges) == [0.0, 2.0, 3.0];
+    dispose(expected_weighted);
+    dispose(expected_density);
+    dispose(direct_edges);
+    dispose(returned_complex_edges);
+    dispose(complex_counts);
+    dispose(complex_edges);
+    dispose(complex_values);
+    dispose(complex_weights);
+    dispose(weighted_edges);
+    dispose(weighted);
+    dispose(weights);
+    dispose(returned_edges);
+    dispose(density);
+    dispose(edges);
+    dispose(inferred_edges);
+    dispose(counts);
+    dispose(values);
+    valid and live_count() == 0.
+
+@test
+pub histogram_estimators_empty_constants_small_inputs_and_ranges_match_numpy(): Bool ->
+    let empty = from_floats([], [0]);
+    let [empty_counts, empty_edges] = histogram_estimator(empty, HistogramEstimator.AUTO);
+    let constant = from_floats([1.0, 1.0, 1.0, 1.0], [4]);
+    let [constant_counts, constant_edges] = histogram_estimator(constant, HistogramEstimator.FREEDMAN_DIACONIS);
+    let small = from_ints([0, 1, 2], [3]);
+    let [small_counts, small_edges] = histogram_estimator(small, HistogramEstimator.AUTO);
+    let ranged = from_floats([-100.0, 0.0, 1.0, 2.0, 100.0], [5]);
+    let [range_counts, range_edges] = histogram_estimator_range(
+        ranged,
+        HistogramEstimator.AUTO,
+        0.0,
+        2.0,
+    );
+    let [last_bin, last_edges] = histogram_range(ranged, 2, 0.0, 2.0);
+    let valid = to_ints(empty_counts) == [0]
+        and to_floats(empty_edges) == [0.0, 1.0]
+        and to_ints(constant_counts) == [4]
+        and to_floats(constant_edges) == [0.5, 1.5]
+        and shape(small_counts) == [3]
+        and to_ints(small_counts) == [1, 1, 1]
+        and to_floats(small_edges) == to_floats(range_edges)
+        and to_ints(range_counts) == [1, 1, 1]
+        and to_ints(last_bin) == [1, 2]
+        and to_floats(last_edges) == [0.0, 1.0, 2.0];
+    dispose(last_edges);
+    dispose(last_bin);
+    dispose(range_edges);
+    dispose(range_counts);
+    dispose(ranged);
+    dispose(small_edges);
+    dispose(small_counts);
+    dispose(small);
+    dispose(constant_edges);
+    dispose(constant_counts);
+    dispose(constant);
+    dispose(empty_edges);
+    dispose(empty_counts);
+    dispose(empty);
+    valid and live_count() == 0.
+
+@test
+pub histogramdd_lists_ranges_edges_weights_and_density_match_numpy(): Bool ->
+    let samples = from_floats([
+        -0.5, 0.5, 1.5,
+        -0.5, 1.5, 2.5,
+        -0.5, 2.5, 0.5,
+        0.5, 0.5, 1.5,
+        0.5, 1.5, 2.5,
+        0.5, 2.5, 2.5,
+    ], [6, 3]);
+    let [counts, x_edges, y_edges, z_edges] = histogramdd_range(
+        samples,
+        [2, 3, 3],
+        [-1.0, 0.0, 0.0],
+        [1.0, 3.0, 3.0],
+    );
+    let expected = from_floats([
+        0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+    ], [2, 3, 3]);
+    let edge_x = from_floats([-2.0, 0.0, 2.0], [3]);
+    let edge_y = from_floats([0.0, 1.0, 2.0, 3.0], [4]);
+    let edge_z = from_floats([0.0, 1.0, 2.0, 3.0], [4]);
+    let [density, density_x, density_y, density_z] = histogramdd_edges(
+        samples,
+        [edge_x, edge_y, edge_z],
+        density = true,
+    );
+    let uniform_samples = from_floats([0.0, 0.0, 0.2, 0.2, 0.8, 0.8, 1.0, 1.0], [4, 2]);
+    let weights = from_ints([2, 2, 2, 2], [4]);
+    let [weighted, weighted_x, weighted_y] = histogramdd_weighted_bins(
+        uniform_samples,
+        weights,
+        [2, 2],
+        density = true,
+    );
+    let [shaped, shaped_x, shaped_y] = histogramdd_bins(uniform_samples, [3, 4]);
+    let expected_density = from_floats([
+        0.0, 1.0 / 12.0, 0.0, 0.0, 0.0, 1.0 / 12.0, 1.0 / 12.0, 0.0, 0.0,
+        0.0, 1.0 / 12.0, 0.0, 0.0, 0.0, 1.0 / 12.0, 0.0, 0.0, 1.0 / 12.0,
+    ], [2, 3, 3]);
+    let valid = allclose(counts, expected, 0.0, 0.0, false)
+        and allclose(density, expected_density, 0.000000000001, 0.000000000001, false)
+        and shape(weighted) == [2, 2]
+        and to_floats(weighted) == [2.0, 0.0, 0.0, 2.0]
+        and shape(shaped) == [3, 4]
+        and to_floats(x_edges) == [-1.0, 0.0, 1.0]
+        and to_floats(y_edges) == [0.0, 1.0, 2.0, 3.0]
+        and to_floats(z_edges) == [0.0, 1.0, 2.0, 3.0];
+    dispose(expected_density);
+    dispose(shaped_y);
+    dispose(shaped_x);
+    dispose(shaped);
+    dispose(weighted_y);
+    dispose(weighted_x);
+    dispose(weighted);
+    dispose(weights);
+    dispose(uniform_samples);
+    dispose(density_z);
+    dispose(density_y);
+    dispose(density_x);
+    dispose(density);
+    dispose(edge_z);
+    dispose(edge_y);
+    dispose(edge_x);
+    dispose(expected);
+    dispose(z_edges);
+    dispose(y_edges);
+    dispose(x_edges);
+    dispose(counts);
+    dispose(samples);
+    valid and live_count() == 0.
+
+@test
+pub histogram2d_defaults_edges_empty_and_mixed_bins_match_numpy(): Bool ->
+    let diagonal = from_floats([0.0, 1.0, 2.0, 3.0], [4]);
+    let [counts, x_edges, y_edges] = histogram2d(diagonal, diagonal, bins = 4);
+    let expected_counts = from_floats([
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
+    ], [4, 4]);
+    let empty = from_floats([], [0]);
+    let unit_edges = from_floats([0.0, 1.0], [2]);
+    let [empty_counts, empty_x_edges, empty_y_edges] = histogram2d_edges(
+        empty,
+        empty,
+        unit_edges,
+        unit_edges,
+    );
+    let mixed_x = from_floats([0.0, 0.1, 0.5, 1.0], [4]);
+    let mixed_y = from_floats([0.0, 0.2, 0.6, 1.0], [4]);
+    let tenths = from_floats([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], [11]);
+    let [x_mixed, x_mixed_edges, x_uniform_edges] = histogram2d_x_edges(
+        mixed_x,
+        mixed_y,
+        tenths,
+        4,
+        0.0,
+        1.0,
+    );
+    let [y_mixed, y_uniform_edges, y_mixed_edges] = histogram2d_y_edges(
+        mixed_x,
+        mixed_y,
+        4,
+        0.0,
+        1.0,
+        tenths,
+    );
+    let valid = shape(counts) == [4, 4]
+        and allclose(counts, expected_counts, 0.0, 0.0, false)
+        and to_floats(x_edges) == [0.0, 0.75, 1.5, 2.25, 3.0]
+        and to_floats(y_edges) == [0.0, 0.75, 1.5, 2.25, 3.0]
+        and shape(empty_counts) == [1, 1]
+        and to_floats(empty_counts) == [0.0]
+        and to_floats(empty_x_edges) == [0.0, 1.0]
+        and to_floats(empty_y_edges) == [0.0, 1.0]
+        and shape(x_mixed) == [10, 4]
+        and to_floats(x_uniform_edges) == [0.0, 0.25, 0.5, 0.75, 1.0]
+        and shape(y_mixed) == [4, 10]
+        and to_floats(y_uniform_edges) == [0.0, 0.25, 0.5, 0.75, 1.0];
+    dispose(y_mixed_edges);
+    dispose(y_uniform_edges);
+    dispose(y_mixed);
+    dispose(x_uniform_edges);
+    dispose(x_mixed_edges);
+    dispose(x_mixed);
+    dispose(tenths);
+    dispose(mixed_y);
+    dispose(mixed_x);
+    dispose(empty_y_edges);
+    dispose(empty_x_edges);
+    dispose(empty_counts);
+    dispose(unit_edges);
+    dispose(empty);
+    dispose(expected_counts);
+    dispose(y_edges);
+    dispose(x_edges);
+    dispose(counts);
+    dispose(diagonal);
+    valid and live_count() == 0.
+
+@test
+pub histogram2d_asymmetric_density_ranges_and_outliers_match_numpy(): Bool ->
+    let x = from_floats([1.0, 1.0, 2.0, 3.0, 4.0, 4.0, 4.0, 5.0], [8]);
+    let y = from_floats([1.0, 3.0, 2.0, 0.0, 1.0, 2.0, 3.0, 4.0], [8]);
+    let minima = from_floats([0.0, 0.0], [2]);
+    let maxima = from_floats([6.0, 5.0], [2]);
+    let [density, x_edges, y_edges] = histogram2d_range(
+        x,
+        y,
+        6,
+        5,
+        minima,
+        maxima,
+        true,
+    );
+    let expected = from_floats([
+        0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.125, 0.0, 0.125, 0.0,
+        0.0, 0.0, 0.125, 0.0, 0.0,
+        0.125, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.125, 0.125, 0.125, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.125,
+    ], [6, 5]);
+    let outliers = from_floats([1000001.0, 1000002.0], [2]);
+    let unit_minima = from_floats([0.0, 0.0], [2]);
+    let unit_maxima = from_floats([1.0, 1.0], [2]);
+    let [outside, outside_x_edges, outside_y_edges] = histogram2d_range(
+        outliers,
+        outliers,
+        4,
+        5,
+        unit_minima,
+        unit_maxima,
+    );
+    let valid = allclose(density, expected, 0.000000000001, 0.000000000001, false)
+        and to_floats(x_edges) == [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        and to_floats(y_edges) == [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+        and shape(outside) == [4, 5]
+        and to_floats(outside) == [
+            0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0,
+        ];
+    dispose(outside_y_edges);
+    dispose(outside_x_edges);
+    dispose(outside);
+    dispose(unit_maxima);
+    dispose(unit_minima);
+    dispose(outliers);
+    dispose(expected);
+    dispose(y_edges);
+    dispose(x_edges);
+    dispose(density);
+    dispose(maxima);
+    dispose(minima);
+    dispose(y);
+    dispose(x);
+    valid and live_count() == 0.

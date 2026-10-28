@@ -1,0 +1,9 @@
+module=ndarray.Polynomial
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=10876991926819456165
+interface_hash=14128645441894208362
+interface_doc_hash=12540985092584563806
+deps=1
+ndarray.Array=10196142311769670942

@@ -1,0 +1,84 @@
+module ndarray.TruthReductionTest.
+
+import ndarray.Array.{all, any, dispose, from_bools, from_complex, from_floats, from_ints, live_count, shape, to_bools}.
+import ndarray.Numpy.{logical_xor_reduce}.
+
+@test
+pub scalar_truth_reductions_match_numpy_defaults(): Bool ->
+    let mixed = from_ints([0, 0, 1, 0], [4]);
+    let zeros = from_ints([0, 0, 0, 0], [4]);
+    let ones = from_ints([1, 1, 1, 1], [4]);
+    let floating = from_floats([0.1, 0.9], [2]);
+    let complex = from_complex([0.0, 2.0], [1.0, 0.0], [2], 13);
+    let mixed_any = any(mixed);
+    let zeros_any = any(zeros);
+    let zeros_all = all(zeros);
+    let ones_all = all(ones);
+    let floating_all = all(floating);
+    let complex_all = all(complex);
+    let valid = to_bools(mixed_any) == [true]
+        and to_bools(zeros_any) == [false]
+        and to_bools(zeros_all) == [false]
+        and to_bools(ones_all) == [true]
+        and to_bools(floating_all) == [true]
+        and to_bools(complex_all) == [true];
+    dispose(complex_all);
+    dispose(floating_all);
+    dispose(ones_all);
+    dispose(zeros_all);
+    dispose(zeros_any);
+    dispose(mixed_any);
+    dispose(complex);
+    dispose(floating);
+    dispose(ones);
+    dispose(zeros);
+    dispose(mixed);
+    valid and live_count() == 0.
+
+@test
+pub axis_keep_dims_and_empty_identities_match_numpy(): Bool ->
+    let values = from_ints([0, 0, 0, 0, 1, 0, 1, 1, 0], [3, 3]);
+    let all_values = from_ints([0, 0, 1, 0, 1, 1, 1, 1, 1], [3, 3]);
+    let empty = from_bools([], [2, 0, 3]);
+    let any_columns = any(values, [0]);
+    let any_rows = any(values, [1], true);
+    let all_columns = all(all_values, [0]);
+    let all_rows = all(all_values, [1], true);
+    let empty_any = any(empty, [1]);
+    let empty_all = all(empty, [1]);
+    let valid = to_bools(any_columns) == [true, true, false]
+        and shape(any_rows) == [3, 1]
+        and to_bools(any_rows) == [false, true, true]
+        and to_bools(all_columns) == [false, false, true]
+        and shape(all_rows) == [3, 1]
+        and to_bools(all_rows) == [false, false, true]
+        and to_bools(empty_any) == [false, false, false, false, false, false]
+        and to_bools(empty_all) == [true, true, true, true, true, true];
+    dispose(empty_all);
+    dispose(empty_any);
+    dispose(all_rows);
+    dispose(all_columns);
+    dispose(any_rows);
+    dispose(any_columns);
+    dispose(empty);
+    dispose(all_values);
+    dispose(values);
+    valid and live_count() == 0.
+
+@test
+pub logical_xor_reductions_preserve_parity_axes_and_empty_identity(): Bool ->
+    let values = from_bools([true, false, true, true, true, true], [2, 3]);
+    let empty = from_bools([], [0]);
+    let flattened = logical_xor_reduce(values, [], 0);
+    let rows = logical_xor_reduce(values, [1], 1);
+    let empty_result = logical_xor_reduce(empty, [], 0);
+    let valid = to_bools(flattened) == [true]
+        and shape(rows) == [2, 1]
+        and to_bools(rows) == [false, true]
+        and to_bools(empty_result) == [false];
+    dispose(empty_result);
+    dispose(rows);
+    dispose(flattened);
+    dispose(empty);
+    dispose(values);
+    valid and live_count() == 0.

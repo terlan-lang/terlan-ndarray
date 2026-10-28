@@ -1,0 +1,67 @@
+{
+  "algorithm": {
+    "identifier": "chacha8",
+    "rand_chacha": "0.9.0",
+    "seed_encoding": "signed-int64-as-twos-complement-u64",
+    "stream_contract": "operations consume generator state in call order"
+  },
+  "package": "terlan-ndarray",
+  "package_version": "0.0.7",
+  "schema": "terlan.ndarray.random-report.v1",
+  "status": "passed",
+  "vector": {
+    "bernoulli_bool": [
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false
+    ],
+    "dtype": {
+      "bernoulli": "bool",
+      "integers": "int64",
+      "normal": "float64",
+      "permutation": "int64",
+      "shuffle": "int64",
+      "uniform": "float64"
+    },
+    "integers_int64": [2, 2, 0, 4, 0, -3, 2, -2],
+    "normal_float64": [
+      -1.3012895064264287,
+      0.007428118903149798,
+      0.923279163165256,
+      -0.2433335392644783,
+      0.6589691530322335,
+      -0.09838380785274985,
+      1.2471744216587757,
+      1.5311346615938863
+    ],
+    "operation_sequence": [
+      "uniform(-1,1,float64)",
+      "uniform(-1,1,float64)",
+      "normal(0,1,float64)",
+      "integers(-5,5,int64)",
+      "bernoulli(0.5)",
+      "permutation(8)",
+      "shuffle(axis=1)"
+    ],
+    "permutation_int64": [2, 7, 6, 1, 0, 3, 4, 5],
+    "seed": 73,
+    "shape": [2, 4],
+    "shuffle_input_int64": [0, 1, 2, 3, 4, 5, 6, 7],
+    "shuffle_output_int64": [1, 2, 0, 3, 5, 6, 4, 7],
+    "uniform_float64": [
+      -0.9511954521741668,
+      0.06863333301204522,
+      0.03697361429363122,
+      0.5409061969874509,
+      0.49454083998355136,
+      0.6207889389170667,
+      -0.6941178387537341,
+      -0.3719899325320102
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+module=ndarray.StatisticsTest
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=13978888387073843783
+interface_hash=2537769244282377032
+interface_doc_hash=1817372784160575009
+deps=0

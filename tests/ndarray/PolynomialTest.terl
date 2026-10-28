@@ -1,0 +1,133 @@
+module ndarray.PolynomialTest.
+
+import ndarray.Array.{dispose, from_floats, from_ints, live_count, shape}.
+import ndarray.Numpy.{allclose}.
+import ndarray.Polynomial.{polyder_axis, polyfit_covariance, polyfit_degrees, polyfit_weighted_degrees, polyint_axis, polyvalfromroots_tensor}.
+
+@test
+pub tensor_calculus_matches_numpy_axis_bound_and_scaling_semantics(): Bool ->
+    let coefficients = from_floats(
+        [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0],
+        [3, 4],
+    );
+    let derivative = polyder_axis(coefficients, 1, 0.5, -1);
+    let expected_derivative = from_floats(
+        [1.0, 3.0, 6.0, 3.0, 7.0, 12.0, 5.0, 11.0, 18.0],
+        [3, 3],
+    );
+    let integral_coefficients = from_floats([1.0, 2.0, 3.0, 4.0], [2, 2]);
+    let constants = from_floats([5.0], [1]);
+    let integral = polyint_axis(integral_coefficients, 1, constants, -1.0, 2.0, 0);
+    let expected_integral = from_floats([4.0, 5.0, 2.0, 4.0, 3.0, 4.0], [3, 2]);
+    let valid = shape(derivative) == [3, 3]
+        and allclose(derivative, expected_derivative, 1e-12, 1e-12, false)
+        and shape(integral) == [3, 2]
+        and allclose(integral, expected_integral, 1e-12, 1e-12, false);
+    dispose(expected_integral);
+    dispose(integral);
+    dispose(constants);
+    dispose(integral_coefficients);
+    dispose(expected_derivative);
+    dispose(derivative);
+    dispose(coefficients);
+    valid and live_count() == 0.
+
+@test
+pub root_evaluation_supports_tensor_and_pointwise_modes(): Bool ->
+    let coordinates = from_floats([0.0, 1.0], [2]);
+    let roots = from_floats([0.0, 1.0, 2.0, 3.0], [2, 2]);
+    let tensor = polyvalfromroots_tensor(coordinates, roots, true);
+    let pointwise = polyvalfromroots_tensor(coordinates, roots, false);
+    let expected_tensor = from_floats([0.0, -1.0, 3.0, 0.0], [2, 2]);
+    let expected_pointwise = from_floats([0.0, 0.0], [2]);
+    let valid = shape(tensor) == [2, 2]
+        and allclose(tensor, expected_tensor, 1e-12, 1e-12, false)
+        and shape(pointwise) == [2]
+        and allclose(pointwise, expected_pointwise, 1e-12, 1e-12, false);
+    dispose(expected_pointwise);
+    dispose(expected_tensor);
+    dispose(pointwise);
+    dispose(tensor);
+    dispose(roots);
+    dispose(coordinates);
+    valid and live_count() == 0.
+
+@test
+pub selected_degree_fitting_supports_matrix_values_and_weights(): Bool ->
+    let coordinates = from_floats([-1.0, -0.5, 0.0, 0.5, 1.0], [5]);
+    let values = from_floats(
+        [3.0, 3.0, 1.3125, 1.3125, 1.0, 1.0, 1.3125, 1.3125, 3.0, 3.0],
+        [5, 2],
+    );
+    let degrees = from_ints([0, 2, 4], [3]);
+    let fitted = polyfit_degrees(coordinates, values, degrees);
+    let expected = from_floats(
+        [1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0],
+        [5, 2],
+    );
+    let line_values = from_floats([-1.0, -0.5, 0.0, 0.5, 1.0], [5]);
+    let line_degrees = from_ints([0, 1], [2]);
+    let weights = from_floats([1.0, 0.0, 1.0, 0.0, 1.0], [5]);
+    let weighted = polyfit_weighted_degrees(
+        coordinates,
+        line_values,
+        line_degrees,
+        weights,
+    );
+    let expected_weighted = from_floats([0.0, 1.0], [2]);
+    let valid = shape(fitted) == [5, 2]
+        and allclose(fitted, expected, 1e-10, 1e-10, false)
+        and allclose(weighted, expected_weighted, 1e-10, 1e-10, false);
+    dispose(expected_weighted);
+    dispose(weighted);
+    dispose(weights);
+    dispose(line_degrees);
+    dispose(line_values);
+    dispose(expected);
+    dispose(fitted);
+    dispose(degrees);
+    dispose(values);
+    dispose(coordinates);
+    valid and live_count() == 0.
+
+@test
+pub covariance_fitting_returns_numpy_scaled_estimates(): Bool ->
+    let coordinates = from_floats(
+        [0.0, 1.0 / 3.0, 2.0 / 3.0, 1.0, 4.0 / 3.0, 5.0 / 3.0, 2.0],
+        [7],
+    );
+    let observations = from_floats(
+        [2.0, 1.0, 14.0 / 3.0, 5.0, 10.0, 35.0 / 3.0, 18.0],
+        [7],
+    );
+    let [coefficients, covariance] =
+        polyfit_covariance(coordinates, observations, 2, true);
+    let expected_coefficients = from_floats(
+        [1.61904762, 0.28571429, 3.85714286],
+        [3],
+    );
+    let expected_covariance = from_floats(
+        [
+            1.16099773,
+            -2.12244898,
+            0.81632653,
+            -2.12244898,
+            6.36734694,
+            -2.93877551,
+            0.81632653,
+            -2.93877551,
+            1.46938776,
+        ],
+        [3, 3],
+    );
+    let valid = shape(coefficients) == [3]
+        and shape(covariance) == [3, 3]
+        and allclose(coefficients, expected_coefficients, 1e-7, 1e-7, false)
+        and allclose(covariance, expected_covariance, 1e-7, 1e-7, false);
+    dispose(expected_covariance);
+    dispose(expected_coefficients);
+    dispose(covariance);
+    dispose(coefficients);
+    dispose(observations);
+    dispose(coordinates);
+    valid and live_count() == 0.

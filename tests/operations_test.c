@@ -51,12 +51,15 @@ static void assert_float_values(TerlanNdArrayHandle array,
   terlan_ndarray_v1_delete_float_values(values);
 }
 
-static void test_reshape_and_transpose_are_independently_owned(void) {
+static void test_reshape_and_transpose_are_shared_views(void) {
   const int64_t values[] = {1, 2, 3, 4, 5, 6};
   const int64_t source_shape[] = {2, 3};
   const int64_t reshaped_shape[] = {3, 2};
   const int64_t transposed_shape[] = {2, 3};
-  const int64_t transposed_values[] = {1, 3, 5, 2, 4, 6};
+  const int64_t reshaped_values[] = {99, 2, 3, 4, 5, 6};
+  const int64_t transposed_values[] = {99, 3, 5, 88, 4, 6};
+  const int64_t source_first[] = {0, 0};
+  const int64_t reshaped_second[] = {0, 1};
   const int64_t scalar_value[] = {7};
   const int64_t vector_shape[] = {3};
   TerlanNdArrayHandle source = NULL;
@@ -71,11 +74,13 @@ static void test_reshape_and_transpose_are_independently_owned(void) {
          TERLAN_NDARRAY_OK);
   assert(terlan_ndarray_v1_reshape(source, reshaped_shape, 2, &reshaped) ==
          TERLAN_NDARRAY_OK);
-  ((int64_t *)source->data)[0] = 99;
-  assert_int_values(reshaped, values, 6);
+  assert(terlan_ndarray_v1_set_int(source, source_first, 2, 99) ==
+         TERLAN_NDARRAY_OK);
+  assert_int_values(reshaped, reshaped_values, 6);
   assert(terlan_ndarray_v1_transpose(reshaped, 0, -1, &transposed) ==
          TERLAN_NDARRAY_OK);
-  ((int64_t *)reshaped->data)[1] = 88;
+  assert(terlan_ndarray_v1_set_int(reshaped, reshaped_second, 2, 88) ==
+         TERLAN_NDARRAY_OK);
   assert_shape(transposed, transposed_shape, 2);
   assert_int_values(transposed, transposed_values, 6);
 
@@ -111,6 +116,7 @@ static void test_exact_shape_arithmetic_and_rejections(void) {
   const int64_t multiplied[] = {5, -12, -21, 32};
   const uint8_t bool_values[] = {1, 0, 1, 0};
   const double float_values[] = {1.0, 2.0, 3.0, 4.0};
+  const double promoted_values[] = {2.0, 0.0, 6.0, 0.0};
   TerlanNdArrayHandle left = NULL;
   TerlanNdArrayHandle right = NULL;
   TerlanNdArrayHandle flat = NULL;
@@ -141,13 +147,22 @@ static void test_exact_shape_arithmetic_and_rejections(void) {
   assert(result == NULL);
   assert(terlan_ndarray_v1_from_bools(bool_values, 4, shape, 2, &bools) ==
          TERLAN_NDARRAY_OK);
-  assert(terlan_ndarray_v1_add(bools, bools, &result) ==
-         TERLAN_NDARRAY_UNSUPPORTED_DTYPE);
+  assert(terlan_ndarray_v1_add(bools, bools, &result) == TERLAN_NDARRAY_OK);
+  {
+    uint8_t *actual = NULL;
+    size_t length = 0;
+    assert(terlan_ndarray_v1_to_bools(result, &actual, &length) ==
+           TERLAN_NDARRAY_OK);
+    assert(length == 4 && actual[0] == 1 && actual[1] == 0 &&
+           actual[2] == 1 && actual[3] == 0);
+    terlan_ndarray_v1_delete_bool_values(actual);
+  }
+  assert(terlan_ndarray_v1_delete(result) == TERLAN_NDARRAY_OK);
   assert(terlan_ndarray_v1_from_floats(float_values, 4, shape, 2, &floats) ==
          TERLAN_NDARRAY_OK);
-  assert(terlan_ndarray_v1_add(left, floats, &result) ==
-         TERLAN_NDARRAY_DTYPE_MISMATCH);
-  assert(result == NULL);
+  assert(terlan_ndarray_v1_add(left, floats, &result) == TERLAN_NDARRAY_OK);
+  assert_float_values(result, promoted_values, 4);
+  assert(terlan_ndarray_v1_delete(result) == TERLAN_NDARRAY_OK);
 
   assert(terlan_ndarray_v1_delete(left) == TERLAN_NDARRAY_OK);
   assert(terlan_ndarray_v1_delete(right) == TERLAN_NDARRAY_OK);
@@ -199,7 +214,61 @@ static void test_arbitrary_rank_transpose_and_float_arithmetic(void) {
   assert(terlan_ndarray_v1_live_count() == 0);
 }
 
-static void test_int64_overflow_is_rejected(void) {
+static void test_numpy_binop_broadcast_views_and_chains_preserve_inputs(void) {
+  const double half_values[] = {0.5, 0.5};
+  const double vector_values[] = {1.0, 2.0};
+  TerlanNdArrayHandle halves = NULL;
+  TerlanNdArrayHandle strided_half = NULL;
+  TerlanNdArrayHandle vector = NULL;
+  TerlanNdArrayHandle inner = NULL;
+  TerlanNdArrayHandle result = NULL;
+  TerlanNdArrayHandle integer_five = NULL;
+  TerlanNdArrayHandle integer_three = NULL;
+  TerlanNdArrayHandle square = NULL;
+
+  assert(terlan_ndarray_v1_from_floats(half_values, 2,
+                                       (const int64_t[]){2}, 1,
+                                       &halves) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_slice_axis(halves, 0, 0, 2, 2,
+                                      &strided_half) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_from_floats(vector_values, 2,
+                                       (const int64_t[]){2}, 1,
+                                       &vector) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_multiply(strided_half, vector, &inner) ==
+         TERLAN_NDARRAY_OK);
+  assert_float_values(inner, (const double[]){0.5, 1.0}, 2);
+  assert(terlan_ndarray_v1_multiply(strided_half, inner, &result) ==
+         TERLAN_NDARRAY_OK);
+  assert_float_values(result, (const double[]){0.25, 0.5}, 2);
+  assert_float_values(halves, half_values, 2);
+  assert_float_values(vector, vector_values, 2);
+  assert(terlan_ndarray_v1_delete(result) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_delete(inner) == TERLAN_NDARRAY_OK);
+
+  assert(terlan_ndarray_v1_from_ints((const int64_t[]){5}, 1,
+                                     (const int64_t[]){1}, 1,
+                                     &integer_five) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_from_ints((const int64_t[]){3}, 1,
+                                     (const int64_t[]){1}, 1,
+                                     &integer_three) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_multiply(integer_five, integer_five, &square) ==
+         TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_true_divide(square, integer_three, &result) ==
+         TERLAN_NDARRAY_OK);
+  assert_float_values(result, (const double[]){25.0 / 3.0}, 1);
+  assert_int_values(integer_five, (const int64_t[]){5}, 1);
+  assert_int_values(integer_three, (const int64_t[]){3}, 1);
+  assert(terlan_ndarray_v1_delete(result) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_delete(square) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_delete(integer_three) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_delete(integer_five) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_delete(vector) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_delete(strided_half) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_delete(halves) == TERLAN_NDARRAY_OK);
+  assert(terlan_ndarray_v1_live_count() == 0);
+}
+
+static void test_int64_arithmetic_wraps_like_numpy(void) {
   const int64_t shape[] = {1};
   const int64_t maximum[] = {INT64_MAX};
   const int64_t minimum[] = {INT64_MIN};
@@ -220,12 +289,17 @@ static void test_int64_overflow_is_rejected(void) {
   assert(terlan_ndarray_v1_from_ints(negative_one, 1, shape, 1,
                                      &negative_one_array) == TERLAN_NDARRAY_OK);
   assert(terlan_ndarray_v1_add(max_array, one_array, &result) ==
-         TERLAN_NDARRAY_ARITHMETIC_OVERFLOW);
-  assert(result == NULL);
+         TERLAN_NDARRAY_OK);
+  assert_int_values(result, minimum, 1);
+  assert(terlan_ndarray_v1_delete(result) == TERLAN_NDARRAY_OK);
   assert(terlan_ndarray_v1_subtract(min_array, one_array, &result) ==
-         TERLAN_NDARRAY_ARITHMETIC_OVERFLOW);
+         TERLAN_NDARRAY_OK);
+  assert_int_values(result, maximum, 1);
+  assert(terlan_ndarray_v1_delete(result) == TERLAN_NDARRAY_OK);
   assert(terlan_ndarray_v1_multiply(min_array, negative_one_array, &result) ==
-         TERLAN_NDARRAY_ARITHMETIC_OVERFLOW);
+         TERLAN_NDARRAY_OK);
+  assert_int_values(result, minimum, 1);
+  assert(terlan_ndarray_v1_delete(result) == TERLAN_NDARRAY_OK);
   assert(terlan_ndarray_v1_live_count() == 4);
   assert(terlan_ndarray_v1_delete(max_array) == TERLAN_NDARRAY_OK);
   assert(terlan_ndarray_v1_delete(min_array) == TERLAN_NDARRAY_OK);
@@ -376,10 +450,11 @@ static void test_operation_failures_leave_sources_usable(void) {
 
 
 int main(void) {
-  test_reshape_and_transpose_are_independently_owned();
+  test_reshape_and_transpose_are_shared_views();
   test_exact_shape_arithmetic_and_rejections();
   test_arbitrary_rank_transpose_and_float_arithmetic();
-  test_int64_overflow_is_rejected();
+  test_numpy_binop_broadcast_views_and_chains_preserve_inputs();
+  test_int64_arithmetic_wraps_like_numpy();
   test_sum_axes_empty_identity_and_non_finite_values();
   test_operation_failures_leave_sources_usable();
   return 0;

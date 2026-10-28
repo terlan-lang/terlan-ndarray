@@ -1,0 +1,9 @@
+module=ndarray.Indexing
+syntax_contract_schema=terlan-syntax-contract-v1
+syntax_contract_fingerprint_algorithm=fnv1a64
+syntax_contract_fingerprint=fnv1a64:2e489e5f33744fbf
+source_hash=583058913687828965
+interface_hash=8153011998961726231
+interface_doc_hash=2383600582305240967
+deps=1
+ndarray.Array=14540436248669504260

@@ -1,0 +1,19 @@
+/** Selects array materialization order. */
+pub type ArrayOrder: Int = C = 0 | FORTRAN = 1 | KEEP = 2 | ANY = 3.
+/** Selects the admissible numerical dtype conversion relationship. */
+pub type CastingRule: Int = NO = 0 | EQUIVALENT = 1 | SAFE = 2 | SAME_KIND = 3 | UNSAFE = 4.
+/** Returns whether the current view is C-contiguous. */
+pub is_c_contiguous(array: Array): Bool -> contiguous_code(array) == 1.
+/** Returns whether the current view is Fortran-contiguous. */
+pub is_fortran_contiguous(array: Array): Bool -> fortran_contiguous_code(array) == 1.
+/** Returns the ABI code for one array materialization order. */
+array_order_code(order: ArrayOrder): Int -> case order { ArrayOrder.C -> 0; ArrayOrder.FORTRAN -> 1; ArrayOrder.KEEP -> 2; ArrayOrder.ANY -> 3 }.
+/** Returns the ABI code for one numerical casting rule. */
+casting_rule_code(casting: CastingRule): Int -> case casting { CastingRule.NO -> 0; CastingRule.EQUIVALENT -> 1; CastingRule.SAFE -> 2; CastingRule.SAME_KIND -> 3; CastingRule.UNSAFE -> 4 }.
+/** Returns an independently owned copy with explicit memory ordering. */
+pub copy_with_order(array: Array, order: ArrayOrder): Array -> copy(array, array_order_code(order)).
+/** Reshapes with explicit C, Fortran, or input-compatible traversal order. */
+pub reshape_with_order(array: Array, shape: List[Int], order: ArrayOrder): Array -> reshape(array, shape, array_order_code(order)).
+/** Converts an array under explicit NumPy-compatible ordering and casting rules. */
+pub astype_with(array: Array, dtype: Int, order: ArrayOrder, copy_values: Bool, casting: CastingRule): Array ->
+    astype(array, dtype, array_order_code(order), copy_values, casting_rule_code(casting)).

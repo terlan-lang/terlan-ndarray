@@ -1,0 +1,10 @@
+module ndarray.BlockTypeProbe.
+
+pub type Block =
+    Array
+  | List[Block].
+
+pub flatten(value: Block): List[Array].
+
+@pure
+pub keep(value: Block): Block.
