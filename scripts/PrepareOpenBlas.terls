@@ -1,0 +1,284 @@
+#!/usr/bin/env -S terlc run
+/**
+ * Acquires and builds the pinned OpenBLAS release provider.
+ */
+import std.core.Option.{None, Some}.
+import std.core.Result.{Err, Ok}.
+import std.core.{String, Unit}.
+import std.crypto.Hash.
+import std.data.Json.
+import std.io.Console.{eprintln, println}.
+import std.io.{Directory, File}.
+import std.system.{Environment, Platform, Process}.
+
+import type std.core.Result.
+import type std.data.Json.
+
+struct Dependency {
+    archive_url: String,
+    revision: String,
+    sha256: String,
+}.
+
+failure(message: String): Bool ->
+    let _printed = eprintln(String.append("error[ndarray.openblas.prepare]: ", message));
+    false.
+
+child(parent: String, relative: String): String ->
+    if {
+        String.ends_with(parent, "/") -> String.append(parent, relative);
+        true -> String.concat([parent, "/", relative])
+    }.
+
+json_string(value: Json, key: String): Result[String, String] ->
+    let {
+        Ok(member) <- value.get(key);
+        Ok(text) <- member.as_string()
+    } else {
+        _ -> Err(String.append("missing dependency field: ", key))
+    };
+    Ok(text).
+
+dependency(repository: String): Result[Dependency, String] ->
+    let {
+        Ok(source) <- File.read_text(child(repository, "native-dependencies.json"));
+        Ok(document) <- Json.parse(source);
+        Ok(dependencies) <- document.get("dependencies");
+        Ok(openblas) <- dependencies.get("openblas");
+        Ok(archive_url) <- json_string(openblas, "archive_url");
+        Ok(revision) <- json_string(openblas, "revision");
+        Ok(sha256) <- json_string(openblas, "sha256")
+    } else {
+        _ -> Err("cannot read pinned OpenBLAS dependency")
+    };
+    Ok(Dependency(archive_url = archive_url, revision = revision, sha256 = sha256)).
+
+cache_base(): Result[String, String] ->
+    case Environment.get("TERLAN_NDARRAY_NATIVE_CACHE") {
+        Some(value) -> Ok(value);
+        None ->
+            case Environment.get("HOME") {
+                Some(home) -> Ok(child(home, ".cache/terlan/native"));
+                None -> Err("HOME or TERLAN_NDARRAY_NATIVE_CACHE is required")
+            }
+    }.
+
+host_name(): String ->
+    let host = Platform.current();
+    String.concat(
+        [String.lowercase(host.architecture), "-", String.lowercase(host.operating_system)],
+    ).
+
+provider_valid(root: String): Bool ->
+    File.exists(child(root, "include/cblas.h"))
+        and File.exists(child(root, "lib/libopenblas.a"))
+        and File.exists(child(root, "lib/pkgconfig/openblas.pc")).
+
+archive_valid(path: String, expected: String): Bool ->
+    case Hash.sha256_file(path) {
+        Ok(actual) -> actual == expected;
+        Err(_reason) -> false
+    }.
+
+remove_file(path: String): Bool ->
+    if {
+        not File.exists(path) -> true;
+        true -> case File.delete(path) {
+            Ok(Unit) -> true;
+            Err(reason) -> failure(reason.message)
+        }
+    }.
+
+remove_directory(path: String): Bool ->
+    case Directory.remove_all(path) {
+        Ok(Unit) -> true;
+        Err(_reason) -> true
+    }.
+
+create_directory(path: String): Bool ->
+    case Directory.create_all(path) {
+        Ok(Unit) -> true;
+        Err(reason) -> failure(reason.message)
+    }.
+
+run(program: String, arguments: List[String], repository: String): Bool ->
+    let command =
+        Process.command(program)
+            .with_arguments(arguments)
+            .with_working_directory(repository)
+            .with_timeout_ms(3600000)
+            .with_output_limit_bytes(16777216);
+    case Process.run(command) {
+        Err(reason) -> failure(reason.message);
+        Ok(output) ->
+            if {
+                output.status == 0 -> true;
+                true -> failure(String.concat([output.stdout, output.stderr]))
+            }
+    }.
+
+capture(program: String, arguments: List[String], repository: String): Result[String, String] ->
+    let command =
+        Process.command(program)
+            .with_arguments(arguments)
+            .with_working_directory(repository)
+            .with_timeout_ms(600000)
+            .with_output_limit_bytes(16777216);
+    case Process.run(command) {
+        Err(reason) -> Err(reason.message);
+        Ok(output) ->
+            if {
+                output.status == 0 -> Ok(output.stdout);
+                true -> Err(String.concat([output.stdout, output.stderr]))
+            }
+    }.
+
+download(url: String, archive: String, repository: String): Bool ->
+    run(
+        "curl",
+        ["--fail", "--location", "--proto", "=https", "--retry", "3", url, "--output", archive],
+        repository,
+    ).
+
+ensure_archive(path: String, dependency: Dependency, repository: String): Bool ->
+    if {
+        archive_valid(path, dependency.sha256) -> true;
+        not remove_file(path) -> false;
+        not download(dependency.archive_url, path, repository) -> false;
+        archive_valid(path, dependency.sha256) -> true;
+        true -> failure("downloaded OpenBLAS archive digest mismatch")
+    }.
+
+safe_path_parts(parts: List[String]): Bool ->
+    case parts {
+        [] -> true;
+        [part | rest] -> part != ".." and part != "." and safe_path_parts(rest)
+    }.
+
+safe_archive_paths(paths: List[String]): Bool ->
+    case paths {
+        [] -> true;
+        [path | rest] ->
+            if {
+                path == "" -> safe_archive_paths(rest);
+                String.starts_with(path, "/") -> false;
+                not safe_path_parts(String.split(path, "/")) -> false;
+                true -> safe_archive_paths(rest)
+            }
+    }.
+
+safe_archive_kinds(lines: List[String]): Bool ->
+    case lines {
+        [] -> true;
+        [line | rest] ->
+            if {
+                line == "" -> safe_archive_kinds(rest);
+                String.starts_with(line, "-") or String.starts_with(line, "d") -> safe_archive_kinds(rest);
+                true -> false
+            }
+    }.
+
+archive_safe(archive: String, repository: String): Bool ->
+    let {
+        Ok(paths) <- capture("tar", ["--list", "--gzip", "--file", archive], repository);
+        Ok(kinds) <- capture("tar", ["--list", "--verbose", "--gzip", "--file", archive], repository)
+    } else {
+        _ -> false
+    };
+    safe_archive_paths(String.split(paths, "\n")) and safe_archive_kinds(String.split(kinds, "\n")).
+
+extract_archive(archive: String, destination: String, repository: String): Bool ->
+    if {
+        not remove_directory(destination) -> false;
+        not archive_safe(archive, repository) -> failure("OpenBLAS archive contains unsafe entries");
+        not create_directory(destination) -> false;
+        true -> run(
+            "tar",
+            [
+                "--extract",
+                "--gzip",
+                "--file",
+                archive,
+                "--directory",
+                destination,
+                "--no-same-owner",
+                "--no-same-permissions",
+            ],
+            repository,
+        )
+    }.
+
+build_provider(source: String, root: String, repository: String): Bool ->
+    remove_directory(root)
+        and run(
+    "make",
+    [
+        "-C",
+        source,
+        "-j2",
+        "DYNAMIC_ARCH=1",
+        "DYNAMIC_OLDER=1",
+        "NO_SHARED=1",
+        "NO_LAPACK=1",
+        "NO_LAPACKE=1",
+        "USE_OPENMP=0",
+    ],
+    repository,
+)
+        and run(
+    "make",
+    [
+        "-C",
+        source,
+        String.append("PREFIX=", root),
+        "NO_SHARED=1",
+        "NO_LAPACK=1",
+        "NO_LAPACKE=1",
+        "install",
+    ],
+    repository,
+)
+        and if {
+    provider_valid(root) -> true;
+    true -> failure("OpenBLAS install is incomplete")
+}.
+
+prepare(repository: String): Result[String, String] ->
+    let {
+        Ok(dependency) <- dependency(repository);
+        Ok(base) <- cache_base()
+    } else {
+        Err(reason) -> Err(reason)
+    };
+    (let revision_root = child(child(base, "openblas"), dependency.revision);
+let host_root = child(revision_root, host_name());
+let root = child(host_root, "install");
+let archive = child(revision_root, "source.tar.gz");
+let extracted = child(host_root, "source");
+let source = child(extracted, String.append("OpenBLAS-", dependency.revision));
+if {
+    provider_valid(root) -> Ok(root);
+    true -> case Directory.create_all(revision_root) {
+        Err(reason) -> Err(reason.message);
+        Ok(Unit) ->
+            if {
+                not create_directory(host_root) -> Err("cannot create OpenBLAS host cache");
+                not ensure_archive(archive, dependency, repository) -> Err("cannot acquire pinned OpenBLAS archive");
+                not extract_archive(archive, extracted, repository) -> Err("cannot extract pinned OpenBLAS archive");
+                not build_provider(source, root, repository) -> Err("cannot build pinned OpenBLAS provider");
+                true -> Ok(root)
+            }
+    }
+}).
+
+entry(): Bool ->
+    let repository = Environment.current_directory();
+    case prepare(repository) {
+        Err(reason) -> failure(reason);
+        Ok(root) ->
+            let _printed = println(root);
+            true
+    }.
+
+assert(entry());
+Unit.

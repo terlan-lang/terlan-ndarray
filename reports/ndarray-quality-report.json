@@ -39,7 +39,7 @@
   },
   "schema": "terlan.ndarray.quality-report.v1",
   "source_policy": {
-    "files_checked": 473,
+    "files_checked": 474,
     "maximum_file": {
       "lines": 2593,
       "path": "src/ndarray/Array.terl"

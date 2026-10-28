@@ -5,12 +5,16 @@ LIBTORCH ?= $(abspath $(PYTORCH))/vendor/libtorch-2.13.0+cpu/libtorch
 MANIFEST := bindings/ndarray-c.json
 GENERATED := generated
 
-.PHONY: generate abi-check package-check terlan-grouped-binding-check terlan-function-reference-check operations-check indexing-view-check broadcasting-promotion-check elementwise-reduction-check shape-composition-check creation-random-check linear-algebra-check serialization-arrow-check nd15-numpy-fixture-check nd18-numpy-fixture-check indexing-ordering-set-check statistics-numerical-check fft-check polynomial-numerical-algebra-check numpy-api-inventory-report numpy-api-inventory-check numpy-test-parity-report numpy-test-parity-check blas-check dlpack-check quality-check release-check feature-complete-release-check clean
+.PHONY: generate prepare-openblas abi-check package-check terlan-grouped-binding-check terlan-function-reference-check operations-check indexing-view-check broadcasting-promotion-check elementwise-reduction-check shape-composition-check creation-random-check linear-algebra-check serialization-arrow-check nd15-numpy-fixture-check nd18-numpy-fixture-check indexing-ordering-set-check statistics-numerical-check fft-check polynomial-numerical-algebra-check numpy-api-inventory-report numpy-api-inventory-check numpy-test-parity-report numpy-test-parity-check blas-check dlpack-check quality-check release-check feature-complete-release-check clean
 
 generate:
 	@test -x "$(TERLC)" || { echo "missing terlc: $(TERLC)" >&2; exit 1; }
 	rm -rf "$(GENERATED)"
 	"$(TERLC)" bind c --manifest "$(MANIFEST)" --out "$(GENERATED)"
+
+prepare-openblas:
+	@test -x "$(TERLC)" || { echo "missing terlc: $(TERLC)" >&2; exit 1; }
+	"$(TERLC)" run scripts/PrepareOpenBlas.terls
 
 abi-check: export RUSTFLAGS := -D warnings
 abi-check: generate
