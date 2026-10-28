@@ -34,6 +34,12 @@ jobs:
       - name: Verify native build tools
         run: command -v cc && command -v curl && command -v make && command -v pkg-config
 
+      - name: Install system OpenBLAS
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes libopenblas-dev
+          pkg-config --exists openblas
+
       - name: Cache native Rust dependencies
         run: cargo fetch --manifest-path ndarray/native/rust/Cargo.toml
 
