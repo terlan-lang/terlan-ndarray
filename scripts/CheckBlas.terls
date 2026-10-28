@@ -171,6 +171,24 @@ nonempty_words(values: List[String], output: List[String]): List[String] ->
             }
     }.
 
+external_header_flags(values: List[String], output: List[String]): List[String] ->
+    case values {
+        [] -> output;
+        [value | rest] ->
+            external_header_flags(
+                rest,
+                concat(
+                    output,
+                    [
+                        if {
+                            String.starts_with(value, "-I") -> String.replace(value, "-I", "-isystem");
+                            true -> value
+                        },
+                    ],
+                ),
+            )
+    }.
+
 compiler_flags(
     repository: String,
     environment: List[EnvironmentEntry],
@@ -183,7 +201,8 @@ compiler_flags(
         true,
     ) {
         Err(reason) -> Err(reason);
-        Ok(output) -> Ok(nonempty_words(String.split(output.stdout, " "), []))
+        Ok(output) ->
+            Ok(external_header_flags(nonempty_words(String.split(output.stdout, " "), []), []))
     }.
 
 native_sources(repository: String): List[String] ->

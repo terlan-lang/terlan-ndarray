@@ -437,7 +437,13 @@ case run_command(
     true,
 ) {
     Err(reason) -> Err(reason);
-    Ok(output) -> Ok({environment, nonempty_words(String.split(output.stdout, " "), [])})
+    Ok(output) ->
+        Ok(
+            {
+                environment,
+                external_header_flags(nonempty_words(String.split(output.stdout, " "), []), []),
+            },
+        )
 }).
 
 nonempty_words(values: List[String], output: List[String]): List[String] ->
@@ -448,6 +454,24 @@ nonempty_words(values: List[String], output: List[String]): List[String] ->
                 String.trim(value) == "" -> nonempty_words(rest, output);
                 true -> nonempty_words(rest, concat(output, [String.trim(value)]))
             }
+    }.
+
+external_header_flags(values: List[String], output: List[String]): List[String] ->
+    case values {
+        [] -> output;
+        [value | rest] ->
+            external_header_flags(
+                rest,
+                concat(
+                    output,
+                    [
+                        if {
+                            String.starts_with(value, "-I") -> String.replace(value, "-I", "-isystem");
+                            true -> value
+                        },
+                    ],
+                ),
+            )
     }.
 
 native_tests(): List[String] ->

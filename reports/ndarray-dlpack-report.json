@@ -38,8 +38,8 @@
     "status": "passed"
   },
   "package_revisions": {
-    "ndarray": "c2110d7a0edf95448b796738df75d7f4b98d83ce",
-    "tensor_sink": "9d401d1ea19415ef6120f132a85cacf2bf869231"
+    "ndarray": "7514aa30358d0296282228657a90ec4e56041b77",
+    "tensor_sink": "cab28caa6efbb15080f131e303c614d15743677f"
   },
   "schema": "terlan.ndarray.dlpack-report.v1",
   "status": "passed"

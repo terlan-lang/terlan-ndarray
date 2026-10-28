@@ -9,17 +9,17 @@
       "samples": [
         {
           "checksum": "0.0090497737556561094",
-          "elapsed_ns": 1485,
+          "elapsed_ns": 1439,
           "sample": 0
         },
         {
           "checksum": "0.0090497737556561094",
-          "elapsed_ns": 1142,
+          "elapsed_ns": 1054,
           "sample": 1
         },
         {
           "checksum": "0.0090497737556561094",
-          "elapsed_ns": 574,
+          "elapsed_ns": 601,
           "sample": 2
         }
       ],
@@ -29,17 +29,17 @@
       "samples": [
         {
           "checksum": "8.619909502262443",
-          "elapsed_ns": 2577,
+          "elapsed_ns": 2406,
           "sample": 0
         },
         {
           "checksum": "8.619909502262443",
-          "elapsed_ns": 2181,
+          "elapsed_ns": 1978,
           "sample": 1
         },
         {
           "checksum": "8.619909502262443",
-          "elapsed_ns": 1352,
+          "elapsed_ns": 1311,
           "sample": 2
         }
       ],
@@ -49,17 +49,17 @@
       "samples": [
         {
           "checksum": "35.687782805429855",
-          "elapsed_ns": 40435,
+          "elapsed_ns": 43296,
           "sample": 0
         },
         {
           "checksum": "35.687782805429855",
-          "elapsed_ns": 39964,
+          "elapsed_ns": 42706,
           "sample": 1
         },
         {
           "checksum": "35.687782805429855",
-          "elapsed_ns": 39086,
+          "elapsed_ns": 48803,
           "sample": 2
         }
       ],
@@ -69,17 +69,17 @@
       "samples": [
         {
           "checksum": "145.05882352941177",
-          "elapsed_ns": 779308,
+          "elapsed_ns": 1746272,
           "sample": 0
         },
         {
           "checksum": "145.05882352941177",
-          "elapsed_ns": 800945,
+          "elapsed_ns": 1883767,
           "sample": 1
         },
         {
           "checksum": "145.05882352941177",
-          "elapsed_ns": 659336,
+          "elapsed_ns": 961073,
           "sample": 2
         }
       ],
@@ -89,17 +89,17 @@
       "samples": [
         {
           "checksum": "583.57918552036199",
-          "elapsed_ns": 41166184,
+          "elapsed_ns": 41321946,
           "sample": 0
         },
         {
           "checksum": "583.57918552036199",
-          "elapsed_ns": 41706603,
+          "elapsed_ns": 41700888,
           "sample": 1
         },
         {
           "checksum": "583.57918552036199",
-          "elapsed_ns": 39280397,
+          "elapsed_ns": 39254930,
           "sample": 2
         }
       ],

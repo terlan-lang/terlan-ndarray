@@ -158,6 +158,24 @@ nonempty_words(values: List[String], output: List[String]): List[String] ->
             }
     }.
 
+external_header_flags(values: List[String], output: List[String]): List[String] ->
+    case values {
+        [] -> output;
+        [value | rest] ->
+            external_header_flags(
+                rest,
+                concat(
+                    output,
+                    [
+                        if {
+                            String.starts_with(value, "-I") -> String.replace(value, "-I", "-isystem");
+                            true -> value
+                        },
+                    ],
+                ),
+            )
+    }.
+
 provider(repository: String): Result[NativeProvider, String] ->
     let {
         Ok(lock) <- read_json(child(repository, "native-dependencies.json"));
@@ -209,7 +227,7 @@ case run_command(
         Ok(
             NativeProvider(
                 environment = environment,
-                flags = nonempty_words(String.split(output.stdout, " "), []),
+                flags = external_header_flags(nonempty_words(String.split(output.stdout, " "), []), []),
                 revision = revision,
             ),
         )

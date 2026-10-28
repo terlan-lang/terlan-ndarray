@@ -74,21 +74,6 @@ provider_valid(root: String): Bool ->
         and File.exists(child(root, "lib/libopenblas.a"))
         and File.exists(child(root, "lib/pkgconfig/openblas.pc")).
 
-normalize_pkg_config(root: String): Bool ->
-    let path = child(root, "lib/pkgconfig/openblas.pc");
-    case File.read_text(path) {
-        Err(reason) -> failure(reason.message);
-        Ok(source) ->
-            let normalized = String.replace(source, "Cflags: -I\${includedir}", "Cflags: -isystem\${includedir}");
-            if {
-                not String.contains(normalized, "Cflags: -isystem\${includedir}") -> failure("OpenBLAS pkg-config Cflags are not recognized");
-                true -> case File.write_text(path, normalized) {
-                    Ok(Unit) -> true;
-                    Err(reason) -> failure(reason.message)
-                }
-            }
-    }.
-
 archive_valid(path: String, expected: String): Bool ->
     case Hash.sha256_file(path) {
         Ok(actual) -> actual == expected;
@@ -253,7 +238,6 @@ build_provider(source: String, root: String, repository: String): Bool ->
     ],
     repository,
 )
-        and normalize_pkg_config(root)
         and if {
     provider_valid(root) -> true;
     true -> failure("OpenBLAS install is incomplete")
@@ -273,7 +257,7 @@ let archive = child(revision_root, "source.tar.gz");
 let extracted = child(host_root, "source");
 let source = child(extracted, String.append("OpenBLAS-", dependency.revision));
 if {
-    provider_valid(root) and normalize_pkg_config(root) -> Ok(root);
+    provider_valid(root) -> Ok(root);
     true -> case Directory.create_all(revision_root) {
         Err(reason) -> Err(reason.message);
         Ok(Unit) ->
