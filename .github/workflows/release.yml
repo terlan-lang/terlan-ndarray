@@ -35,7 +35,12 @@ jobs:
         run: command -v cc && command -v curl && command -v make && command -v pkg-config
 
       - name: Cache native Rust dependencies
-        run: cargo fetch --manifest-path ndarray/native/rust/Cargo.toml
+        run: |
+          cargo fetch --manifest-path ndarray/native/rust/Cargo.toml
+          "$GITHUB_WORKSPACE/terlan/target/debug/terlc" bind c \
+            --manifest ndarray/bindings/ndarray-c.json \
+            --out ndarray/generated
+          cargo fetch --manifest-path ndarray/generated/native/rust/Cargo.toml
 
       - name: Prepare pinned OpenBLAS
         run: >-
