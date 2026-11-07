@@ -106,7 +106,7 @@ mod native_boundary_dispatch_49;
 mod native_boundary_dispatch_50;
 
 use std::collections::HashMap;
-use std::io::{self, BufRead, Read, Write};
+use std::io::{self, Write};
 
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
@@ -114,6 +114,9 @@ use terlan_ndarray_native::{Array, ArrowArray, CAbiError, RandomStream, atleast_
 
 const MAX_ADAPTER_FRAME_BYTES: usize = 1048576;
 const MAX_ADAPTER_TRANSFER_BYTES: usize = 16777216;
+
+#[path = "native_boundary_helper/transport.rs"]
+mod adapter_transport;
 
 fn main() {
     let mut worker = match Worker::new() {
@@ -126,30 +129,65 @@ fn main() {
     let stdin = io::stdin();
     let mut input = stdin.lock();
     let mut stdout = io::stdout().lock();
+    let limits = adapter_transport::Limits {
+        frame: MAX_ADAPTER_FRAME_BYTES,
+        transfer: MAX_ADAPTER_TRANSFER_BYTES,
+    };
     loop {
-        let mut frame = Vec::new();
-        let read = Read::by_ref(&mut input)
-            .take((MAX_ADAPTER_FRAME_BYTES + 1) as u64)
-            .read_until(b'\n', &mut frame);
-        let (payload, terminate) = match read {
-            Ok(0) => break,
-            Ok(_) if frame.len() > MAX_ADAPTER_FRAME_BYTES => (
-                protocol_error("frame_too_large", "native adapter frame exceeds its bound"),
-                true,
-            ),
-            Ok(_) => match String::from_utf8(frame) {
-                Ok(line) => (
-                    worker.execute_line(line.trim_end_matches(['\r', '\n'])),
-                    false,
-                ),
-                Err(error) => (protocol_error("invalid_utf8", &error.to_string()), false),
-            },
-            Err(error) => (protocol_error("native_read_error", &error.to_string()), true),
+        let (payload, terminate) = match adapter_transport::read_message(
+            &mut input,
+            adapter_transport::Direction::Call,
+            None,
+            limits,
+        ) {
+            Ok(None) => break,
+            Ok(Some(request)) => (worker.execute_line(&request), false),
+            Err(error) => {
+                let message = error.to_string();
+                let code = if message.contains("frame exceeds") {
+                    "frame_too_large"
+                } else {
+                    "invalid_transfer_chunk"
+                };
+                (protocol_error(code, &message), true)
+            }
         };
-        if writeln!(stdout, "{payload}").is_err() || stdout.flush().is_err() || terminate {
+        if write_response(&mut stdout, &payload, limits).is_err() || terminate {
             break;
         }
     }
+}
+
+fn write_response(
+    output: &mut impl Write,
+    response: &str,
+    limits: adapter_transport::Limits,
+) -> io::Result<()> {
+    let request_id = response
+        .split_whitespace()
+        .nth(1)
+        .and_then(|field| field.parse::<u64>().ok())
+        .unwrap_or(0);
+    let oversized;
+    let response = if response.len() > limits.message() {
+        oversized = format!(
+            "reply {request_id} 1 {}",
+            protocol_error(
+                "transfer_too_large",
+                "native adapter response exceeds its bound",
+            )
+        );
+        &oversized
+    } else {
+        response
+    };
+    adapter_transport::write_message(
+        output,
+        response,
+        request_id,
+        adapter_transport::Direction::Reply,
+        limits,
+    )
 }
 
 struct Worker {
