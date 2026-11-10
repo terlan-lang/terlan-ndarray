@@ -65,7 +65,7 @@ child(parent: String, relative: String): String ->
     }.
 
 read_json(path: String): Option[Json] ->
-    let {
+    when {
         Ok(source) <- File.read_text(path);
         Ok(document) <- Json.parse(source)
     } else {
@@ -96,8 +96,8 @@ structured_suffix(path: String): Bool ->
 
 file_line_limit(path: String): Int ->
     if {
-        String.ends_with(path, ".terl") or String.ends_with(path, ".terls") -> 3000;
-        true -> 1000
+        String.ends_with(path, ".terl") or String.ends_with(path, ".terls") -> 3_000;
+        true -> 1_000
     }.
 
 pinned_third_party(path: String): Bool ->
@@ -269,7 +269,7 @@ source_file_stats(paths: List[String], scrubber: Regex, current: SourceStats): S
 string_array_at(value: Json, index: Int, count: Int, output: List[String]): Option[List[String]] ->
     if {
         index == count -> Some(output);
-        true -> let {
+        true -> when {
             Ok(item) <- value.at(index);
             Ok(text) <- item.as_string()
         } else {
@@ -303,7 +303,7 @@ any_reference_exists(values: List[String], evidence: List[String]): Bool ->
     }.
 
 valid_category(item: Json, category: String, evidence: List[String]): Bool ->
-    let {
+    when {
         Ok(value) <- item.get(category);
         Some(references) <- string_array(value)
     } else {
@@ -320,7 +320,7 @@ validate_evidence(keys: List[String], evidence: Json): Bool ->
     case keys {
         [] -> true;
         [identity | rest] ->
-            let {
+            when {
                 Ok(item) <- evidence.get(identity);
                 Ok(projection) <- item.required_fields(["marker", "path"], [], []);
                 [marker, path] <- projection.strings;
@@ -339,7 +339,7 @@ manifest_functions_at(
 ): Option[List[ManifestFunction]] ->
     if {
         index == count -> Some(output);
-        true -> let {
+        true -> when {
             Ok(function) <- functions.at(index);
             Ok(name_value) <- function.get("name");
             Ok(name) <- name_value.as_string();
@@ -385,7 +385,7 @@ manifest_modules_at(
 ): Option[List[ManifestFunction]] ->
     if {
         index == count -> Some(output);
-        true -> let {
+        true -> when {
             Ok(module_value) <- modules.at(index);
             Ok(functions) <- module_value.get("functions");
             Some(module_functions) <- manifest_functions(functions)
@@ -440,7 +440,7 @@ manifest_function_identities(
     }.
 
 public_functions(manifest: Json): Option[List[String]] ->
-    let {
+    when {
         Ok(modules) <- manifest.get("modules");
         Ok(count) <- modules.length()
     } else {
@@ -473,7 +473,7 @@ family_members_at(
     case keys {
         [] -> Some(output);
         [family | rest] ->
-            let {
+            when {
                 Ok(item) <- families.get(family);
                 Ok(members_value) <- item.get("members");
                 Some(members) <- string_array(members_value)
@@ -534,7 +534,9 @@ extension_declaration_names_at(
     case identities {
         [] -> Some(output);
         [identity | rest] ->
-            let Ok(item) <- items.get(identity) else {
+            when {
+                Ok(item) <- items.get(identity)
+            } else {
                 _ -> None
             };
             case item.get("declaration") {
@@ -555,7 +557,7 @@ extension_declaration_names(identities: List[String], items: Json): Option[List[
     extension_declaration_names_at(identities, items, []).
 
 check_coverage(): CoverageResult ->
-    let {
+    when {
         Some(manifest) <- read_json("bindings/ndarray-c.json");
         Some(document) <- read_json("tests/public-api-coverage.json");
         Ok(schema_value) <- document.get("schema");
@@ -654,7 +656,7 @@ governed_source_reason(paths: List[String]): Result[String, String] ->
     }.
 
 governed_paths(): Option[List[String]] ->
-    let {
+    when {
         Ok(source) <- Directory.files_recursive_excluding("src", []);
         Ok(bindings) <- Directory.files_recursive_excluding("bindings", []);
         Ok(rust) <- Directory.files_recursive_excluding("native/rust/src", [])
@@ -684,7 +686,7 @@ valid_hex(value: String, length: Int): Bool ->
     String.byte_size(value) == length and all_hex(String.codepoints(value)).
 
 dependency_pin_valid(dependencies: Json, name: String): Bool ->
-    let {
+    when {
         Ok(dependency) <- dependencies.get(name);
         Ok(fields) <- dependency.required_fields(["revision", "sha256"], [], []);
         [revision, digest] <- fields.strings
@@ -709,7 +711,7 @@ host_identity(): String ->
     String.concat([architecture, "-unknown-", operating_system, "-gnu"]).
 
 check_independence(): IndependenceResult ->
-    let {
+    when {
         Some(paths) <- governed_paths();
         Ok(source_reason) <- governed_source_reason(paths);
         Ok(manifest_source) <- File.read_text("terlan.toml");
@@ -799,7 +801,7 @@ validation_scripts_are_terlan(files: List[String]): Bool ->
     }.
 
 check_terlan_validation_drivers(): Bool ->
-    let {
+    when {
         Ok(makefile) <- File.read_text("Makefile");
         Ok(scripts) <- Directory.files_recursive_excluding("scripts", ["__pycache__"]);
         Ok(workflows) <-
@@ -809,7 +811,7 @@ check_terlan_validation_drivers(): Bool ->
                 [".yml", ".yaml"],
                 [],
                 0,
-                1000,
+                1_000,
             )
     } else {
         _ -> false
@@ -837,9 +839,9 @@ run_cargo(
                     ),
                     removed,
                 ),
-                600000,
+                600_000,
             ),
-            16777216,
+            16_777_216,
         );
     case Process.run(command) {
         Err(_reason) -> false;
@@ -862,7 +864,7 @@ run_cargo(
     }.
 
 openblas_environment(): Option[List[EnvironmentEntry]] ->
-    let {
+    when {
         Some(lock) <- read_json("native-dependencies.json");
         Ok(dependencies) <- lock.get("dependencies");
         Ok(openblas) <- dependencies.get("openblas");
@@ -908,7 +910,9 @@ if {
 }).
 
 check_rust(): Bool ->
-    let Some(provider_environment) <- openblas_environment() else {
+    when {
+        Some(provider_environment) <- openblas_environment()
+    } else {
         _ -> false
     };
     (let manifest = "generated/native/rust/Cargo.toml";
@@ -1042,7 +1046,7 @@ report(
     let _schema = output.put("schema", Json.string("terlan.ndarray.quality-report.v1"));
     let _source = output.put("source_policy", source_policy);
     let _output_status = output.put("status", Json.string("passed"));
-    let {
+    when {
         Ok(_header) <- output.required_fields(["schema", "status"], [], []);
         Ok(value) <- Json.stringify_pretty(output)
     } else {
@@ -1056,7 +1060,9 @@ entry(): Bool ->
             {2, Some("--terlc"), Some(path)} -> Some(path);
             _ -> None
         };
-    let Some(terlc) <- compiler else {
+    when {
+        Some(terlc) <- compiler
+    } else {
         _ -> failure("usage: CheckQuality.terls --terlc PATH")
     };
     if {

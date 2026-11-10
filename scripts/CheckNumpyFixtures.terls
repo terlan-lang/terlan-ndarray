@@ -20,7 +20,7 @@ failure(message: String): Bool ->
     false.
 
 fixture_valid(path: String, digest: String): Bool ->
-    let {
+    when {
         Ok(actual_digest) <- Hash.sha256_file(path);
         Ok(source) <- File.read_text(path);
         Ok(document) <- Json.parse(source);
@@ -43,9 +43,9 @@ command(program: String, arguments: List[String]): Command ->
                 Process.with_arguments(Process.command(program), arguments),
                 Environment.current_directory(),
             ),
-            120000,
+            120_000,
         ),
-        8388608,
+        8_388_608,
     ).
 
 run(program: String, arguments: List[String]): Option[Output] ->
@@ -61,14 +61,7 @@ successful(program: String, arguments: List[String]): Bool ->
         Some(output) ->
             if {
                 output.status == 0 -> true;
-                true -> failure(
-                    String.concat([
-                        program,
-                        " failed: ",
-                        output.stderr,
-                        output.stdout,
-                    ]),
-                )
+                true -> failure(String.concat([program, " failed: ", output.stderr, output.stdout]))
             };
         None -> false
     }.
@@ -82,50 +75,48 @@ compiler(): String ->
 nd15(): Bool ->
     if {
         not fixture_valid(
-            "tests/fixtures/numpy-1.21.5-nd15.json",
-            "738232c467528f9553547138f50f4eb7e35a67848c45669e5fedb8c175b46e7e",
-        ) -> failure("ND15 fixture provenance drifted");
+    "tests/fixtures/numpy-1.21.5-nd15.json",
+    "738232c467528f9553547138f50f4eb7e35a67848c45669e5fedb8c175b46e7e",
+) -> failure("ND15 fixture provenance drifted");
         true -> case Directory.create_temporary("terlan_nd15_numpy") {
             Err(_reason) -> failure("cannot create ND15 temporary directory");
             Ok(root) ->
                 let binary = String.concat([root, "/fixture"]);
-                let built = successful(
-                    compiler(),
-                    [
-                        "-std=c11",
-                        "-Wall",
-                        "-Wextra",
-                        "-Wpedantic",
-                        "-Werror",
-                        "-I",
-                        "bindings",
-                        "bindings/terlan_ndarray.c",
-                        "bindings/terlan_ndarray_dtype.c",
-                        "bindings/terlan_ndarray_ordering.c",
-                        "bindings/terlan_ndarray_set.c",
-                        "bindings/terlan_ndarray_shape.c",
-                        "bindings/terlan_ndarray_indexing.c",
-                        "tests/nd15_numpy_fixture_test.c",
-                        "-lm",
-                        "-o",
-                        binary,
-                    ],
-                );
+                let built =
+                    successful(
+                        compiler(),
+                        [
+                            "-std=c11",
+                            "-Wall",
+                            "-Wextra",
+                            "-Wpedantic",
+                            "-Werror",
+                            "-I",
+                            "bindings",
+                            "bindings/terlan_ndarray.c",
+                            "bindings/terlan_ndarray_dtype.c",
+                            "bindings/terlan_ndarray_ordering.c",
+                            "bindings/terlan_ndarray_set.c",
+                            "bindings/terlan_ndarray_shape.c",
+                            "bindings/terlan_ndarray_indexing.c",
+                            "tests/nd15_numpy_fixture_test.c",
+                            "-lm",
+                            "-o",
+                            binary,
+                        ],
+                    );
                 let executed = built and successful(binary, List.new[String]());
                 let _removed = Directory.remove_all(root);
                 if {
-                    executed ->
-                        let _printed = println(
-                            "terlan-ndarray NumPy 1.21.5 ND15 fixtures passed",
-                        );
-                        true;
+                    executed -> let _printed = println("terlan-ndarray NumPy 1.21.5 ND15 fixtures passed");
+                    true;
                     true -> false
                 }
         }
     }.
 
 nd18_markers(): Bool ->
-    let {
+    when {
         Ok(polynomial) <- File.read_text("bindings/ndarray_polynomial_numpy_tests.rs");
         Ok(polynomial_fit) <- File.read_text("bindings/ndarray_polynomial_tests.rs");
         Ok(algebra) <- File.read_text("bindings/ndarray_tensor_algebra_tests.rs")
@@ -141,13 +132,12 @@ nd18_markers(): Bool ->
 nd18(): Bool ->
     if {
         not fixture_valid(
-            "tests/fixtures/numpy-1.21.5-nd18.json",
-            "ce50e5ff287c151a81c74a9baaffd301280d18a4b5e516da8b52d6a5749d4bb8",
-        ) -> failure("ND18 fixture provenance drifted");
+    "tests/fixtures/numpy-1.21.5-nd18.json",
+    "ce50e5ff287c151a81c74a9baaffd301280d18a4b5e516da8b52d6a5749d4bb8",
+) -> failure("ND18 fixture provenance drifted");
         not nd18_markers() -> failure("ND18 executable Rust evidence is incomplete");
-        true ->
-            let _printed = println("terlan-ndarray NumPy 1.21.5 ND18 fixtures passed");
-            true
+        true -> let _printed = println("terlan-ndarray NumPy 1.21.5 ND18 fixtures passed");
+        true
     }.
 
 entry(): Bool ->

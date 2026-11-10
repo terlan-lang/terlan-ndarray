@@ -31,7 +31,7 @@ child(parent: String, relative: String): String ->
     }.
 
 json_string(value: Json, key: String): Result[String, String] ->
-    let {
+    when {
         Ok(member) <- value.get(key);
         Ok(text) <- member.as_string()
     } else {
@@ -40,7 +40,7 @@ json_string(value: Json, key: String): Result[String, String] ->
     Ok(text).
 
 dependency(repository: String): Result[Dependency, String] ->
-    let {
+    when {
         Ok(source) <- File.read_text(child(repository, "native-dependencies.json"));
         Ok(document) <- Json.parse(source);
         Ok(dependencies) <- document.get("dependencies");
@@ -106,8 +106,8 @@ run(program: String, arguments: List[String], repository: String): Bool ->
         Process.command(program)
             .with_arguments(arguments)
             .with_working_directory(repository)
-            .with_timeout_ms(3600000)
-            .with_output_limit_bytes(16777216);
+            .with_timeout_ms(3_600_000)
+            .with_output_limit_bytes(16_777_216);
     case Process.run(command) {
         Err(reason) -> failure(reason.message);
         Ok(output) ->
@@ -122,8 +122,8 @@ capture(program: String, arguments: List[String], repository: String): Result[St
         Process.command(program)
             .with_arguments(arguments)
             .with_working_directory(repository)
-            .with_timeout_ms(600000)
-            .with_output_limit_bytes(16777216);
+            .with_timeout_ms(600_000)
+            .with_output_limit_bytes(16_777_216);
     case Process.run(command) {
         Err(reason) -> Err(reason.message);
         Ok(output) ->
@@ -179,7 +179,7 @@ safe_archive_kinds(lines: List[String]): Bool ->
     }.
 
 archive_safe(archive: String, repository: String): Bool ->
-    let {
+    when {
         Ok(paths) <- capture("tar", ["--list", "--gzip", "--file", archive], repository);
         Ok(kinds) <- capture("tar", ["--list", "--verbose", "--gzip", "--file", archive], repository)
     } else {
@@ -244,7 +244,7 @@ build_provider(source: String, root: String, repository: String): Bool ->
 }.
 
 prepare(repository: String): Result[String, String] ->
-    let {
+    when {
         Ok(dependency) <- dependency(repository);
         Ok(base) <- cache_base()
     } else {

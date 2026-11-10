@@ -209,7 +209,8 @@ pub copyto_where(
 histogramdd_edge_offsets(edges: List[Array], offset: Int): List[Int] ->
     case edges {
         [] -> [offset];
-        [edge | rest] -> let [length] = shape(edge);
+        [edge | rest] ->
+            [length] <- shape(edge);
             [offset | histogramdd_edge_offsets(rest, offset + length)]
     }.
 

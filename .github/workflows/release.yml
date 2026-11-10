@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: terlan-lang/terlan
-          ref: 0a8085a6f6e1b83b55b0900ada7e2688b0921c32
+          ref: main
           path: terlan
 
       - name: Build compiler

@@ -82,8 +82,8 @@ run_command(
             .with_arguments(arguments)
             .with_working_directory(working_directory)
             .with_environment(environment)
-            .with_timeout_ms(1200000)
-            .with_output_limit_bytes(16777216);
+            .with_timeout_ms(1_200_000)
+            .with_output_limit_bytes(16_777_216);
     case Process.run(command) {
         Err(reason) -> Err(reason.message);
         Ok(output) ->
@@ -99,7 +99,7 @@ run_command(
     }.
 
 json_string_member(value: Json, key: String): Result[String, String] ->
-    let {
+    when {
         Ok(member) <- value.get(key);
         Ok(text) <- Json.as_string(member)
     } else {
@@ -108,7 +108,7 @@ json_string_member(value: Json, key: String): Result[String, String] ->
     Ok(text).
 
 dependency(repository: String): Result[{String, String}, String] ->
-    let {
+    when {
         Ok(source) <- File.read_text(child(repository, "native-dependencies.json"));
         Ok(document) <- Json.parse(source);
         Ok(dependencies) <- document.get("dependencies");
@@ -121,7 +121,9 @@ dependency(repository: String): Result[{String, String}, String] ->
     Ok({revision, digest}).
 
 provider_root(repository: String): Result[{String, String, String}, String] ->
-    let Ok({revision, digest}) <- dependency(repository) else {
+    when {
+        Ok({revision, digest}) <- dependency(repository)
+    } else {
         Err(reason) -> Err(reason)
     };
     (let host = Platform.current();
@@ -304,7 +306,7 @@ inspect_provider(
             Some(value) -> value;
             None -> "cc"
         };
-    let {
+    when {
         Ok(Unit) <- write_file(source, probe_source());
         Ok(_version_check) <-
             run_command(
@@ -366,7 +368,7 @@ adversarial_provider_checks(
             ],
         );
     let host = Platform.current();
-    let {
+    when {
         Ok(Unit) <- create_directory(empty);
         Ok(_missing) <-
             run_command(
@@ -396,7 +398,7 @@ adversarial_provider_checks(
 parse_sample(line: String, expected_size: Int): Option[Sample] ->
     case String.split(line, " ") {
         [size_text, sample_text, elapsed_text, checksum_text] ->
-            let {
+            when {
                 Some({"size", size_value}) <- String.split_once(size_text, "=");
                 Some({"sample", sample_value}) <- String.split_once(sample_text, "=");
                 Some({"elapsed_ns", elapsed_value}) <- String.split_once(elapsed_text, "=");
@@ -566,7 +568,7 @@ write_reports(
             .put("status", Json.string("recorded"))
             .put("warmup_runs", Json.int(1));
     let reports = child(repository, "reports");
-    let {
+    when {
         Ok(Unit) <- create_directory(reports);
         Ok(Unit) <- write_report(child(reports, "ndarray-blas-report.json"), semantic);
         Ok(Unit) <- write_report(child(reports, "ndarray-blas-benchmark.json"), benchmark)
@@ -583,7 +585,7 @@ workflow_provider(
     source_sha256: String,
 ): Result[Unit, String] ->
     let environment = provider_environment(root);
-    let {
+    when {
         Ok(flags) <- compiler_flags(repository, environment);
         Ok(provider) <-
             inspect_provider(
@@ -615,7 +617,7 @@ workflow_provider(
             );
         Ok(rows) <-
             benchmark_rows(
-                [1, 16, 64, 256, 1024],
+                [1, 16, 64, 256, 1_024],
                 child(temporary, "blas-benchmark"),
                 repository,
                 environment,

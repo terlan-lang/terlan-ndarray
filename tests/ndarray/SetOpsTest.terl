@@ -59,108 +59,93 @@ pub membership_preserves_element_shape_and_composes_with_inversion(): Bool ->
 @test
 pub unique_returns_values_first_indexes_inverse_and_counts(): Bool ->
     let source = from_ints([5, 7, 1, 2, 1, 5, 7, 5], [2, 4]);
-    let [values, indexes, inverse, counts] = unique_all(source);
-    let valid =
-        to_ints(values) == [1, 2, 5, 7]
-            and to_ints(indexes) == [2, 3, 0, 1]
-            and shape(inverse) == [2, 4]
-            and to_ints(inverse) == [2, 3, 0, 1, 0, 2, 3, 2]
-            and to_ints(counts) == [2, 1, 3, 2]
-            and to_ints(source) == [5, 7, 1, 2, 1, 5, 7, 5];
-    dispose(counts);
-    dispose(inverse);
-    dispose(indexes);
-    dispose(values);
-    dispose(source);
-    valid and live_count() == 0.
+    when {
+        [values, indexes, inverse, counts] <- unique_all(source)
+    } else {
+        _ -> false
+    };
+    (let valid =
+    to_ints(values) == [1, 2, 5, 7]
+        and to_ints(indexes) == [2, 3, 0, 1]
+        and shape(inverse) == [2, 4]
+        and to_ints(inverse) == [2, 3, 0, 1, 0, 2, 3, 2]
+        and to_ints(counts) == [2, 1, 3, 2]
+        and to_ints(source) == [5, 7, 1, 2, 1, 5, 7, 5];
+(dispose(counts); dispose(inverse); dispose(indexes); dispose(values); dispose(source); valid and live_count() == 0)).
 
 @test
 pub numpy_set_variants_preserve_indexes_order_flattening_and_typed_edges(): Bool ->
     let left = from_ints([1, 2, 2, 3, 4, 3, 2], [1, 7]);
     let right = from_ints([1, 8, 4, 2, 2, 3, 2, 3], [2, 4]);
-    let [intersection, left_indexes, right_indexes] = intersect_all(left, right);
-    let flat_candidates = from_ints([2, 4], [2]);
-    let membership = in1d(left, flat_candidates);
-    let inverted = in1d(left, flat_candidates, true);
-    let ordered_left = from_ints([3, 2, 1, 2], [2, 2]);
-    let ordered_right = from_ints([7, 5, 2], [3]);
-    let ordered_difference = set_difference_unique(ordered_left, ordered_right);
-    let source = from_ints([1, 2], [2]);
-    let begin = from_ints([5, 6], [2]);
-    let end = from_ints([7, 8], [2]);
-    let difference = ediff1d(source);
-    let edged = ediff1d_edges(source, begin, end);
-    let valid =
-        to_ints(intersection) == [1, 2, 3, 4]
-            and to_ints(left_indexes) == [0, 1, 3, 4]
-            and to_ints(right_indexes) == [0, 3, 5, 2]
-            and shape(membership) == [7]
-            and to_bools(membership) == [false, true, true, false, true, false, true]
-            and to_bools(inverted) == [true, false, false, true, false, true, false]
-            and to_ints(ordered_difference) == [3, 1]
-            and to_ints(difference) == [1]
-            and to_ints(edged) == [5, 6, 1, 7, 8];
-    dispose(edged);
-    dispose(difference);
-    dispose(end);
-    dispose(begin);
-    dispose(source);
-    dispose(ordered_difference);
-    dispose(ordered_right);
-    dispose(ordered_left);
-    dispose(inverted);
-    dispose(membership);
-    dispose(flat_candidates);
-    dispose(right_indexes);
-    dispose(left_indexes);
-    dispose(intersection);
-    dispose(right);
-    dispose(left);
-    valid and live_count() == 0.
+    when {
+        [intersection, left_indexes, right_indexes] <- intersect_all(left, right)
+    } else {
+        _ -> false
+    };
+    (let flat_candidates = from_ints([2, 4], [2]);
+let membership = in1d(left, flat_candidates);
+let inverted = in1d(left, flat_candidates, true);
+let ordered_left = from_ints([3, 2, 1, 2], [2, 2]);
+let ordered_right = from_ints([7, 5, 2], [3]);
+let ordered_difference = set_difference_unique(ordered_left, ordered_right);
+let source = from_ints([1, 2], [2]);
+let begin = from_ints([5, 6], [2]);
+let end = from_ints([7, 8], [2]);
+let difference = ediff1d(source);
+let edged = ediff1d_edges(source, begin, end);
+let valid =
+    to_ints(intersection) == [1, 2, 3, 4]
+        and to_ints(left_indexes) == [0, 1, 3, 4]
+        and to_ints(right_indexes) == [0, 3, 5, 2]
+        and shape(membership) == [7]
+        and to_bools(membership) == [false, true, true, false, true, false, true]
+        and to_bools(inverted) == [true, false, false, true, false, true, false]
+        and to_ints(ordered_difference) == [3, 1]
+        and to_ints(difference) == [1]
+        and to_ints(edged) == [5, 6, 1, 7, 8];
+(dispose(edged); dispose(difference); dispose(end); dispose(begin); dispose(source); dispose(ordered_difference); dispose(ordered_right); dispose(ordered_left); dispose(inverted); dispose(membership); dispose(flat_candidates); dispose(right_indexes); dispose(left_indexes); dispose(intersection); dispose(right); dispose(left); valid and live_count() == 0)).
 
 @test
 pub unique_axis_handles_lexicographic_slices_negative_axes_and_zero_widths(): Bool ->
     let array = from_ints([0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0], [4, 4]);
-    let [rows, row_indexes, row_inverse, row_counts] = unique_axis_all(array, 0);
-    let [columns, column_indexes, column_inverse, column_counts] = unique_axis_all(array, -1);
-    let zero = from_ints([], [2, 0]);
-    let [zero_rows, zero_row_indexes, zero_row_inverse, zero_row_counts] = unique_axis_all(zero, 0);
-    let [zero_columns, zero_column_indexes, zero_column_inverse, zero_column_counts] = unique_axis_all(zero, 1);
-    let valid =
-        shape(rows) == [2, 4]
-            and to_ints(rows) == [0, 1, 0, 0, 1, 0, 0, 0]
-            and to_ints(row_indexes) == [0, 1]
-            and to_ints(row_inverse) == [0, 1, 0, 1]
-            and to_ints(row_counts) == [2, 2]
-            and shape(columns) == [4, 3]
-            and to_ints(columns) == [0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0]
-            and to_ints(column_indexes) == [2, 0, 1]
-            and to_ints(column_inverse) == [1, 2, 0, 0]
-            and to_ints(column_counts) == [2, 1, 1]
-            and shape(zero_rows) == [1, 0]
-            and to_ints(zero_row_indexes) == [0]
-            and to_ints(zero_row_inverse) == [0, 0]
-            and to_ints(zero_row_counts) == [2]
-            and shape(zero_columns) == [2, 0]
-            and to_ints(zero_column_indexes) == []
-            and to_ints(zero_column_inverse) == []
-            and to_ints(zero_column_counts) == [];
-    dispose(zero_column_counts);
-    dispose(zero_column_inverse);
-    dispose(zero_column_indexes);
-    dispose(zero_columns);
-    dispose(zero_row_counts);
-    dispose(zero_row_inverse);
-    dispose(zero_row_indexes);
-    dispose(zero_rows);
-    dispose(zero);
-    dispose(column_counts);
-    dispose(column_inverse);
-    dispose(column_indexes);
-    dispose(columns);
-    dispose(row_counts);
-    dispose(row_inverse);
-    dispose(row_indexes);
-    dispose(rows);
-    dispose(array);
-    valid and live_count() == 0.
+    when {
+        [rows, row_indexes, row_inverse, row_counts] <- unique_axis_all(array, 0)
+    } else {
+        _ -> false
+    };
+    (when {
+    [columns, column_indexes, column_inverse, column_counts] <- unique_axis_all(array, -1)
+} else {
+    _ -> false
+};
+(let zero = from_ints([], [2, 0]);
+(when {
+    [zero_rows, zero_row_indexes, zero_row_inverse, zero_row_counts] <- unique_axis_all(zero, 0)
+} else {
+    _ -> false
+};
+(when {
+    [zero_columns, zero_column_indexes, zero_column_inverse, zero_column_counts] <- unique_axis_all(zero, 1)
+} else {
+    _ -> false
+};
+(let valid =
+    shape(rows) == [2, 4]
+        and to_ints(rows) == [0, 1, 0, 0, 1, 0, 0, 0]
+        and to_ints(row_indexes) == [0, 1]
+        and to_ints(row_inverse) == [0, 1, 0, 1]
+        and to_ints(row_counts) == [2, 2]
+        and shape(columns) == [4, 3]
+        and to_ints(columns) == [0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0]
+        and to_ints(column_indexes) == [2, 0, 1]
+        and to_ints(column_inverse) == [1, 2, 0, 0]
+        and to_ints(column_counts) == [2, 1, 1]
+        and shape(zero_rows) == [1, 0]
+        and to_ints(zero_row_indexes) == [0]
+        and to_ints(zero_row_inverse) == [0, 0]
+        and to_ints(zero_row_counts) == [2]
+        and shape(zero_columns) == [2, 0]
+        and to_ints(zero_column_indexes) == []
+        and to_ints(zero_column_inverse) == []
+        and to_ints(zero_column_counts) == [];
+(dispose(zero_column_counts); dispose(zero_column_inverse); dispose(zero_column_indexes); dispose(zero_columns); dispose(zero_row_counts); dispose(zero_row_inverse); dispose(zero_row_indexes); dispose(zero_rows); dispose(zero); dispose(column_counts); dispose(column_inverse); dispose(column_indexes); dispose(columns); dispose(row_counts); dispose(row_inverse); dispose(row_indexes); dispose(rows); dispose(array); valid and live_count() == 0)))))).

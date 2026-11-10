@@ -56,8 +56,8 @@ run_command(
             .with_arguments(arguments)
             .with_working_directory(working_directory)
             .with_environment(environment)
-            .with_timeout_ms(1800000)
-            .with_output_limit_bytes(16777216);
+            .with_timeout_ms(1_800_000)
+            .with_output_limit_bytes(16_777_216);
     case Process.run(command) {
         Err(reason) -> Err(String.concat(["cannot run `", reason.program, "`: ", reason.message]));
         Ok(output) ->
@@ -83,8 +83,8 @@ run_with_stdin(
             .with_working_directory(working_directory)
             .with_environment(environment)
             .with_stdin(stdin)
-            .with_timeout_ms(1800000)
-            .with_output_limit_bytes(16777216);
+            .with_timeout_ms(1_800_000)
+            .with_output_limit_bytes(16_777_216);
     case Process.run(command) {
         Err(reason) -> Err(String.concat(["cannot run `", reason.program, "`: ", reason.message]));
         Ok(output) ->
@@ -119,7 +119,7 @@ write_file(path: String, contents: String): Result[Unit, String] ->
     }.
 
 read_json(path: String): Result[Json, String] ->
-    let {
+    when {
         Ok(source) <- File.read_text(path);
         Ok(value) <- Json.parse(source)
     } else {
@@ -140,7 +140,7 @@ json_member(value: Json, key: String): Result[Json, String] ->
     }.
 
 json_string(value: Json, key: String): Result[String, String] ->
-    let {
+    when {
         Ok(member) <- json_member(value, key);
         Ok(text) <- member.as_string()
     } else {
@@ -177,7 +177,7 @@ external_header_flags(values: List[String], output: List[String]): List[String] 
     }.
 
 provider(repository: String): Result[NativeProvider, String] ->
-    let {
+    when {
         Ok(lock) <- read_json(child(repository, "native-dependencies.json"));
         Ok(dependencies) <- json_member(lock, "dependencies");
         Ok(openblas) <- json_member(dependencies, "openblas");
@@ -327,7 +327,7 @@ prefix_paths(values: List[String], root: String, output: List[String]): List[Str
     }.
 
 native_sources(repository: String): Result[List[String], String] ->
-    let {
+    when {
         Ok(manifest) <- read_json(child(repository, "bindings/ndarray-c.json"));
         Ok(metadata) <- json_member(manifest, "c_metadata");
         Ok(sources) <- json_member(metadata, "sources");
@@ -431,7 +431,7 @@ run_sanitized_tests(
                         ),
                     ],
                 );
-            let {
+            when {
                 Ok(binary) <-
                     compile_native_test(
                         test,
@@ -460,7 +460,7 @@ run_valgrind_tests(
     case tests {
         [] -> Ok(Json.object().put("status", Json.string("passed")));
         [test | rest] ->
-            let {
+            when {
                 Ok(binary) <-
                     compile_native_test(
                         test,
@@ -505,8 +505,8 @@ tooling(
                     .with_arguments(["--version"])
                     .with_working_directory(repository)
                     .with_environment(provider.environment)
-                    .with_timeout_ms(1800000)
-                    .with_output_limit_bytes(16777216);
+                    .with_timeout_ms(1_800_000)
+                    .with_output_limit_bytes(16_777_216);
             case Process.run(version) {
                 Err(reason) ->
                     if {
@@ -632,7 +632,7 @@ run_negative_consumers(
     case cases {
         [] -> Ok(passed);
         [test_case | rest] ->
-            let {
+            when {
                 Ok(Unit) <- write_file(source, negative_source(test_case.body));
                 Ok(output) <-
                     run_command(
@@ -684,7 +684,7 @@ fresh_consumer(
     let package = child(temporary, "package");
     let consumer = child(temporary, "consumer");
     let source = child(consumer, "src/ndarray_consumer/Main.terl");
-    let {
+    when {
         Ok(Unit) <- copy_tree(generated, package);
         Ok(_init) <- run_command("git", ["init", "--quiet"], package, [], true);
         Ok(_email) <-
@@ -729,7 +729,7 @@ fresh_consumer(
     };
     if {
         not File.exists(child(consumer, "terlan.lock")) -> Err("fresh consumer did not write terlan.lock");
-        true -> let {
+        true -> when {
             Ok(Unit) <- remove_directory(package);
             Ok(output) <-
                 run_command(
@@ -872,7 +872,7 @@ prepare_helper(
 workflow(repository: String, terlc: String, temporary: String): Result[Unit, String] ->
     let generated = child(repository, "generated");
     let target = child(temporary, "cargo-target");
-    let {
+    when {
         Ok(provider) <- provider(repository);
         Ok(helper) <- prepare_helper(generated, target, repository, provider.environment);
         Ok(lifecycle) <- check_helper_lifecycle(helper, repository, provider.environment);
@@ -907,7 +907,7 @@ workflow(repository: String, terlc: String, temporary: String): Result[Unit, Str
                     Process.environment_entry("TERLAN_NDARRAY_NATIVE_BOUNDARY_HELPER_PATH", helper),
                 ],
             );
-        let {
+        when {
             Ok(consumer) <- fresh_consumer(generated, terlc, temporary, environment);
             Ok(tooling) <- tooling(sources, provider, repository, temporary);
             Ok(abi_digest) <- hash_file(child(repository, "reports/ndarray-abi-report.json"));

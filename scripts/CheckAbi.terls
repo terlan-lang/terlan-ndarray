@@ -50,8 +50,8 @@ run_command(
             .with_arguments(arguments)
             .with_working_directory(working_directory)
             .with_environment(environment)
-            .with_timeout_ms(1200000)
-            .with_output_limit_bytes(16777216);
+            .with_timeout_ms(1_200_000)
+            .with_output_limit_bytes(16_777_216);
     case Process.run(command) {
         Err(reason) -> Err(reason.message);
         Ok(output) ->
@@ -110,7 +110,7 @@ json_member(value: Json, key: String): Result[Json, String] ->
     }.
 
 json_string(value: Json, key: String): Result[String, String] ->
-    let {
+    when {
         Ok(member) <- json_member(value, key);
         Ok(text) <- member.as_string()
     } else {
@@ -119,7 +119,7 @@ json_string(value: Json, key: String): Result[String, String] ->
     Ok(text).
 
 read_manifest(path: String): Result[Json, String] ->
-    let {
+    when {
         Ok(source) <- File.read_text(path);
         Ok(value) <- Json.parse(source)
     } else {
@@ -151,7 +151,7 @@ find_object_index(values: Json, field_name: String, expected: String, index: Int
     }.
 
 replace_symbol(manifest: Json, index: Int, symbol: Json): Result[Json, String] ->
-    let {
+    when {
         Ok(metadata) <- json_member(manifest, "c_metadata");
         Ok(symbols) <- json_member(metadata, "symbols")
     } else {
@@ -166,7 +166,7 @@ mutate_parameter(
     field_name: String,
     field_value: String,
 ): Result[Json, String] ->
-    let {
+    when {
         Ok(metadata) <- json_member(manifest, "c_metadata");
         Ok(symbols) <- json_member(metadata, "symbols");
         Some(symbol_index) <- find_object_index(symbols, "id", symbol_id, 0);
@@ -210,7 +210,7 @@ parameters_without(
     }.
 
 remove_parameter(manifest: Json, symbol_id: String, name: String): Result[Json, String] ->
-    let {
+    when {
         Ok(metadata) <- json_member(manifest, "c_metadata");
         Ok(symbols) <- json_member(metadata, "symbols");
         Some(symbol_index) <- find_object_index(symbols, "id", symbol_id, 0);
@@ -227,7 +227,7 @@ mutate_manifest(manifest: Json, mutation: Int): Result[Json, String] ->
         mutation == 0 -> remove_parameter(manifest, "function.from_floats", "rank");
         mutation == 1 -> mutate_parameter(manifest, "function.from_ints", "values", "c_type", "int64_t *");
         mutation == 2 -> mutate_parameter(manifest, "function.from_ints", "values", "ownership", "transfer_full");
-        mutation == 3 -> let {
+        mutation == 3 -> when {
             Ok(metadata) <- json_member(manifest, "c_metadata");
             Ok(symbols) <- json_member(metadata, "symbols");
             Some(index) <- find_object_index(symbols, "id", "record.ndarray", 0);
@@ -237,7 +237,7 @@ mutate_manifest(manifest: Json, mutation: Int): Result[Json, String] ->
         };
         (let _symbol = symbol.remove("destructor_symbol"); replace_symbol(manifest, index, symbol));
         mutation == 4 -> mutate_parameter(manifest, "function.from_floats", "values", "c_type", "const float *");
-        mutation == 5 -> let {
+        mutation == 5 -> when {
             Ok(metadata) <- json_member(manifest, "c_metadata");
             Ok(symbols) <- json_member(metadata, "symbols");
             Some(index) <- find_object_index(symbols, "id", "function.rank", 0);
@@ -246,7 +246,9 @@ mutate_manifest(manifest: Json, mutation: Int): Result[Json, String] ->
             _ -> Err("cannot find rank symbol")
         };
         (let _symbols = symbols.push(symbol); let _metadata = metadata.put("symbols", symbols); Ok(manifest.put("c_metadata", metadata)));
-        mutation == 6 -> let Ok(metadata) <- json_member(manifest, "c_metadata") else {
+        mutation == 6 -> when {
+            Ok(metadata) <- json_member(manifest, "c_metadata")
+        } else {
             _ -> Err("cannot find C metadata")
         };
         (let _metadata = metadata.put("abi_version", Json.int(0)); Ok(manifest.put("c_metadata", metadata)));
@@ -303,7 +305,7 @@ run_adversarial_cases(
         [test_case | rest] ->
             let root = child(temporary, test_case.name);
             let manifest_path = child(root, "ndarray-c.json");
-            let {
+            when {
                 Ok(Unit) <- copy_tree(child(repository, "bindings"), root);
                 Ok(manifest) <- read_manifest(manifest_path);
                 Ok(mutated) <- mutate_manifest(manifest, test_case.mutation);
@@ -376,7 +378,7 @@ string_array(value: Json, index: Int, output: List[String]): Result[List[String]
     }.
 
 native_sources(repository: String, manifest: Json): Result[List[String], String] ->
-    let {
+    when {
         Ok(metadata) <- json_member(manifest, "c_metadata");
         Ok(sources) <- json_member(metadata, "sources");
         Ok(names) <- string_array(sources, 0, [])
@@ -392,7 +394,7 @@ prefix_paths(values: List[String], root: String, output: List[String]): List[Str
     }.
 
 openblas_environment(repository: String): Result[{List[EnvironmentEntry], List[String]}, String] ->
-    let {
+    when {
         Ok(lock) <- read_manifest(child(repository, "native-dependencies.json"));
         Ok(dependencies) <- json_member(lock, "dependencies");
         Ok(openblas) <- json_member(dependencies, "openblas");
@@ -522,7 +524,7 @@ run_native_tests(
                     Some(value) -> value;
                     None -> "cc"
                 };
-            let {
+            when {
                 Ok(_compiled) <-
                     run_command(
                         compiler,
@@ -587,7 +589,7 @@ workflow(
     let first = child(temporary, "first");
     let second = child(temporary, "second");
     let cargo_target = child(child(repository, "_build"), "rust-target");
-    let {
+    when {
         Ok(_first) <-
             run_command(
                 terlc,
@@ -611,7 +613,7 @@ workflow(
     };
     if {
         first_digest != second_digest -> Err("C ABI generation was not byte-deterministic");
-        true -> let {
+        true -> when {
             Ok(native_dependencies) <- read_manifest(child(repository, "native-dependencies.json"));
             Ok(paths) <- list_files(first);
             Ok(result) <- hash_files(paths, first, Json.object(), 0, native_dependencies);
@@ -700,7 +702,7 @@ workflow(
 
 publish(repository: String, first_report: Json): Result[Unit, String] ->
     let reports = child(repository, "reports");
-    let {
+    when {
         Ok(Unit) <- create_directory(reports);
         Ok(Unit) <- write_report(child(reports, "ndarray-abi-report.json"), first_report)
     } else {

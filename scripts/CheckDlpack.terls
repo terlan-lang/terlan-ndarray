@@ -76,8 +76,8 @@ run_command(
             .with_arguments(arguments)
             .with_working_directory(working_directory)
             .with_environment(environment)
-            .with_timeout_ms(1200000)
-            .with_output_limit_bytes(16777216);
+            .with_timeout_ms(1_200_000)
+            .with_output_limit_bytes(16_777_216);
     case Process.run(command) {
         Err(reason) -> Err(command_error(program, arguments, reason.message));
         Ok(output) ->
@@ -121,7 +121,7 @@ external_header_flags(values: List[String], output: List[String]): List[String] 
     }.
 
 json_string_member(value: Json, key: String): Result[String, String] ->
-    let {
+    when {
         Ok(member) <- value.get(key);
         Ok(text) <- Json.as_string(member)
     } else {
@@ -130,7 +130,7 @@ json_string_member(value: Json, key: String): Result[String, String] ->
     Ok(text).
 
 openblas_revision(repository: String): Result[String, String] ->
-    let {
+    when {
         Ok(source) <- File.read_text(child(repository, "native-dependencies.json"));
         Ok(document) <- Json.parse(source);
         Ok(dependencies) <- document.get("dependencies");
@@ -142,7 +142,9 @@ openblas_revision(repository: String): Result[String, String] ->
     Ok(revision).
 
 openblas_environment(repository: String): Result[List[EnvironmentEntry], String] ->
-    let Ok(revision) <- openblas_revision(repository) else {
+    when {
+        Ok(revision) <- openblas_revision(repository)
+    } else {
         Err(reason) -> Err(reason)
     };
     (let host = Platform.current();
@@ -243,7 +245,7 @@ native_audit(
             Some(value) -> value;
             _ -> "cc"
         };
-    let {
+    when {
         Ok(flags) <- openblas_flags(repository, environment);
         Ok(_built) <-
             run_command(
@@ -298,7 +300,7 @@ commit_package(source: String, destination: String, name: String): Result[String
             Process.environment_entry("GIT_AUTHOR_DATE", "2000-01-01T00:00:00Z"),
             Process.environment_entry("GIT_COMMITTER_DATE", "2000-01-01T00:00:00Z"),
         ];
-    let {
+    when {
         Ok(Unit) <- copy_directory(source, destination);
         Ok(_init) <- run_command("git", ["init", "--quiet"], destination, [], true);
         Ok(_email) <-
@@ -347,7 +349,7 @@ main_source(body: String): String ->
 write_main(consumer: String, body: String): Result[Unit, String] ->
     let directory = child(consumer, "src/ndarray_dlpack_consumer");
     let path = child(directory, "Main.terl");
-    let {
+    when {
         Ok(Unit) <- create_directory(directory);
         Ok(Unit) <- write_file(path, main_source(body))
     } else {
@@ -365,7 +367,7 @@ run_case(
     expected: String,
     success: Bool,
 ): Result[Unit, String] ->
-    let {
+    when {
         Ok(Unit) <- write_main(consumer, body);
         Ok(output) <-
             run_command(
@@ -436,7 +438,7 @@ interop_cases(
     temporary: String,
     environment: List[EnvironmentEntry],
 ): Result[Unit, String] ->
-    let {
+    when {
         Ok(Unit) <-
             run_case(
                 terlc,
@@ -509,7 +511,9 @@ interop_cases(
     Ok(Unit).
 
 workflow(repository: String, terlc: String, temporary: String): Result[WorkflowResult, String] ->
-    let Ok(provider_environment) <- openblas_environment(repository) else {
+    when {
+        Ok(provider_environment) <- openblas_environment(repository)
+    } else {
         Err(reason) -> Err(reason)
     };
     (let environment =
@@ -525,7 +529,7 @@ let sink_generated = child(temporary, "tensor-sink-generated");
 let ndarray_package = child(temporary, "ndarray-package");
 let sink_package = child(temporary, "tensor-sink-package");
 let consumer = child(temporary, "consumer");
-(let {
+(when {
     Ok(Unit) <- native_audit(repository, temporary, environment);
     Ok(_bound) <-
         run_command(
@@ -559,7 +563,7 @@ let consumer = child(temporary, "consumer");
 };
 if {
     not File.exists(child(consumer, "terlan.lock")) -> Err("DLPack consumer did not lock both package revisions");
-    true -> let {
+    true -> when {
         Ok(Unit) <- remove_directory(ndarray_package);
         Ok(Unit) <- remove_directory(sink_package);
         Ok(Unit) <-

@@ -43,8 +43,7 @@ child(parent: String, relative: String): String ->
 relative_path(root: String, path: String): Option[String] ->
     let prefix = child(root, "");
     if {
-        String.starts_with(path, prefix) ->
-            Some(path.utf8_slice(prefix.byte_size(), path.byte_size() - prefix.byte_size()));
+        String.starts_with(path, prefix) -> Some(path.utf8_slice(prefix.byte_size(), path.byte_size() - prefix.byte_size()));
         true -> None
     }.
 
@@ -64,14 +63,12 @@ prepend_labeled(
 ): List[LabeledFile] ->
     case files {
         [] -> output;
-        [path | rest] -> case relative_path(repository, path) {
-            Some(relative) -> prepend_labeled(
-                repository,
-                rest,
-                [Hash.labeled_file(path, relative) | output],
-            );
-            None -> prepend_labeled(repository, rest, output)
-        }
+        [path | rest] ->
+            case relative_path(repository, path) {
+                Some(relative) ->
+                    prepend_labeled(repository, rest, [Hash.labeled_file(path, relative) | output]);
+                None -> prepend_labeled(repository, rest, output)
+            }
     }.
 
 collect_root(
@@ -90,7 +87,7 @@ collect_root(
 package_files(repository: String): Option[List[LabeledFile]] ->
     let manifest = child(repository, "terlan.toml");
     let initial = [Hash.labeled_file(manifest, "terlan.toml")];
-    let {
+    when {
         Some(bindings) <- collect_root(repository, "bindings", initial);
         Some(native) <- collect_root(repository, "native", bindings);
         Some(source) <- collect_root(repository, "src", native)
@@ -108,22 +105,20 @@ manifest_version(repository: String): Option[String] ->
 version_line(lines: List[String]): Option[String] ->
     case lines {
         [] -> None;
-        [line | rest] -> case String.split_once(line, "=") {
-            Some({left, right}) ->
-                if {
-                    String.trim(left) == "version" -> quoted(String.trim(right));
-                    true -> version_line(rest)
-                };
-            None -> version_line(rest)
-        }
+        [line | rest] ->
+            case String.split_once(line, "=") {
+                Some({left, right}) ->
+                    if {
+                        String.trim(left) == "version" -> quoted(String.trim(right));
+                        true -> version_line(rest)
+                    };
+                None -> version_line(rest)
+            }
     }.
 
 quoted(value: String): Option[String] ->
     if {
-        value.byte_size() >= 2
-            and String.starts_with(value, "\"")
-            and String.ends_with(value, "\"") ->
-                Some(value.utf8_slice(1, value.byte_size() - 2));
+        value.byte_size() >= 2 and String.starts_with(value, "\"") and String.ends_with(value, "\"") -> Some(value.utf8_slice(1, value.byte_size() - 2));
         true -> None
     }.
 
@@ -145,7 +140,7 @@ package_evidence(
     contract_path: String,
     markers: List[String],
 ): PackageEvidence ->
-    let {
+    when {
         Some(version) <- manifest_version(repository);
         Some(files) <- package_files(repository);
         Ok(digest) <- Hash.sha256_labeled_file_contents(files)
@@ -166,24 +161,27 @@ package_json(value: PackageEvidence): Json ->
     output.
 
 render(inputs: Inputs): Option[String] ->
-    let ndarray = package_evidence(
-        "ndarray",
-        inputs.ndarray,
-        "src/ndarray/Array.terl",
-        ["pub export_tensor_packet", "pub import_tensor_packet", "pub transpose"],
-    );
-    let polars = package_evidence(
-        "polars",
-        inputs.polars,
-        "src/polars/DataFrame.terl",
-        ["to_array(_columns:", "to_pytorch_packet(_columns:"],
-    );
-    let pytorch = package_evidence(
-        "pytorch",
-        inputs.pytorch,
-        "src/pytorch/Tensor.terl",
-        ["pub from_packet", "pub amax"],
-    );
+    let ndarray =
+        package_evidence(
+            "ndarray",
+            inputs.ndarray,
+            "src/ndarray/Array.terl",
+            ["pub export_tensor_packet", "pub import_tensor_packet", "pub transpose"],
+        );
+    let polars =
+        package_evidence(
+            "polars",
+            inputs.polars,
+            "src/polars/DataFrame.terl",
+            ["to_array(_columns:", "to_pytorch_packet(_columns:"],
+        );
+    let pytorch =
+        package_evidence(
+            "pytorch",
+            inputs.pytorch,
+            "src/pytorch/Tensor.terl",
+            ["pub from_packet", "pub amax"],
+        );
     if {
         not ndarray.valid or not polars.valid or not pytorch.valid -> None;
         true -> let contracts = Json.object();
@@ -200,10 +198,7 @@ render(inputs: Inputs): Option[String] ->
         let _network = report.put("network_disabled_after_fetch", Json.bool(true));
         let _source = report.put("package_source_access_after_fetch", Json.bool(false));
         let _packages = report.put("packages", packages);
-        let _schema = report.put(
-            "schema",
-            Json.string("terlan.ndarray.integration-report.v1"),
-        );
+        let _schema = report.put("schema", Json.string("terlan.ndarray.integration-report.v1"));
         let _status = report.put("status", Json.string("passed"));
         case Json.stringify_pretty(report) {
             Ok(value) -> Some(String.append(value, "\n"));
@@ -233,33 +228,25 @@ arguments(
         argument_6,
         argument_7,
     } {
-        {
-            8,
-            Some("--ndarray"),
-            Some(ndarray),
-            Some("--polars"),
-            Some(polars),
-            Some("--pytorch"),
-            Some(pytorch),
-            Some("--output"),
-            Some(output),
-        } -> Some(Inputs(ndarray = ndarray, polars = polars, pytorch = pytorch, output = output));
+        {8, Some("--ndarray"), Some(ndarray), Some("--polars"), Some(polars), Some("--pytorch"), Some(pytorch), Some("--output"), Some(output)} ->
+            Some(Inputs(ndarray = ndarray, polars = polars, pytorch = pytorch, output = output));
         _ -> None
     }.
 
 entry(): Bool ->
-    let {
-        Some(inputs) <- arguments(
-            Arguments.count(),
-            Arguments.get(0),
-            Arguments.get(1),
-            Arguments.get(2),
-            Arguments.get(3),
-            Arguments.get(4),
-            Arguments.get(5),
-            Arguments.get(6),
-            Arguments.get(7),
-        );
+    when {
+        Some(inputs) <-
+            arguments(
+                Arguments.count(),
+                Arguments.get(0),
+                Arguments.get(1),
+                Arguments.get(2),
+                Arguments.get(3),
+                Arguments.get(4),
+                Arguments.get(5),
+                Arguments.get(6),
+                Arguments.get(7),
+            );
         Some(first) <- render(inputs);
         Some(second) <- render(inputs)
     } else {
@@ -269,9 +256,10 @@ entry(): Bool ->
         first != second -> failure("report changed across identical renders");
         true -> case File.write_text(inputs.output, first) {
             Ok(Unit) ->
-                let _printed = println(
-                    "terlan-ndarray integration report passed (3 packages, 2 identical renders)",
-                );
+                let _printed =
+                    println(
+                        "terlan-ndarray integration report passed (3 packages, 2 identical renders)",
+                    );
                 true;
             Err(_reason) -> failure("could not write the integration report")
         }
