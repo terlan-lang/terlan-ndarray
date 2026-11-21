@@ -36,8 +36,8 @@ run_tests(
                     Process.command(terlc)
                         .with_arguments(["--incremental", "test", path, "--target", "terlan-vm"])
                         .with_working_directory(repository)
-                        .with_timeout_ms(1800000)
-                        .with_output_limit_bytes(16777216);
+                        .with_timeout_ms(1_800_000)
+                        .with_output_limit_bytes(16_777_216);
                 case Process.run(command) {
                     Err(reason) -> Err(reason.message);
                     Ok(output) ->

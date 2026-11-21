@@ -62,24 +62,19 @@ pub shared_shape_views_and_owned_materialization_are_exact(): Bool ->
     let transposed = transpose(reshaped, 0, -1);
     set_int(transposed, [0, 0], 9);
     let materialized = contiguous(transposed);
-    set_int(materialized, [0, 0], 11);
-    let valid =
-        shape(reshaped) == [3, 2]
-            and strides(reshaped) == [2, 1]
-            and to_ints(reshaped) == [9, 2, 3, 4, 5, 6]
-            and to_ints(source) == [9, 2, 3, 4, 5, 6]
-            and shape(transposed) == [2, 3]
-            and strides(transposed) == [1, 2]
-            and contiguous_code(transposed) == 0
-            and to_ints(transposed) == [9, 3, 5, 2, 4, 6]
-            and strides(materialized) == [3, 1]
-            and to_ints(materialized) == [11, 3, 5, 2, 4, 6]
-            and to_ints(transposed) == [9, 3, 5, 2, 4, 6];
-    dispose(source);
-    dispose(materialized);
-    dispose(transposed);
-    dispose(reshaped);
-    valid and live_count() == 0.
+    (set_int(materialized, [0, 0], 11); let valid =
+    shape(reshaped) == [3, 2]
+        and strides(reshaped) == [2, 1]
+        and to_ints(reshaped) == [9, 2, 3, 4, 5, 6]
+        and to_ints(source) == [9, 2, 3, 4, 5, 6]
+        and shape(transposed) == [2, 3]
+        and strides(transposed) == [1, 2]
+        and contiguous_code(transposed) == 0
+        and to_ints(transposed) == [9, 3, 5, 2, 4, 6]
+        and strides(materialized) == [3, 1]
+        and to_ints(materialized) == [11, 3, 5, 2, 4, 6]
+        and to_ints(transposed) == [9, 3, 5, 2, 4, 6];
+(dispose(source); dispose(materialized); dispose(transposed); dispose(reshaped); valid and live_count() == 0)).
 
 @test
 pub exact_shape_arithmetic_and_reductions_are_exact(): Bool ->

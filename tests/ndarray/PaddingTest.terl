@@ -48,14 +48,14 @@ pub ramp_and_odd_reflections_match_numpy(): Bool ->
 pub shared_widths_and_exact_constants_match_numpy(): Bool ->
     let matrix = from_ints([1, 2, 3, 4], [2, 2]);
     let matrix_edge = pad_edge(matrix, [1], [1]);
-    let large_source = from_ints([18014398509481987], [1]);
-    let leading = from_ints([18014398509481985], [1]);
-    let trailing = from_ints([18014398509481985], [1]);
+    let large_source = from_ints([18_014_398_509_481_987], [1]);
+    let leading = from_ints([18_014_398_509_481_985], [1]);
+    let trailing = from_ints([18_014_398_509_481_985], [1]);
     let large_padded = pad_constant_values(large_source, [1], [1], leading, trailing);
     let valid =
         shape(matrix_edge) == [4, 4]
             and to_ints_cast(matrix_edge) == [1, 1, 2, 2, 1, 1, 2, 2, 3, 3, 4, 4, 3, 3, 4, 4]
-            and to_ints_cast(large_padded) == [18014398509481985, 18014398509481987, 18014398509481985];
+            and to_ints_cast(large_padded) == [18_014_398_509_481_985, 18_014_398_509_481_987, 18_014_398_509_481_985];
     dispose(large_padded);
     dispose(trailing);
     dispose(leading);

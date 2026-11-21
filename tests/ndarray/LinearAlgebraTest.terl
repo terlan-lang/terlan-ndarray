@@ -1,10 +1,9 @@
 module ndarray.LinearAlgebraTest.
 
-import std.core.Float.{abs}.
-
 import ndarray.Array.{dispose, dtype_code, from_complex, from_floats, from_floats_as, from_ints_as, inverse, live_count, shape, solve, to_floats_cast, to_ints_cast, zeros}.
 import ndarray.LinearAlgebra.{HermitianTriangle, NormOrder, QrMode, cholesky, cond, condition, det, eig, eigvals, eigvalsh, lstsq, matrix_power, matrix_rank, multi_dot, multi_dot_into, norm, qr, singular_values, svd, symmetric_eigen}.
 import ndarray.Numpy.{allclose}.
+import std.core.Float.{abs}.
 
 close(actual: Float, expected: Float): Bool ->
     abs(actual - expected) < 1e-12.
@@ -25,42 +24,53 @@ pub condition_orders_match_numpy_matrix_norms(): Bool ->
 pub matrix_power_preserves_stacks_and_promotes_negative_integer_powers(): Bool ->
     let shift_values = [0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
     let shift = from_ints_as(shift_values, [4, 4], 6);
-    let stacked = from_ints_as(
-        [
-            0, 0, 0, 1,
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1,
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-        ],
-        [2, 4, 4],
-        6,
-    );
+    let stacked =
+        from_ints_as(
+            [
+                0,
+                0,
+                0,
+                1,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+            ],
+            [2, 4, 4],
+            6,
+        );
     let squared = matrix_power(stacked, 2);
     let inverse = matrix_power(shift, -1);
     let valid =
         shape(squared) == [2, 4, 4]
             and dtype_code(squared) == 6
-            and to_ints_cast(squared) == [
-                0, 0, 1, 0,
-                0, 0, 0, 1,
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1,
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-            ]
+            and to_ints_cast(squared) == [0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0]
             and dtype_code(inverse) == 3
-            and to_floats_cast(inverse) == [
-                0.0, 1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0, 1.0,
-                1.0, 0.0, 0.0, 0.0,
-            ];
+            and to_floats_cast(inverse) == [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0];
     dispose(inverse);
     dispose(squared);
     dispose(stacked);
@@ -89,20 +99,7 @@ pub multi_dot_supports_vector_endpoints_and_atomic_destination_writes(): Bool ->
             and allclose(right, expected_right, 1e-12, 1e-12, false)
             and shape(scalar) == []
             and allclose(scalar, expected_scalar, 1e-12, 1e-12, false);
-    dispose(scalar);
-    dispose(right);
-    dispose(left);
-    dispose(expected_scalar);
-    dispose(expected_right);
-    dispose(expected_left);
-    dispose(expected_destination);
-    dispose(destination);
-    dispose(vector);
-    dispose(row);
-    dispose(column);
-    dispose(scale);
-    dispose(matrix);
-    valid and live_count() == 0.
+    (dispose(scalar); dispose(right); dispose(left); dispose(expected_scalar); dispose(expected_right); dispose(expected_left); dispose(expected_destination); dispose(destination); dispose(vector); dispose(row); dispose(column); dispose(scale); dispose(matrix); valid and live_count() == 0).
 
 @test
 pub generalized_norm_supports_orders_axes_keepdims_complex_and_empty_arrays(): Bool ->
@@ -128,7 +125,7 @@ pub generalized_norm_supports_orders_axes_keepdims_complex_and_empty_arrays(): B
             and close(to_floats_cast(batched_norms)[0], 10.0)
             and close(to_floats_cast(batched_norms)[1], 2.0)
             and dtype_code(complex_norm) == 11
-            and abs(to_floats_cast(complex_norm)[0] - 11.615898132184) < 1e-5
+            and abs(to_floats_cast(complex_norm)[0] - 11.615898132184) < 0.00001
             and shape(empty_norm) == [1]
             and to_floats_cast(empty_norm) == [0.0];
     dispose(empty_norm);
@@ -176,12 +173,7 @@ pub decompositions_preserve_dtypes_batches_and_empty_matrix_shapes(): Bool ->
             and shape(u) == [4, 4]
             and shape(singular) == [0]
             and shape(vh) == [0, 0]
-            and to_floats_cast(u) == [
-                1.0, 0.0, 0.0, 0.0,
-                0.0, 1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0, 1.0,
-            ]
+            and to_floats_cast(u) == [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
             and shape(eigenvalues) == [0, 1]
             and shape(eigenvectors) == [0, 1, 1]
             and dtype_code(eigenvalues) == 3
@@ -209,17 +201,9 @@ pub decompositions_preserve_dtypes_batches_and_empty_matrix_shapes(): Bool ->
 
 @test
 pub stacked_system_operations_preserve_shapes_dtypes_and_broadcast_rhs(): Bool ->
-    let matrices = from_floats_as(
-        [2.0, 0.0, 0.0, 4.0, 1.0, 0.0, 0.0, 5.0],
-        [2, 2, 2],
-        11,
-    );
+    let matrices = from_floats_as([2.0, 0.0, 0.0, 4.0, 1.0, 0.0, 0.0, 5.0], [2, 2, 2], 11);
     let rhs = from_floats_as([4.0, 20.0], [1, 2, 1], 11);
-    let expected_inverse = from_floats_as(
-        [0.5, 0.0, 0.0, 0.25, 1.0, 0.0, 0.0, 0.2],
-        [2, 2, 2],
-        11,
-    );
+    let expected_inverse = from_floats_as([0.5, 0.0, 0.0, 0.25, 1.0, 0.0, 0.0, 0.2], [2, 2, 2], 11);
     let determinants = det(matrices);
     let conditions = condition(matrices, 2);
     let solved = solve(matrices, rhs);
@@ -237,7 +221,7 @@ pub stacked_system_operations_preserve_shapes_dtypes_and_broadcast_rhs(): Bool -
             and close(to_floats_cast(conditions)[1], 5.0)
             and shape(solved) == [2, 2, 1]
             and to_floats_cast(solved) == [2.0, 5.0, 4.0, 4.0]
-            and allclose(inverted, expected_inverse, 1e-6, 1e-6, false)
+            and allclose(inverted, expected_inverse, 0.000001, 0.000001, false)
             and shape(eigenvalues) == [2, 2]
             and shape(eigenvectors) == [2, 2, 2]
             and dtype_code(eigenvalues) == 11
@@ -257,10 +241,7 @@ pub stacked_system_operations_preserve_shapes_dtypes_and_broadcast_rhs(): Bool -
 
 @test
 pub rank_least_squares_and_qr_modes_match_numpy_result_contracts(): Bool ->
-    let stacked = from_floats(
-        [1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0],
-        [2, 2, 2],
-    );
+    let stacked = from_floats([1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0], [2, 2, 2]);
     let ranks = matrix_rank(stacked);
     let coefficients = from_floats([1.0, 0.0, 0.0, 1.0], [2, 2]);
     let rhs = from_floats([2.0, 3.0], [2]);

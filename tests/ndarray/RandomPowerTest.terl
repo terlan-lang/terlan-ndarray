@@ -3,7 +3,9 @@ module ndarray.RandomPowerTest.
 import ndarray.Array.{dispose, dtype_code, live_count, shape, to_floats_cast}.
 import ndarray.RandomStream.{new, power}.
 
-/** Returns whether every sampled value is inside NumPy's power-distribution range. */
+/**
+ * Returns whether every sampled value is inside NumPy's power-distribution range.
+ */
 bounded(values: List[Float]): Bool ->
     case values {
         [] -> true;

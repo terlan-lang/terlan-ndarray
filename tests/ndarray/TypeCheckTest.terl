@@ -14,17 +14,18 @@ pub numeric_components_and_classification_preserve_typed_array_semantics(): Bool
     let complex_imag = imag(complex);
     let floating = asfarray(integers);
     let integer_finite = is_finite(integers);
-    let valid = dtype_code(integer_real) == 2
-        and dtype_code(integer_imag) == 2
-        and to_ints(integer_real) == [1, 0]
-        and to_ints(integer_imag) == [0, 0]
-        and dtype_code(complex_real) == 3
-        and dtype_code(complex_imag) == 3
-        and to_floats(complex_real) == [1.0, 3.0]
-        and to_floats(complex_imag) == [2.0, -4.0]
-        and dtype_code(floating) == 3
-        and to_floats(floating) == [1.0, 0.0]
-        and to_bools(integer_finite) == [true, true];
+    let valid =
+        dtype_code(integer_real) == 2
+            and dtype_code(integer_imag) == 2
+            and to_ints(integer_real) == [1, 0]
+            and to_ints(integer_imag) == [0, 0]
+            and dtype_code(complex_real) == 3
+            and dtype_code(complex_imag) == 3
+            and to_floats(complex_real) == [1.0, 3.0]
+            and to_floats(complex_imag) == [2.0, -4.0]
+            and dtype_code(floating) == 3
+            and to_floats(floating) == [1.0, 0.0]
+            and to_bools(integer_finite) == [true, true];
     dispose(integer_finite);
     dispose(floating);
     dispose(complex_imag);
@@ -44,13 +45,8 @@ pub nan_replacement_supports_dtype_defaults_and_explicit_destinations(): Bool ->
     let destination = from_floats([7.0], []);
     nan_to_num_into(destination, nan, 10.0, 20.0, 30.0);
     let nan_mask = is_nan(nan);
-    let valid = to_floats(defaulted) == [0.0]
-        and to_floats(destination) == [10.0]
-        and to_bools(nan_mask) == [true];
-    dispose(nan_mask);
-    dispose(destination);
-    dispose(defaulted);
-    dispose(nan);
-    dispose(stop);
-    dispose(start);
-    valid and live_count() == 0.
+    let valid =
+        to_floats(defaulted) == [0.0]
+            and to_floats(destination) == [10.0]
+            and to_bools(nan_mask) == [true];
+    (dispose(nan_mask); dispose(destination); dispose(defaulted); dispose(nan); dispose(stop); dispose(start); valid and live_count() == 0).

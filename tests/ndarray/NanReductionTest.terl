@@ -30,23 +30,18 @@ pub nan_reductions_cover_axes_dtypes_outputs_and_all_nan_values(): Bool ->
     let scalar_destination = from_floats([0.0], []);
     nansum_into(scalar_destination, mixed, [], false);
     let sum_written = to_floats(scalar_destination) == [4.0];
-    nanprod_into(scalar_destination, mixed, [], false);
-    let product_written = to_floats(scalar_destination) == [3.0];
-    nanmean_into(scalar_destination, mixed, [], false);
-    let mean_written = to_floats(scalar_destination) == [2.0];
-    nanmin_into(scalar_destination, mixed, [], false);
-    let minimum_written = to_floats(scalar_destination) == [1.0];
-    nanmax_into(scalar_destination, mixed, [], false);
-    let maximum_written = to_floats(scalar_destination) == [3.0];
-    nanvar_into(scalar_destination, mixed, [], false, 0);
-    let variance_written = to_floats(scalar_destination) == [1.0];
-    nanstd_into(scalar_destination, mixed, [], false, 0);
-    let deviation_written = to_floats(scalar_destination) == [1.0];
-    let all_nan_minimum = nanmin(nan_vector, [], false);
-    let all_nan_mean = nanmean(nan_vector, [], false);
-    let all_nan_minimum_mask = is_nan(all_nan_minimum);
-    let all_nan_mean_mask = is_nan(all_nan_mean);
-    let valid = to_floats(sum) == [4.0]
+    (nanprod_into(scalar_destination, mixed, [], false); let product_written = to_floats(scalar_destination) == [3.0];
+(nanmean_into(scalar_destination, mixed, [], false); let mean_written = to_floats(scalar_destination) == [2.0];
+(nanmin_into(scalar_destination, mixed, [], false); let minimum_written = to_floats(scalar_destination) == [1.0];
+(nanmax_into(scalar_destination, mixed, [], false); let maximum_written = to_floats(scalar_destination) == [3.0];
+(nanvar_into(scalar_destination, mixed, [], false, 0); let variance_written = to_floats(scalar_destination) == [1.0];
+(nanstd_into(scalar_destination, mixed, [], false, 0); let deviation_written = to_floats(scalar_destination) == [1.0];
+let all_nan_minimum = nanmin(nan_vector, [], false);
+let all_nan_mean = nanmean(nan_vector, [], false);
+let all_nan_minimum_mask = is_nan(all_nan_minimum);
+let all_nan_mean_mask = is_nan(all_nan_mean);
+let valid =
+    to_floats(sum) == [4.0]
         and to_floats(product) == [3.0]
         and to_floats(mean) == [2.0]
         and to_floats(minimum) == [1.0]
@@ -70,33 +65,7 @@ pub nan_reductions_cover_axes_dtypes_outputs_and_all_nan_values(): Bool ->
         and deviation_written
         and to_bools(all_nan_minimum_mask) == [true]
         and to_bools(all_nan_mean_mask) == [true];
-    dispose(all_nan_mean_mask);
-    dispose(all_nan_minimum_mask);
-    dispose(all_nan_mean);
-    dispose(all_nan_minimum);
-    dispose(scalar_destination);
-    dispose(maximum_index);
-    dispose(minimum_index);
-    dispose(typed_deviation);
-    dispose(typed_variance);
-    dispose(typed_mean);
-    dispose(typed_product);
-    dispose(typed_sum);
-    dispose(deviation);
-    dispose(variance);
-    dispose(maximum);
-    dispose(minimum);
-    dispose(mean);
-    dispose(product);
-    dispose(sum);
-    dispose(mixed);
-    dispose(last);
-    dispose(first);
-    dispose(nan_vector);
-    dispose(nan_scalar);
-    dispose(stop);
-    dispose(start);
-    valid and live_count() == 0.
+(dispose(all_nan_mean_mask); dispose(all_nan_minimum_mask); dispose(all_nan_mean); dispose(all_nan_minimum); dispose(scalar_destination); dispose(maximum_index); dispose(minimum_index); dispose(typed_deviation); dispose(typed_variance); dispose(typed_mean); dispose(typed_product); dispose(typed_sum); dispose(deviation); dispose(variance); dispose(maximum); dispose(minimum); dispose(mean); dispose(product); dispose(sum); dispose(mixed); dispose(last); dispose(first); dispose(nan_vector); dispose(nan_scalar); dispose(stop); dispose(start); valid and live_count() == 0))))))).
 
 @test
 pub nan_cumulative_operations_cover_axes_flattening_integer_dtypes_and_outputs(): Bool ->
@@ -122,34 +91,17 @@ pub nan_cumulative_operations_cover_axes_flattening_integer_dtypes_and_outputs()
     let integers = from_ints([1, 2, 3], [3]);
     let integer_sums = nancumsum(integers, 0);
     let integer_products = nancumprod(integers, 0);
-    let valid = to_floats(sums) == [1.0, 1.0, 4.0]
-        and to_floats(products) == [1.0, 1.0, 3.0]
-        and to_floats(flat_sums) == [1.0, 1.0, 4.0]
-        and to_floats(flat_products) == [1.0, 1.0, 3.0]
-        and dtype_code(typed_sums) == 11
-        and dtype_code(typed_products) == 11
-        and to_floats(sum_destination) == [1.0, 1.0, 4.0]
-        and to_floats(product_destination) == [1.0, 1.0, 3.0]
-        and dtype_code(integer_sums) == 2
-        and dtype_code(integer_products) == 2
-        and to_floats_cast(integer_sums) == [1.0, 3.0, 6.0]
-        and to_floats_cast(integer_products) == [1.0, 2.0, 6.0];
-    dispose(integer_products);
-    dispose(integer_sums);
-    dispose(integers);
-    dispose(product_destination);
-    dispose(sum_destination);
-    dispose(typed_products);
-    dispose(typed_sums);
-    dispose(flat_products);
-    dispose(flat_sums);
-    dispose(products);
-    dispose(sums);
-    dispose(mixed);
-    dispose(last);
-    dispose(first);
-    dispose(nan_vector);
-    dispose(nan_scalar);
-    dispose(stop);
-    dispose(start);
-    valid and live_count() == 0.
+    let valid =
+        to_floats(sums) == [1.0, 1.0, 4.0]
+            and to_floats(products) == [1.0, 1.0, 3.0]
+            and to_floats(flat_sums) == [1.0, 1.0, 4.0]
+            and to_floats(flat_products) == [1.0, 1.0, 3.0]
+            and dtype_code(typed_sums) == 11
+            and dtype_code(typed_products) == 11
+            and to_floats(sum_destination) == [1.0, 1.0, 4.0]
+            and to_floats(product_destination) == [1.0, 1.0, 3.0]
+            and dtype_code(integer_sums) == 2
+            and dtype_code(integer_products) == 2
+            and to_floats_cast(integer_sums) == [1.0, 3.0, 6.0]
+            and to_floats_cast(integer_products) == [1.0, 2.0, 6.0];
+    (dispose(integer_products); dispose(integer_sums); dispose(integers); dispose(product_destination); dispose(sum_destination); dispose(typed_products); dispose(typed_sums); dispose(flat_products); dispose(flat_sums); dispose(products); dispose(sums); dispose(mixed); dispose(last); dispose(first); dispose(nan_vector); dispose(nan_scalar); dispose(stop); dispose(start); valid and live_count() == 0).

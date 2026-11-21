@@ -10,10 +10,11 @@ pub einsum_supports_ellipsis_singleton_broadcasting_and_scalar_terms(): Bool ->
     let broadcast = einsum([matrix, singleton], "...j,...j->...j");
     let scalar = from_floats([3.0], []);
     let reduced = einsum([scalar, matrix], ", ij ->");
-    let valid = shape(broadcast) == [2, 2]
-        and to_floats_cast(broadcast) == [10.0, 40.0, 30.0, 80.0]
-        and shape(reduced) == []
-        and to_floats_cast(reduced) == [30.0];
+    let valid =
+        shape(broadcast) == [2, 2]
+            and to_floats_cast(broadcast) == [10.0, 40.0, 30.0, 80.0]
+            and shape(reduced) == []
+            and to_floats_cast(reduced) == [30.0];
     dispose(reduced);
     dispose(scalar);
     dispose(broadcast);
@@ -28,10 +29,7 @@ pub einsum_into_stages_results_before_overlapping_destination_writes(): Bool ->
     let rhs_view = reshape(rhs, [2, 2]);
     einsum_into(rhs, [lhs, rhs_view], "ij,jk->ik");
     let valid = to_floats_cast(rhs) == [2.0, 3.0, 6.0, 11.0];
-    dispose(rhs_view);
-    dispose(rhs);
-    dispose(lhs);
-    valid and live_count() == 0.
+    (dispose(rhs_view); dispose(rhs); dispose(lhs); valid and live_count() == 0).
 
 @test
 pub einsum_exposes_typed_c_and_fortran_output_order(): Bool ->
@@ -42,13 +40,14 @@ pub einsum_exposes_typed_c_and_fortran_output_order(): Bool ->
     let c_order = einsum([lhs, rhs], "...ft,mf->...mt", ArrayOrder.C);
     let f_order = einsum([lhs, rhs], "...ft,mf->...mt", ArrayOrder.FORTRAN);
     let keep_order = einsum([lhs_f, rhs_f], "...ft,mf->...mt", ArrayOrder.KEEP);
-    let valid = is_c_contiguous(c_order)
-        and is_fortran_contiguous(f_order)
-        and not is_c_contiguous(keep_order)
-        and not is_fortran_contiguous(keep_order)
-        and shape(keep_order) == [2, 4, 5]
-        and to_floats_cast(c_order) == to_floats_cast(f_order)
-        and to_floats_cast(c_order) == to_floats_cast(keep_order);
+    let valid =
+        is_c_contiguous(c_order)
+            and is_fortran_contiguous(f_order)
+            and not is_c_contiguous(keep_order)
+            and not is_fortran_contiguous(keep_order)
+            and shape(keep_order) == [2, 4, 5]
+            and to_floats_cast(c_order) == to_floats_cast(f_order)
+            and to_floats_cast(c_order) == to_floats_cast(keep_order);
     dispose(keep_order);
     dispose(f_order);
     dispose(c_order);

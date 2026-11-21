@@ -9,26 +9,17 @@ pub numpy_bytes_files_and_mmaps_preserve_values_and_fortran_order(): Bool ->
     let source = from_floats([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], [2, 3]);
     let fortran = copy_with_order(source, ArrayOrder.FORTRAN);
     let bytes = to_npy(fortran);
-    let decoded = from_npy(bytes, 1048576);
+    let decoded = from_npy(bytes, 1_048_576);
     save_npy(fortran, path);
-    let loaded = load_npy(path, 1048576);
-    let mapped = mmap_npy(path, true, 1048576);
-    set_float(mapped, [1, 0], 40.0);
-    flush(mapped);
-    dispose(mapped);
-    let persisted = load_npy(path, 1048576);
-    let valid =
-        not is_c_contiguous(decoded)
-            and is_fortran_contiguous(decoded)
-            and not is_c_contiguous(loaded)
-            and is_fortran_contiguous(loaded)
-            and to_floats_cast(decoded) == [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
-            and to_floats_cast(loaded) == [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
-            and to_floats_cast(persisted) == [1.0, 2.0, 3.0, 40.0, 5.0, 6.0];
-    dispose(persisted);
-    dispose(loaded);
-    dispose(decoded);
-    dispose(fortran);
-    dispose(source);
-    let _deleted = delete(path);
-    valid and live_count() == 0.
+    let loaded = load_npy(path, 1_048_576);
+    let mapped = mmap_npy(path, true, 1_048_576);
+    (set_float(mapped, [1, 0], 40.0); flush(mapped); dispose(mapped); let persisted = load_npy(path, 1_048_576);
+let valid =
+    not is_c_contiguous(decoded)
+        and is_fortran_contiguous(decoded)
+        and not is_c_contiguous(loaded)
+        and is_fortran_contiguous(loaded)
+        and to_floats_cast(decoded) == [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        and to_floats_cast(loaded) == [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+        and to_floats_cast(persisted) == [1.0, 2.0, 3.0, 40.0, 5.0, 6.0];
+(dispose(persisted); dispose(loaded); dispose(decoded); dispose(fortran); dispose(source); let _deleted = delete(path); valid and live_count() == 0)).

@@ -11,12 +11,13 @@ pub float16_ufuncs_round_results_and_promote_only_when_required(): Bool ->
     let half_power = power(lhs, rhs);
     let single = from_floats_as([2.0], [1], 11);
     let promoted = power(lhs, single);
-    let valid = dtype_code(added) == 14
-        and dtype_code(divided) == 14
-        and dtype_code(half_power) == 14
-        and dtype_code(promoted) == 11
-        and to_floats_cast(added) == [-2.0, 6.0, 3.0, 8.0, 5.0]
-        and to_floats_cast(divided) == [-0.0, 0.199951171875, 2.0, 1.0, 0.66650390625];
+    let valid =
+        dtype_code(added) == 14
+            and dtype_code(divided) == 14
+            and dtype_code(half_power) == 14
+            and dtype_code(promoted) == 11
+            and to_floats_cast(added) == [-2.0, 6.0, 3.0, 8.0, 5.0]
+            and to_floats_cast(divided) == [-0.0, 0.199951171875, 2.0, 1.0, 0.66650390625];
     dispose(promoted);
     dispose(single);
     dispose(half_power);

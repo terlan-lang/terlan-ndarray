@@ -16,12 +16,13 @@ pub scalar_truth_reductions_match_numpy_defaults(): Bool ->
     let ones_all = all(ones);
     let floating_all = all(floating);
     let complex_all = all(complex);
-    let valid = to_bools(mixed_any) == [true]
-        and to_bools(zeros_any) == [false]
-        and to_bools(zeros_all) == [false]
-        and to_bools(ones_all) == [true]
-        and to_bools(floating_all) == [true]
-        and to_bools(complex_all) == [true];
+    let valid =
+        to_bools(mixed_any) == [true]
+            and to_bools(zeros_any) == [false]
+            and to_bools(zeros_all) == [false]
+            and to_bools(ones_all) == [true]
+            and to_bools(floating_all) == [true]
+            and to_bools(complex_all) == [true];
     dispose(complex_all);
     dispose(floating_all);
     dispose(ones_all);
@@ -46,14 +47,15 @@ pub axis_keep_dims_and_empty_identities_match_numpy(): Bool ->
     let all_rows = all(all_values, [1], true);
     let empty_any = any(empty, [1]);
     let empty_all = all(empty, [1]);
-    let valid = to_bools(any_columns) == [true, true, false]
-        and shape(any_rows) == [3, 1]
-        and to_bools(any_rows) == [false, true, true]
-        and to_bools(all_columns) == [false, false, true]
-        and shape(all_rows) == [3, 1]
-        and to_bools(all_rows) == [false, false, true]
-        and to_bools(empty_any) == [false, false, false, false, false, false]
-        and to_bools(empty_all) == [true, true, true, true, true, true];
+    let valid =
+        to_bools(any_columns) == [true, true, false]
+            and shape(any_rows) == [3, 1]
+            and to_bools(any_rows) == [false, true, true]
+            and to_bools(all_columns) == [false, false, true]
+            and shape(all_rows) == [3, 1]
+            and to_bools(all_rows) == [false, false, true]
+            and to_bools(empty_any) == [false, false, false, false, false, false]
+            and to_bools(empty_all) == [true, true, true, true, true, true];
     dispose(empty_all);
     dispose(empty_any);
     dispose(all_rows);
@@ -72,10 +74,11 @@ pub logical_xor_reductions_preserve_parity_axes_and_empty_identity(): Bool ->
     let flattened = logical_xor_reduce(values, [], 0);
     let rows = logical_xor_reduce(values, [1], 1);
     let empty_result = logical_xor_reduce(empty, [], 0);
-    let valid = to_bools(flattened) == [true]
-        and shape(rows) == [2, 1]
-        and to_bools(rows) == [false, true]
-        and to_bools(empty_result) == [false];
+    let valid =
+        to_bools(flattened) == [true]
+            and shape(rows) == [2, 1]
+            and to_bools(rows) == [false, true]
+            and to_bools(empty_result) == [false];
     dispose(empty_result);
     dispose(rows);
     dispose(flattened);

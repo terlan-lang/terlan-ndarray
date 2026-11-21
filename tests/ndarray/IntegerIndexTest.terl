@@ -10,13 +10,8 @@ pub signed_and_unsigned_index_dtypes_select_and_assign(): Bool ->
     let selected = take_along_axis(source, indexes, 0);
     let replacement = from_ints([3, 1, 2], [3]);
     put_along_axis(source, indexes, replacement, 0);
-    let valid = to_ints(selected) == [30, 10, 20]
-        and to_ints(source) == [1, 2, 3];
-    dispose(replacement);
-    dispose(selected);
-    dispose(indexes);
-    dispose(source);
-    valid and live_count() == 0.
+    let valid = to_ints(selected) == [30, 10, 20] and to_ints(source) == [1, 2, 3];
+    (dispose(replacement); dispose(selected); dispose(indexes); dispose(source); valid and live_count() == 0).
 
 @test
 pub shaped_take_preserves_index_rank_and_stages_overlapping_outputs(): Bool ->
@@ -30,28 +25,12 @@ pub shaped_take_preserves_index_rank_and_stages_overlapping_outputs(): Bool ->
     let overlap_source = from_ints([0, 1, 2, 3, 4], [5]);
     let overlap_destination = slice_axis(overlap_source, 0, 2, 5, 1);
     let overlap_indices = from_ints([1, 2, 3], [3]);
-    take_into(
-        overlap_destination,
-        overlap_source,
-        overlap_indices,
-        0,
-        TakeMode.WRAP,
-    );
-    let valid =
-        shape(selected) == [3, 1, 2]
-            and to_ints(selected) == [0, 2, 4, 6, 8, 10]
-            and shape(scalar_selected) == [3]
-            and to_ints(scalar_selected) == [1, 5, 9]
-            and to_ints(destination) == [0, 2, 4, 6, 8, 10]
-            and to_ints(overlap_destination) == [1, 2, 3]
-            and to_ints(overlap_source) == [0, 1, 1, 2, 3];
-    dispose(overlap_indices);
-    dispose(overlap_destination);
-    dispose(overlap_source);
-    dispose(destination);
-    dispose(scalar_selected);
-    dispose(scalar_index);
-    dispose(selected);
-    dispose(matrix_indices);
-    dispose(source);
-    valid and live_count() == 0.
+    (take_into(overlap_destination, overlap_source, overlap_indices, 0, TakeMode.WRAP); let valid =
+    shape(selected) == [3, 1, 2]
+        and to_ints(selected) == [0, 2, 4, 6, 8, 10]
+        and shape(scalar_selected) == [3]
+        and to_ints(scalar_selected) == [1, 5, 9]
+        and to_ints(destination) == [0, 2, 4, 6, 8, 10]
+        and to_ints(overlap_destination) == [1, 2, 3]
+        and to_ints(overlap_source) == [0, 1, 1, 2, 3];
+(dispose(overlap_indices); dispose(overlap_destination); dispose(overlap_source); dispose(destination); dispose(scalar_selected); dispose(scalar_index); dispose(selected); dispose(matrix_indices); dispose(source); valid and live_count() == 0)).
